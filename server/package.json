@@ -6,7 +6,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "migrate": "tsx migrations/createDB.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.0",
