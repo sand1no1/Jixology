@@ -71,3 +71,14 @@ export default defineConfig([
   },
 ])
 ```
+
+# Structure
+
+## client/
+Frontend application and UI logic.
+
+## server/
+API integrations.
+
+## supabase/
+Supabase configuration, database migrations, and project resources.

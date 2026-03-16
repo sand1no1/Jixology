@@ -14,6 +14,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 node_modules/
 client/node_modules/
 server/node_modules/
+supabase/node_modules/
 jspm_packages/
 
 # TypeScript
@@ -43,6 +44,10 @@ next-env.d.ts
 .env.local
 client/.env
 server/.env
+supabase/.env
+supabase/.env.keys
+supabase/.env.local
+supabase/.env.*.local
 
 # Vite / Build outputs
 dist/
@@ -50,6 +55,10 @@ dist-ssr/
 client/dist/
 server/dist/
 *.local
+
+# Supabase
+supabase/.branches
+supabase/.temp
 
 # Editor directories and files
 .vscode/*
@@ -70,3 +79,4 @@ desktop.ini
 /coverage
 client/coverage/
 server/coverage/
+supabase/coverage/
