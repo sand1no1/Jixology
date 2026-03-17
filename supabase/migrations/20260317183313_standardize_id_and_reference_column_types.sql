@@ -42,7 +42,7 @@ REFERENCES proyecto(id);
 
 -- id_etiqueta_proyecto_personalizada de etiqueta_proyecto_personalizada
 ALTER TABLE public.etiqueta_proyecto_personalizada
-DROP CONSTRAINT etiqueta_proyecto_personaliza_id_etiqueta_proyecto_persona_fkey
+DROP CONSTRAINT etiqueta_proyecto_personaliza_id_etiqueta_proyecto_persona_fkey;
 
 ALTER TABLE public.etiqueta_proyecto_personalizada
 ALTER COLUMN id_etiqueta_proyecto_personalizada TYPE BIGINT
