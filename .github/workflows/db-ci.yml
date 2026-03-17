@@ -4,8 +4,8 @@ on:
   pull_request:
     branches: [dev, qa, main]
     paths:
-      - "supabase/migrations"
-      - "supabase/tests"
+      - "supabase/migrations/**"
+      - "supabase/tests/**"
       - ".github/workflows/db-ci.yml"
       - ".github/workflows/db-cd.yml"
   push:
