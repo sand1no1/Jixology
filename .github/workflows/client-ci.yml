@@ -18,6 +18,7 @@ on:
 jobs:
   client-ci:
     runs-on: ubuntu-latest
+    if: ${{ vars.ENABLE_FRONTEND_CI == 'true' }}
 
     defaults:
       run:
