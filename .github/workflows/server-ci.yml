@@ -16,9 +16,10 @@ on:
       - '.github/workflows/server-cd.yml'
 
 jobs:
-  ci:
+  server-ci:
     runs-on: ubuntu-latest
-
+    if: ${{ vars.ENABLE_API_CI == 'true' }}
+    
     defaults:
       run:
         working-directory: server
