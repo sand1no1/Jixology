@@ -1,0 +1,50 @@
+name: server-ci
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-ci.yml'
+      - '.github/workflows/server-cd.yml'
+
+  push:
+    branches: ['feature/**', develop, main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server-ci.yml'
+      - '.github/workflows/server-cd.yml'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: server
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test --if-present
+
+      - name: Build app
+        run: npm run build --if-present
+
+      - name: Validate Docker build
+        run: docker build -t server-ci:test .
