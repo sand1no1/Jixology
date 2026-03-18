@@ -2,14 +2,13 @@ name: db-ci
 
 on:
   pull_request:
-    branches: [dev, qa, main]
+    branches: [develop, main]
     paths:
-      - "supabase/migrations/**"
-      - "supabase/tests/**"
+      - "supabase/**"
       - ".github/workflows/db-ci.yml"
       - ".github/workflows/db-cd.yml"
   push:
-    branches: [dev, qa]
+    branches: ['feature/**', develop, main]
     paths:
       - "supabase/**"
       - ".github/workflows/db-ci.yml"
@@ -22,7 +21,7 @@ jobs:
       has_tests: ${{ steps.check.outputs.has_tests }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Detect DB tests
         id: check
@@ -39,13 +38,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
-
+          version: 2.79.0
+      
       - name: Start local Supabase
         run: supabase start
 
