@@ -21,7 +21,7 @@ jobs:
   client-cd:
     runs-on: ubuntu-latest
     if: ${{ (github.ref == 'refs/heads/develop' && vars.ENABLE_FRONTEND_STAGING_DEPLOY == 'true') ||
-      (github.ref == 'refs/heads/main' && vars.ENABLE_FRONTNED_PROD_DEPLOY == 'true')}}
+      (github.ref == 'refs/heads/main' && vars.ENABLE_FRONTEND_PROD_DEPLOY == 'true')}}
     
     steps:
       - name: Checkout
