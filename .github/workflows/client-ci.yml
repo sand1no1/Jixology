@@ -1,0 +1,50 @@
+name: client-ci
+
+on:
+  pull_request:
+    branches: [develop, main]
+    paths:
+      - 'client/**'
+      - '.github/workflows/client-ci.yml'
+      - '.github/workflows/client-cd.yml'
+
+  push:
+    branches: ['feature/**', develop, main]
+    paths:
+      - 'client/**'
+      - '.github/workflows/client-ci.yml'
+      - '.github/workflows/client-cd.yml'
+
+jobs:
+  client-ci:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Test
+        run: npm test --if-present
+
+      - name: Build app
+        run: npm run build
+
+      - name: Validate Docker build
+        run: docker build -t client-ci:test .
