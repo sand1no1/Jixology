@@ -20,7 +20,8 @@ concurrency:
 jobs:
   server-cd:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main'
+    if: ${{ (github.ref == 'refs/heads/develop' && vars.ENABLE_API_STAGING_DEPLOY == 'true') ||
+      (github.ref == 'refs/heads/main' && vars.ENABLE_API_PROD_DEPLOY == 'true')}}
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
 
     steps:
