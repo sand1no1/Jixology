@@ -2,7 +2,7 @@ name: db-cd
 
 on:
   push:
-    branches: [develop, main]
+    branches: [staging, main]
     paths:
       - "supabase/**"
       - ".github/workflows/db-cd.yml"
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   validate-migrations:
-    if: ${{ (github.ref == 'refs/heads/develop' && vars.ENABLE_DB_STAGING_DEPLOY == 'true') ||
+    if: ${{ (github.ref == 'refs/heads/staging' && vars.ENABLE_DB_STAGING_DEPLOY == 'true') ||
       (github.ref == 'refs/heads/main' && vars.ENABLE_DB_PROD_DEPLOY == 'true')}}
     runs-on: ubuntu-latest
 
@@ -43,7 +43,7 @@ jobs:
     needs: validate-migrations
     if: ${{ needs.validate-migrations.result == 'success' &&
       (
-        (github.ref == 'refs/heads/develop' && vars.ENABLE_DB_STAGING_DEPLOY == 'true') ||
+        (github.ref == 'refs/heads/staging' && vars.ENABLE_DB_STAGING_DEPLOY == 'true') ||
         (github.ref == 'refs/heads/main' && vars.ENABLE_DB_PROD_DEPLOY == 'true')
       )}}
 

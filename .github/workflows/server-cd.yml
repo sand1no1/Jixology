@@ -2,7 +2,7 @@ name: server-cd
 
 on:
   push:
-    branches: [develop, main]
+    branches: [staging, main]
     paths:
       - 'server/**'
       - '.github/workflows/server-cd.yml'
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   server-cd:
     runs-on: ubuntu-latest
-    if: ${{ (github.ref == 'refs/heads/develop' && vars.ENABLE_API_STAGING_DEPLOY == 'true') ||
+    if: ${{ (github.ref == 'refs/heads/staging' && vars.ENABLE_API_STAGING_DEPLOY == 'true') ||
       (github.ref == 'refs/heads/main' && vars.ENABLE_API_PROD_DEPLOY == 'true')}}
     environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
 
@@ -35,7 +35,7 @@ jobs:
       - name: Set environment values
         id: vars
         run: |
-          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+          if [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
             echo "image_tag=staging" >> "$GITHUB_OUTPUT"
           elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             echo "image_tag=prod" >> "$GITHUB_OUTPUT"

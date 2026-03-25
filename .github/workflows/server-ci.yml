@@ -2,14 +2,14 @@ name: server-ci
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [develop, staging, main]
     paths:
       - 'server/**'
       - '.github/workflows/server-ci.yml'
       - '.github/workflows/server-cd.yml'
 
   push:
-    branches: ['feature/**', develop, main]
+    branches: ['feature/**', develop, staging, main]
     paths:
       - 'server/**'
       - '.github/workflows/server-ci.yml'
