@@ -2,13 +2,13 @@ name: db-ci
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [develop, staging, main]
     paths:
       - "supabase/**"
       - ".github/workflows/db-ci.yml"
       - ".github/workflows/db-cd.yml"
   push:
-    branches: ['feature/**', develop, main]
+    branches: ['feature/**', develop, staging, main]
     paths:
       - "supabase/**"
       - ".github/workflows/db-ci.yml"
