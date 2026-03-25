@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ (github.ref == 'refs/heads/staging' && vars.ENABLE_FRONTEND_STAGING_DEPLOY == 'true') ||
       (github.ref == 'refs/heads/main' && vars.ENABLE_FRONTEND_PROD_DEPLOY == 'true')}}
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
     
     steps:
       - name: Checkout
