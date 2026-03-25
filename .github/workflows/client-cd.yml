@@ -2,7 +2,7 @@ name: client-cd
 
 on:
   push:
-    branches: [develop, main]
+    branches: [staging, main]
     paths:
       - 'client/**'
       - '.github/workflows/client-cd.yml'
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   client-cd:
     runs-on: ubuntu-latest
-    if: ${{ (github.ref == 'refs/heads/develop' && vars.ENABLE_FRONTEND_STAGING_DEPLOY == 'true') ||
+    if: ${{ (github.ref == 'refs/heads/staging' && vars.ENABLE_FRONTEND_STAGING_DEPLOY == 'true') ||
       (github.ref == 'refs/heads/main' && vars.ENABLE_FRONTEND_PROD_DEPLOY == 'true')}}
     
     steps:
@@ -34,7 +34,7 @@ jobs:
       - name: Set environment values
         id: vars
         run: |
-          if [[ "${GITHUB_REF_NAME}" == "develop" ]]; then
+          if [[ "${GITHUB_REF_NAME}" == "staging" ]]; then
             echo "image_tag=staging" >> "$GITHUB_OUTPUT"
           elif [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             echo "image_tag=prod" >> "$GITHUB_OUTPUT"
