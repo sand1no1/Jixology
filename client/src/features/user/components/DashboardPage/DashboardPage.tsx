@@ -1,8 +1,7 @@
-import React, { ReactNode } from 'react';
+import type { FC } from 'react';
 import './DashboardPage.css';
 
-
-const DashboardPage: React.FC = () => {
+const DashboardPage: FC = () => {
   return (
     <div className="dashboard-page">
       DashboardPage Component

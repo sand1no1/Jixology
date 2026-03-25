@@ -1,8 +1,7 @@
-import React, { ReactNode } from 'react';
+import type { FC } from 'react';
 import './ButtonComponent.css';
 
-
-const ButtonComponent: React.FC = () => {
+const ButtonComponent: FC = () => {
   return (
     <div className="button-component">
       button component
