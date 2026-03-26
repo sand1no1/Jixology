@@ -12,12 +12,32 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --status-green: #80ef80; 
-  --status-yellow: #ffee8c;
-  --status-blue: #84b6f4;
-  --status-gray: #d3d4d6;
-  --status-red: #ff746c;
+  --status-green: #16a34a;
+  --status-yellow: #ca8a04;
+  --status-blue: #2563eb;
+  --status-gray: #6b7280;
+  --status-red: #dc2626;
+
+  /* Paleta de colores de Tech Mahindra */
+  /* ---------------------------------- */
+  --color-white:          #FFFFFF;
+  --color-clarity-gray-1: #F6F2EA;
+  --color-clarity-gray-2: #E5DFD3;
+  --color-anchor-gray-1:  #4A453D;
+  --color-anchor-gray-2:  #29251D;
+
+  --color-clarity-red:  #F8B4A3;
+  --color-mahindra-red: #E31837;
+  --color-impact-red:   #5F0229;
+
+  --color-blueprint-navy: #0A0838;
 }
+
+/* Status colors globales para toda la app */
+.status-completed  { background-color: var(--status-green); }
+.status-delayed    { background-color: var(--status-red); }
+.status-onTrack    { background-color: var(--status-blue); }
+.status-unassigned { background-color: var(--status-gray); }
 
 a {
   font-weight: 500;

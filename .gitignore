@@ -75,6 +75,10 @@ supabase/.temp
 Thumbs.db
 desktop.ini
 
+# Personal debug playground
+client/src/debug.tsx
+debug.html
+
 # Testing
 /coverage
 client/coverage/
