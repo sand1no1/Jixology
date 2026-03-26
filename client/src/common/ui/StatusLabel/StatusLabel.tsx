@@ -1,19 +1,22 @@
 import React from 'react';
-import type { ReactNode } from 'react';
-import './StatusLabel.css';
+import { statusClassMap } from '@/common/utils/statusClassMap';
+import styles from './StatusLabel.module.css';
 
+// un pill banner que muestra el status
 export interface IStatusLabelProps {
-  children?: ReactNode;
   statusId: number;
+  statusName: string;
   statusOrder: number;
-  isTerminal: boolean; 
+  isTerminal?: boolean;
 }
 
-const StatusLabel: React.FC<IStatusLabelProps> = ({ statusId, statusOrder, isTerminal, children }) => {
+
+const StatusLabel: React.FC<IStatusLabelProps> = ({ statusId, statusName, isTerminal = false }) => {
+  const statusClass = statusClassMap[statusId] ?? 'status-unassigned';
+
   return (
-    <div className="status-label-completed">
-      <p>Completado</p>
-      {children}
+    <div className={`${styles.pill} ${statusClass}`}>
+      {statusName}
     </div>
   );
 };
