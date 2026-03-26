@@ -1,0 +1,171 @@
+.log-in-page {
+  min-height: 100%;
+  width: 100%;
+  background-color: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
+
+.log-in-header {
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 0.0625rem solid #d4d4d4;
+  display: flex;
+  align-items: center;
+  padding: 1rem 2rem;
+  box-sizing: border-box;
+}
+
+.log-in-logo {
+  line-height: 1;
+}
+
+.log-in-logo-tech {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #444444;
+  letter-spacing: 0.03125rem;
+}
+
+.log-in-logo-mahindra {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #e33b54;
+  margin-top: -0.25rem;
+}
+
+.log-in-main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.log-in-card {
+  flex: 1;
+  width: 100%;
+  background-color: #f7f7f7;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem 2rem;
+  box-sizing: border-box;
+}
+
+.log-in-content {
+  width: 100%;
+  max-width: 32rem;
+  background-color: #ffffff;
+  border: 0.0625rem solid #bdbdbd;
+  border-radius: 2rem;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+  padding: 3.5rem 3rem;
+  box-sizing: border-box;
+}
+
+.log-in-title {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: 600;
+  color: #1f3650;
+  margin: 0 0 2.5rem;
+}
+
+.log-in-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.log-in-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.log-in-label {
+  display: block;
+  font-size: 1rem;
+  color: #555555;
+  margin-bottom: 0.5rem;
+}
+
+.log-in-input {
+  width: 100%;
+  height: 3.25rem;
+  border: 0.0625rem solid #cccccc;
+  border-radius: 999rem;
+  padding: 0 1.125rem;
+  font-size: 1rem;
+  outline: none;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.log-in-input:focus {
+  border-color: #d9a194;
+  box-shadow: 0 0 0 0.125rem rgba(217, 161, 148, 0.25);
+}
+
+.log-in-password-wrapper {
+  position: relative;
+}
+
+.log-in-password-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+  color: #888888;
+  pointer-events: none;
+}
+
+.log-in-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  font-size: 0.875rem;
+  color: #666666;
+  flex-wrap: wrap;
+}
+
+.log-in-remember {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.log-in-forgot {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  color: #666666;
+  cursor: pointer;
+}
+
+.log-in-forgot:hover {
+  text-decoration: underline;
+}
+
+.log-in-button {
+  width: 8.75rem;
+  height: 3rem;
+  border: none;
+  border-radius: 999rem;
+  background-color: #e6a18f;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.log-in-button:hover {
+  opacity: 0.9;
+}
