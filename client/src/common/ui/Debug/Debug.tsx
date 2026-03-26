@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-
+import StatusLabel from '@/common/ui/StatusLabel';
 export interface IDebugProps {
   data: unknown;
   label?: string;
@@ -28,6 +28,9 @@ const Debug: React.FC<IDebugProps> = ({ data, label, children }) => {
       >
         {JSON.stringify(data, null, 2)}
       </pre>
+      <StatusLabel statusId={0} statusOrder={0} isTerminal={false}>
+        {label ?? 'debug'}
+      </StatusLabel>
       {children}
     </details>
   );

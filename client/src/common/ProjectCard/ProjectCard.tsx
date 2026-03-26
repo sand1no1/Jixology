@@ -6,7 +6,7 @@ export interface IProjectCardProps {
   children?: ReactNode;
   projectId: number;
   projectName: string;
-  projectStatus: 
+  projectStatus: number;
 }
 
 const ProjectCard: React.FC<IProjectCardProps> = ({ children }) => {

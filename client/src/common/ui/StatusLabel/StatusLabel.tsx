@@ -11,7 +11,8 @@ export interface IStatusLabelProps {
 
 const StatusLabel: React.FC<IStatusLabelProps> = ({ statusId, statusOrder, isTerminal, children }) => {
   return (
-    <div className="status-label">
+    <div className="status-label-completed">
+      <p>Completado</p>
       {children}
     </div>
   );
