@@ -9,7 +9,7 @@ export interface IStatusLabelProps {
   isTerminal: boolean; 
 }
 
-const StatusLabel: React.FC<IStatusLabelProps> = ({ children }) => {
+const StatusLabel: React.FC<IStatusLabelProps> = ({ statusId, statusOrder, isTerminal, children }) => {
   return (
     <div className="status-label">
       {children}
