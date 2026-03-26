@@ -1,0 +1,23 @@
+.status-label {
+    display: block;
+    border-radius: 10px;
+    width: 50px;
+    height: 30px;
+}
+
+.status-label-completed {
+    background-color: var(--status-green);
+}
+.status-label-delayed {
+    background-color: var(--status-red);
+}
+.status-label-onTrack{
+    background-color: var(--status-blue);
+}
+.status-label-unassigned{
+    background-color: var(--status-gray);
+}
+
+
+
+
