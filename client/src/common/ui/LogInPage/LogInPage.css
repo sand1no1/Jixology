@@ -1,38 +1,10 @@
 .log-in-page {
-  min-height: 100%;
-  width: 100%;
+  min-height: auto;
+  width: auto;
   background-color: #f7f7f7;
   display: flex;
   flex-direction: column;
   font-family: Arial, sans-serif;
-}
-
-.log-in-header {
-  width: 100%;
-  background-color: #ffffff;
-  border-bottom: 0.0625rem solid #d4d4d4;
-  display: flex;
-  align-items: center;
-  padding: 1rem 2rem;
-  box-sizing: border-box;
-}
-
-.log-in-logo {
-  line-height: 1;
-}
-
-.log-in-logo-tech {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #444444;
-  letter-spacing: 0.03125rem;
-}
-
-.log-in-logo-mahindra {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #e33b54;
-  margin-top: -0.25rem;
 }
 
 .log-in-main {
