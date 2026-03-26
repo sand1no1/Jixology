@@ -12,8 +12,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --status-green: #16a34a;
-  --status-yellow: #ca8a04;
+  --status-green: #0A0838;
+  --status-yellow: #f59e0b;
   --status-blue: #2563eb;
   --status-gray: #6b7280;
   --status-red: #dc2626;
@@ -34,9 +34,9 @@
 }
 
 /* Status colors globales para toda la app */
-.status-completed  { background-color: var(--status-green); }
+.status-completed  { background-color: var(--status-blue); }
 .status-delayed    { background-color: var(--status-red); }
-.status-onTrack    { background-color: var(--status-blue); }
+.status-onTrack    { background-color: var(--status-yellow); }
 .status-unassigned { background-color: var(--status-gray); }
 
 a {
