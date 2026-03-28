@@ -1,3 +1,4 @@
 * text=auto
 *.toml text eol=lf
 *.json text eol=lf
+*app.json texto eol=crlf
