@@ -12,7 +12,6 @@
     "generate": "plop --plopfile ./plopfile.cjs"
   },
   "dependencies": {
-    "@heroicons/react": "^2.2.0",
     "@dicebear/collection": "^9.4.2",
     "@dicebear/core": "^9.4.2",
     "@supabase/supabase-js": "^2.100.0",
