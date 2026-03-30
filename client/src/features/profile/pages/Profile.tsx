@@ -29,16 +29,16 @@ const TAB_LABELS: Record<FeatureKey, string> = {
   mouth:       'Mouth',
 };
 
-// Features that have a probability prop
-const PROB_PROP: Partial<Record<FeatureKey, string>> = {
+// Features that have a DiceBear probability prop
+const PROB_PROP: Partial<Record<FeatureKey, ProbKey>> = {
   accessories: 'accessoriesProbability',
   beard:       'beardProbability',
   glasses:     'glassesProbability',
   hat:         'hatProbability',
 };
 
-// Features that have a colour prop — maps feature → { colorProp, colorOptions }
-const COLOR_META: Partial<Record<FeatureKey, { prop: string; options: string[] }>> = {
+// Features that have a DiceBear colour prop
+const COLOR_META: Partial<Record<FeatureKey, { prop: ColorKey; options: string[] }>> = {
   accessories: { prop: 'accessoriesColor', options: accessoriesColor },
   clothing:    { prop: 'clothingColor',    options: clothingColor    },
   eyes:        { prop: 'eyesColor',        options: eyesColor        },
@@ -48,10 +48,12 @@ const COLOR_META: Partial<Record<FeatureKey, { prop: string; options: string[] }
   mouth:       { prop: 'mouthColor',       options: mouthColor       },
 };
 
-// ── Avatar config ────────────────────────────────────────────────────────────
-const SEED = 'Juan Guarnizo';
+// ── Strict types (no `any`) ───────────────────────────────────────────────────
+type ProbKey  = 'accessoriesProbability' | 'beardProbability' | 'glassesProbability' | 'hatProbability';
+type ColorKey = 'accessoriesColor' | 'clothingColor' | 'eyesColor' | 'glassesColor' | 'hairColor' | 'hatColor' | 'mouthColor';
 
-interface AvatarFeatures {
+// Separate the three logical groups so we can index each without `any`
+interface FeatureVariants {
   accessories: string[];
   beard:       string[];
   clothing:    string[];
@@ -60,20 +62,15 @@ interface AvatarFeatures {
   hair:        string[];
   hat:         string[];
   mouth:       string[];
-  // probabilities
-  accessoriesProbability?: number;
-  beardProbability?:       number;
-  glassesProbability?:     number;
-  hatProbability?:         number;
-  // colours
-  accessoriesColor?: string[];
-  clothingColor?:    string[];
-  eyesColor?:        string[];
-  glassesColor?:     string[];
-  hairColor?:        string[];
-  hatColor?:         string[];
-  mouthColor?:       string[];
 }
+
+type FeatureProbabilities = Partial<Record<ProbKey,  number>>;
+type FeatureColors        = Partial<Record<ColorKey, string[]>>;
+
+type AvatarFeatures = FeatureVariants & FeatureProbabilities & FeatureColors;
+
+// ── Default state ─────────────────────────────────────────────────────────────
+const SEED = 'Juan Guarnizo';
 
 const DEFAULT_FEATURES: AvatarFeatures = {
   accessories:            ['variant01'],
@@ -90,43 +87,44 @@ const DEFAULT_FEATURES: AvatarFeatures = {
   hatProbability:         0,
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
+// DiceBear's generated types are extremely strict literal unions per-feature.
+// We spread our runtime-string config through a Record<string,unknown> bridge
+// which satisfies ESLint (no `any`) while keeping full type safety on our side.
 function makeAvatarSvg(features: AvatarFeatures): string {
-  return createAvatar(pixelArt, { seed: SEED, ...(features as any) }).toString();
+  const opts: Record<string, unknown> = { seed: SEED, ...features };
+  return createAvatar(pixelArt, opts as Parameters<typeof createAvatar>[1]).toString();
 }
 
 function makeVariantTileSvg(base: AvatarFeatures, feature: FeatureKey, value: string | null): string {
   const probKey = PROB_PROP[feature];
-  return makeAvatarSvg({
-    ...base,
-    ...(value !== null ? { [feature]: [value] } : {}),
-    ...(probKey ? { [probKey]: value === null ? 0 : 100 } : {}),
-  });
+  const probOverride: FeatureProbabilities = probKey ? { [probKey]: value === null ? 0 : 100 } : {};
+  const variantOverride: Partial<FeatureVariants> = value !== null ? { [feature]: [value] } : {};
+  return makeAvatarSvg({ ...base, ...probOverride, ...variantOverride });
 }
 
 function makeColorTileSvg(base: AvatarFeatures, feature: FeatureKey, colorValue: string): string {
-  const colorMeta = COLOR_META[feature]!;
-  const probKey   = PROB_PROP[feature];
-  return makeAvatarSvg({
-    ...base,
-    [colorMeta.prop]: [colorValue],
-    ...(probKey ? { [probKey]: 100 } : {}),
-  });
+  const colorMeta = COLOR_META[feature];
+  if (!colorMeta) return makeAvatarSvg(base);
+  const probKey = PROB_PROP[feature];
+  const probOverride: FeatureProbabilities = probKey ? { [probKey]: 100 } : {};
+  const colorOverride: FeatureColors = { [colorMeta.prop]: [colorValue] };
+  return makeAvatarSvg({ ...base, ...probOverride, ...colorOverride });
 }
 
-// ── ColorSwatch ──────────────────────────────────────────────────────────────
+// ── ColorSwatch ────────────────────────────────────────────────────────────────
 interface ColorSwatchProps {
-  hex: string;      // raw hex, may be "transparent"
+  hex: string;
   selected: boolean;
   onClick: () => void;
 }
 
 const ColorSwatch: React.FC<ColorSwatchProps> = ({ hex, selected, onClick }) => {
-  const bg = hex === 'transparent' ? 'transparent' : `#${hex}`;
+  const bg = hex === 'transparent' ? undefined : `#${hex}`;
   return (
     <div
       className={`color-swatch ${selected ? 'color-swatch--selected' : ''}`}
-      style={{ background: bg }}
+      style={bg ? { background: bg } : undefined}
       onClick={onClick}
       title={hex}
     >
@@ -135,7 +133,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ hex, selected, onClick }) => 
   );
 };
 
-// ── AvatarTile ───────────────────────────────────────────────────────────────
+// ── AvatarTile ─────────────────────────────────────────────────────────────────
 interface AvatarTileProps {
   svg: string;
   label: string;
@@ -150,38 +148,36 @@ const AvatarTile: React.FC<AvatarTileProps> = ({ svg, label, selected, onClick }
   </div>
 );
 
-// ── InventoryCard ────────────────────────────────────────────────────────────
+// ── InventoryCard ──────────────────────────────────────────────────────────────
 interface InventoryCardProps {
   features: AvatarFeatures;
   onSelectVariant: (feature: FeatureKey, value: string | null) => void;
-  onSelectColor:   (feature: FeatureKey, colorProp: string, colorValue: string) => void;
+  onSelectColor:   (feature: FeatureKey, colorProp: ColorKey, colorValue: string) => void;
 }
 
 const InventoryCard: React.FC<InventoryCardProps> = ({ features, onSelectVariant, onSelectColor }) => {
   const [activeTab,    setActiveTab]    = useState<FeatureKey>('hair');
   const [showingColor, setShowingColor] = useState(false);
 
-  // Reset colour mode when switching tabs
   const handleTabChange = (key: FeatureKey) => {
     setActiveTab(key);
     setShowingColor(false);
   };
 
-  const colorMeta   = COLOR_META[activeTab];
-  const hasColor    = !!colorMeta;
-  const probKey     = PROB_PROP[activeTab];
-  const isNoneSelected = probKey ? (features as any)[probKey] === 0 : false;
+  const colorMeta      = COLOR_META[activeTab];
+  const hasColor       = !!colorMeta;
+  const probKey        = PROB_PROP[activeTab];
+  const isNoneSelected = probKey ? (features[probKey] ?? 100) === 0 : false;
 
-  // ── Variant tiles ──
   const variantTiles = useMemo(() => {
-    const opts = OPTIONS[activeTab] as readonly string[];
-    const tiles = [];
+    const opts  = OPTIONS[activeTab] as readonly string[];
+    const tiles: { value: string | null; label: string; svg: string; selected: boolean }[] = [];
 
     if (probKey) {
       tiles.push({
-        value: null as string | null,
-        label: 'None',
-        svg:   makeVariantTileSvg(features, activeTab, null),
+        value:    null,
+        label:    'None',
+        svg:      makeVariantTileSvg(features, activeTab, null),
         selected: isNoneSelected,
       });
     }
@@ -189,18 +185,17 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ features, onSelectVariant
     for (const value of opts) {
       tiles.push({
         value,
-        label: value,
-        svg:   makeVariantTileSvg(features, activeTab, value),
+        label:    value,
+        svg:      makeVariantTileSvg(features, activeTab, value),
         selected: !isNoneSelected && features[activeTab][0] === value,
       });
     }
     return tiles;
   }, [activeTab, features, isNoneSelected, probKey]);
 
-  // ── Color tiles (shown when showingColor) ──
   const colorTiles = useMemo(() => {
     if (!colorMeta) return [];
-    const currentColor = ((features as any)[colorMeta.prop] as string[] | undefined)?.[0];
+    const currentColor = (features[colorMeta.prop] ?? [])[0];
     return colorMeta.options.map((c) => ({
       hex:      c,
       svg:      makeColorTileSvg(features, activeTab, c),
@@ -210,7 +205,6 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ features, onSelectVariant
 
   return (
     <div className="inv-card">
-      {/* Tab bar */}
       <nav className="inv-tabs">
         {(Object.keys(OPTIONS) as FeatureKey[]).map((key) => (
           <button
@@ -222,19 +216,16 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ features, onSelectVariant
           </button>
         ))}
 
-        {/* Colour toggle — only when the active tab supports colours */}
         {hasColor && (
           <button
             className={`inv-color-toggle ${showingColor ? 'inv-color-toggle--active' : ''}`}
             onClick={() => setShowingColor((s) => !s)}
-            title="Toggle colour picker"
           >
             🎨 {showingColor ? 'Variants' : 'Colors'}
           </button>
         )}
       </nav>
 
-      {/* Grid */}
       <div className="inv-grid">
         {!showingColor
           ? variantTiles.map(({ value, label, svg, selected }) => (
@@ -254,7 +245,11 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ features, onSelectVariant
                   selected={selected}
                   onClick={() => onSelectColor(activeTab, colorMeta!.prop, hex)}
                 />
-                <ColorSwatch hex={hex} selected={selected} onClick={() => onSelectColor(activeTab, colorMeta!.prop, hex)} />
+                <ColorSwatch
+                  hex={hex}
+                  selected={selected}
+                  onClick={() => onSelectColor(activeTab, colorMeta!.prop, hex)}
+                />
               </div>
             ))
         }
@@ -263,7 +258,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({ features, onSelectVariant
   );
 };
 
-// ── Profile ──────────────────────────────────────────────────────────────────
+// ── Profile ────────────────────────────────────────────────────────────────────
 const Profile: React.FC = () => {
   const [features, setFeatures] = useState<AvatarFeatures>(DEFAULT_FEATURES);
 
@@ -278,12 +273,11 @@ const Profile: React.FC = () => {
     }));
   };
 
-  const handleSelectColor = (feature: FeatureKey, colorProp: string, colorValue: string) => {
+  const handleSelectColor = (feature: FeatureKey, colorProp: ColorKey, colorValue: string) => {
     const probKey = PROB_PROP[feature];
     setFeatures((prev) => ({
       ...prev,
       [colorProp]: [colorValue],
-      // make sure the feature is visible when a colour is chosen
       ...(probKey ? { [probKey]: 100 } : {}),
     }));
   };
