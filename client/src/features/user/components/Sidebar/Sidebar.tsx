@@ -1,17 +1,20 @@
 import React from 'react';
- import type { ReactNode } from 'react';
-import styles from './Sidebar.module.css';
+import type { ReactNode } from 'react';
+import Profile from '@/features/profile/pages';
+import './Sidebar.css';
 
 export interface ISidebarProps {
   children?: ReactNode;
 }
 
 const Sidebar: React.FC<ISidebarProps> = ({ children }) => {
-  return (
-    <div className={styles.container}>
-      {children}
-    </div>
-  );
+  return (<>
+  <div id="MainPageBelow">
+    <div id="Sidebar">
+    <label>SidebarXD</label>
+  </div>
+  </div>
+  </>);
 };
 
 export default Sidebar;
