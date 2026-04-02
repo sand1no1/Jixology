@@ -5,9 +5,11 @@ import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile from '@/features/profile/pages';
+import Header from '@/features/user/components/Header';
+import Sidebar from '@/features/user/components/Sidebar';
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
-type DebugViewKey = 'login' | 'projects' | 'profile';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'header';
 
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
@@ -105,6 +107,10 @@ export default function DebugApp() {
 
       profile: <Profile />,
       // myNewComponent: <MyNewComponent />,
+      header: <>
+        <Header />
+        <Sidebar />
+      </>,
     }),
     []
   );
