@@ -9,11 +9,29 @@ export interface ISidebarProps {
 
 const Sidebar: React.FC<ISidebarProps> = ({ children }) => {
   return (<>
-  <div id="MainPageBelow">
-    <div id="Sidebar">
-    <label>SidebarXD</label>
-  </div>
-  </div>
+    <nav>
+      <div className="Header">
+        <div className="HeaderMain">
+          <img src="../../TechMahindraLogo.png"></img>
+          <span>Proyecto Principal</span>
+        </div>
+      </div>
+      
+
+      <div className="Sidebar">
+          <div className="SidebarHeader">
+            <span className="SidebarImage">
+              <img src="../../TechMahindraLogoSmall.png"></img>
+            </span>
+            <div className="SidebarMainTitle">
+              <span className="SidebarTitle">Jixology Devsys</span>
+              <span className="SidebarSubtitle">Tech Mahindra's Development Environment</span>
+            </div>
+          </div>
+      </div>
+
+      
+    </nav>
   </>);
 };
 
