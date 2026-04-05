@@ -12,6 +12,7 @@
     "generate": "plop --plopfile ./plopfile.cjs"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@supabase/supabase-js": "^2.100.0",
     "dotenv": "^17.3.1",
     "react": "^19.2.0",
