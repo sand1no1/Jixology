@@ -4,16 +4,16 @@ import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
 import HeaderView from "@/shared/components/MainNavigation/Header"
 import SidebarView from "@/shared/components/MainNavigation/Sidebar"
+import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/profile" replace />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/user" element={<UserDashboardPage />}/>
-      <Route path="/header" element={<HeaderView />}/>
-      <Route path="/sidebar" element={<SidebarView />}/>
+      <Route path="/" element={<Navigate to="/perfil" replace />} />
+      <Route path="/inicio-sesion" element={<LoginPage />} />
+      <Route path="/perfil" element={<ProfilePage />} />
+      <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
+      <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
     </Routes>
   );
 }
