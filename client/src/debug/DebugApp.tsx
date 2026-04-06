@@ -5,9 +5,10 @@ import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile from '@/features/profile/pages';
+import SearchBarComponent from '@/shared/components/SearchBarComponent';
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
-type DebugViewKey = 'login' | 'projects' | 'profile';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar';
 
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
@@ -104,6 +105,12 @@ export default function DebugApp() {
       ),
 
       profile: <Profile />,
+
+      searchBar: (
+        <div style={{ padding: '1.5rem' }}>
+          <SearchBarComponent infoText="Buscar proyectos..." />
+        </div>
+      ),
       // myNewComponent: <MyNewComponent />,
     }),
     []
