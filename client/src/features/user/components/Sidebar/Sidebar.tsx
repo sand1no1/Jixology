@@ -13,7 +13,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ children }) => {
       <div className="Header">
         <div className="HeaderMain">
           <img src="../../TechMahindraLogo.png"></img>
-          <span>Proyecto Principal</span>
+          <span><b>Proyecto Principal</b></span>
         </div>
       </div>
       
@@ -24,7 +24,7 @@ const Sidebar: React.FC<ISidebarProps> = ({ children }) => {
               <img src="../../TechMahindraLogoSmall.png"></img>
             </span>
             <div className="SidebarMainTitle">
-              <span className="SidebarTitle">Jixology Devsys</span>
+              <span className="SidebarTitle"><b>Jixology Devsys</b></span>
               <span className="SidebarSubtitle">Tech Mahindra's Development Environment</span>
             </div>
           </div>
