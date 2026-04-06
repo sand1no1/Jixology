@@ -5,8 +5,8 @@ import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile from '@/features/profile/pages';
-import Header from '@/features/user/components/Header';
-import Sidebar from '@/features/user/components/Sidebar';
+import Header from "@/shared/components/MainNavigation/Header"
+import Sidebar from "@/shared/components/MainNavigation/Sidebar"
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
 type DebugViewKey = 'login' | 'projects' | 'profile' | 'header';
