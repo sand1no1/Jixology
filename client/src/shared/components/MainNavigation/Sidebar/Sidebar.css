@@ -1,96 +1,124 @@
-:root{
-    --bodyColor: #9f9f9fe6;
-    --sidebarColor: #f7e4e4;
-}
-
-body {
-    background: var(--bodyColor);
-}
-
-.Sidebar label{
+:root {
+    --bgMain: #f5f5f5;
+    --bgSidebar: #ffffff;
+    --accent: #d32f2f;
+    --text: #2b2b2b;
+    --textSoft: #6b6b6b;
+    --border: #e0e0e0;
+  }
+  
+  body {
+    margin: 0;
+    background: var(--bgMain);
     font-family: sans-serif;
-    font-size: larger;
-}
-
-.Header {
+    color: var(--text);
+  }
+  
+  .header {
     position: fixed;
     top: 0;
     left: 0;
-    min-height: 50px;
+    height: 55px;
     width: 100%;
-    background: var(--sidebarColor);
-    outline: 2px solid black;
-}
-.Header .HeaderMain {
+    background: var(--bgSidebar);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-}
+    z-index: 10;
+  }
+  
+  .headerMain {
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+  }
 
-.Header img {
-    height: 50px;
-    padding: 0px 10px;
-    padding-bottom: 2px;
-}
-.Header span {
-    padding-left: 10px;
-    font-size: larger;
-}
-
-.Sidebar {
+  .headerMain span {
+    padding-left: 15px;
+  }
+  
+  .header img {
+    height: 40px;
+  }
+  
+  .header span {
+    margin-left: 10px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .sidebar {
     position: fixed;
-    top: 54px;
+    top: 55px;
     left: 0;
-    height: 100%;
-    width: 250px;
-    background: var(--sidebarColor);
-    padding: 10px 10px;
-}
-
-.Sidebar .SidebarImage img {
-    width:30px
-}
-
-.Sidebar .SidebarHeader {
+    width: 200px;
+    height: calc(100% - 55px);
+    background: var(--bgSidebar);
+    border-right: 1px solid var(--border);
+    padding: 15px 10px;
+  }
+  
+  .sidebarHeader {
     display: flex;
     align-items: center;
-}
-
-.Sidebar .SidebarHeader .SidebarMainTitle {
+    margin-bottom: 20px;
+  }
+  
+  .sidebarLogo {
+    width: 35px;
+  }
+  
+  .sidebarTitles {
     display: flex;
     flex-direction: column;
-    padding-left: 10px;
-}
-
-.Sidebar .SidebarHeader .SidebarMainTitle .SidebarTitle{
-    font-size: 20px;
-}
-
-.Sidebar .SidebarHeader .SidebarMainTitle .SidebarSubtitle{
-    font-size: 10px;
-}
-
-.SidebarMenu {
-
-}
-
-.SidebarMenuElement {
-    height: 50px;
-    background: red;
-    font-size: 18px;
-    margin: 5px 0px;
-    margin-left: -40px;
-    display: flex;
-    align-items: center;
-}
-
-.SidebarMenuImage {
-    background: blue;
-    display: flex;
-    align-items: center;
-    margin-left: 15px;
-}
-
-.SidebarMenuElement span {
-    background: green;
     margin-left: 10px;
-}
+  }
+  
+  .title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .subtitle {
+    font-size: 11px;
+    color: var(--textSoft);
+  }
+  
+  .menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .menuItem {
+    margin: 6px 0;
+  }
+  
+  .menuItem a {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text);
+    transition: 0.2s;
+  }
+  
+  .menuItem a:hover {
+    background: #f0f0f0;
+    color: var(--accent)
+  }
+  
+  .menuItem a:hover .icon {
+    color: var(--accent);
+  }
+  
+  .icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .menuItem span {
+    margin-left: 12px;
+    font-size: 15px;
+  }
