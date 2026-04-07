@@ -68,3 +68,29 @@ body {
 .Sidebar .SidebarHeader .SidebarMainTitle .SidebarSubtitle{
     font-size: 10px;
 }
+
+.SidebarMenu {
+
+}
+
+.SidebarMenuElement {
+    height: 50px;
+    background: red;
+    font-size: 18px;
+    margin: 5px 0px;
+    margin-left: -40px;
+    display: flex;
+    align-items: center;
+}
+
+.SidebarMenuImage {
+    background: blue;
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+}
+
+.SidebarMenuElement span {
+    background: green;
+    margin-left: 10px;
+}
