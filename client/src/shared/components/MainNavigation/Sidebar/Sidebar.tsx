@@ -6,12 +6,13 @@ import {
   UserCircleIcon,
   LockClosedIcon
 } from '@heroicons/react/24/solid';
+import ProfilePage from '@/features/profile/pages';
 
 export interface ISidebarProps {
   children?: ReactNode;
 }
 
-const Sidebar: React.FC<ISidebarProps> = () => {
+const Sidebar: React.FC<ISidebarProps> = ({ children }) => {
   return (
     <nav>
       <div className="header">
@@ -43,6 +44,13 @@ const Sidebar: React.FC<ISidebarProps> = () => {
           </li>
         </ul>
       </aside>
+
+      <div className="overlay"></div>
+
+      <main className="content">
+        {children}
+        <ProfilePage/>
+      </main>
     </nav>
   );
 };
