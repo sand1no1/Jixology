@@ -14,8 +14,6 @@ import ListUserCard from '@/features/profile/components/ListUserCard';
 type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard';
 
 
-// import MyNewComponent from '@/somewhere/MyNewComponent';
-
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
     () => ({
@@ -110,8 +108,6 @@ export default function DebugApp() {
         </div>
       ),
 
-      profile: <Profile />,
-
       searchBar: (
         <div style={{ padding: '1.5rem' }}>
           <SearchBarComponent infoText="Buscar proyectos..." />
@@ -158,6 +154,8 @@ export default function DebugApp() {
           />
         </div>
       ),
+
+      profile: <Profile />,
 
       // myNewComponent: <MyNewComponent />,
     }),
