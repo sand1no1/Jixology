@@ -88,9 +88,6 @@ const DEFAULT_FEATURES: AvatarFeatures = {
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-// DiceBear's generated types are extremely strict literal unions per-feature.
-// We spread our runtime-string config through a Record<string,unknown> bridge
-// which satisfies ESLint (no `any`) while keeping full type safety on our side.
 function makeAvatarSvg(features: AvatarFeatures): string {
   const opts: Record<string, unknown> = { seed: SEED, ...features };
   return createAvatar(pixelArt, opts as Parameters<typeof createAvatar>[1]).toString();
@@ -295,16 +292,14 @@ const Profile: React.FC = () => {
           <div className="info-row"><span>Telefono: 81 22544 4444</span></div>
           <div className="info-row"><span>Correo: juan.guarnizo@gmail.com</span></div>
         </div>
+
+        <div className="about-me-section">
+          <div className="about-me-label">Sobre mi</div>
+          <p className="about-me-text">Lorem ipsum dolor sit amet consectetur adipiscing elit, potenti justo nostra tristique ullamcorper curae sociis, bibendum enim turpis hendrerit mauris magnis.</p>
+        </div>
       </div>
 
       <div className="profile-right">
-        <div className="profile-section">
-          <div className="section-tab">Sobre mi</div>
-          <div className="section-body">
-            <p>Lorem ipsum dolor sit amet consectetur adipiscing elit, potenti justo nostra tristique ullamcorper curae sociis, bibendum enim turpis hendrerit mauris magnis.</p>
-          </div>
-        </div>
-
         <div className="profile-section profile-section--inventory">
           <div className="section-tab">Cosméticos</div>
           <div className="section-body section-body--flush">
