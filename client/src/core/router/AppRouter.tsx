@@ -14,6 +14,7 @@ export function AppRouter() {
       <Route path="/perfil" element={<ProfilePage />} />
       <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
       <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
+      <Route path="/sidebar" element={<SidebarView />} />
     </Routes>
   );
 }
