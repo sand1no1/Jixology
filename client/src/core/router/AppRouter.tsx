@@ -2,7 +2,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '@/features/auth/pages/LogInPage';
 import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
-import HeaderView from "@/shared/components/MainNavigation/Header"
 import SidebarView from "@/shared/components/MainNavigation/Sidebar"
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 
