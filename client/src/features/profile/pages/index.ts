@@ -1,2 +1,2 @@
 export { default } from './Profile';
-export { DEFAULT_FEATURES, makeAvatarSvg } from '../services/avatar.service';
+export { CATALOG, makeAvatarSvg } from '../services/avatar.service';

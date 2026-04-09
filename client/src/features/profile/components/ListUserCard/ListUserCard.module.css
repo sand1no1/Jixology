@@ -30,6 +30,19 @@
   flex-shrink: 0;
 }
 
+.avatarSvg {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatarSvg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* ── Name ────────────────────────────────────────────────────── */
 .name {
   color: var(--color-blueprint-navy);

@@ -161,6 +161,41 @@
   color: var(--color-white);
 }
 
+/* ── Background type segmented toggle ───────────────────────────── */
+.inv-type-toggle {
+  display: flex;
+  width: 100%;
+  gap: 0;
+  margin-bottom: 4px;
+  background: var(--color-clarity-gray-1);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.inv-type-btn {
+  flex: 1;
+  padding: 7px 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-anchor-gray-1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.inv-type-btn--active {
+  background: var(--color-white);
+  color: var(--color-blueprint-navy);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(10, 8, 56, 0.10);
+}
+
+.inv-type-btn:hover:not(.inv-type-btn--active) {
+  color: var(--color-blueprint-navy);
+}
+
 /* ── Inventory grid ─────────────────────────────────────────────── */
 .inv-grid {
   display: flex;

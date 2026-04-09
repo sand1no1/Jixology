@@ -12,14 +12,18 @@ interface ListUserCardProps {
   fullName: string;
   roles: Role[];
   email: string;
+  avatarSvg?: string;
   onEdit?: () => void;
 }
 
-const ListUserCard: React.FC<ListUserCardProps> = ({ fullName, roles, email, onEdit }) => (
+const ListUserCard: React.FC<ListUserCardProps> = ({ fullName, roles, email, avatarSvg, onEdit }) => (
   <div className={styles.row}>
-    {/* Avatar icon */}
+    {/* Avatar */}
     <div className={styles.avatar}>
-      <UserIcon width={18} height={18} />
+      {avatarSvg
+        ? <div className={styles.avatarSvg} dangerouslySetInnerHTML={{ __html: avatarSvg }} />
+        : <UserIcon width={18} height={18} />
+      }
     </div>
 
     {/* Name */}

@@ -6,7 +6,7 @@ import InventoryCard from '../components/InventoryCard';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 
 const Profile: React.FC = () => {
-  const { features, mainAvatarSvg, handleSelectVariant, handleSelectColor } = useAvatarFeatures();
+  const { features, mainAvatarSvg, handleSelectVariant, handleSelectColor, handleSelectType } = useAvatarFeatures();
 
   return (
     <div className="profile-page">
@@ -28,6 +28,7 @@ const Profile: React.FC = () => {
               features={features}
               onSelectVariant={handleSelectVariant}
               onSelectColor={handleSelectColor}
+              onSelectType={handleSelectType}
             />
           </div>
         </div>
