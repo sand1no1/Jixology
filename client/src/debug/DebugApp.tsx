@@ -4,8 +4,7 @@ import '@/app/index.css';
 import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
-import Profile, { makeAvatarSvg } from '@/features/profile/pages';
-import { CATALOG } from '@/features/profile/services/avatar.service';
+import Profile from '@/features/profile/pages';
 
 import UserCard from '@/features/profile/components/UserCard/UserCard';
 import ListUserCard from '@/features/profile/components/ListUserCard';
@@ -111,7 +110,6 @@ export default function DebugApp() {
       
       userCard: (
         <UserCard
-          avatarSvg={makeAvatarSvg(CATALOG.defaultFeatures)}
           name="Juan Guarnizo"
           age={99}
           birthDate="01/01/1987"
@@ -126,7 +124,6 @@ export default function DebugApp() {
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <ListUserCard
             fullName="John Doe"
-            avatarSvg={makeAvatarSvg(CATALOG.defaultFeatures)}
             roles={[
               { label: 'QA',    color: '#FEF3C7', textColor: '#D97706' },
               { label: 'Front', color: '#EDE9FE', textColor: '#7C3AED' },
@@ -135,7 +132,6 @@ export default function DebugApp() {
           />
           <ListUserCard
             fullName="Ana García"
-            avatarSvg={makeAvatarSvg(CATALOG.defaultFeatures)}
             roles={[
               { label: 'Back', color: '#DBEAFE', textColor: '#1D4ED8' },
               { label: 'DevOps', color: '#D1FAE5', textColor: '#065F46' },
@@ -144,7 +140,6 @@ export default function DebugApp() {
           />
           <ListUserCard
             fullName="Carlos Martínez"
-            avatarSvg={makeAvatarSvg(CATALOG.defaultFeatures)}
             roles={[
               { label: 'PM', color: '#FCE7F3', textColor: '#BE185D' },
             ]}

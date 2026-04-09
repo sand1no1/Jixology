@@ -4,9 +4,12 @@ import './Profile.css';
 import UserCard from '../components/UserCard';
 import InventoryCard from '../components/InventoryCard';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
+import { useRandomAvatarFromDb } from '../hooks/useRandomAvatarFromDb';
 
 const Profile: React.FC = () => {
-  const { features, mainAvatarSvg, handleSelectVariant, handleSelectColor, handleSelectType } = useAvatarFeatures();
+  const { initialFeatures } = useRandomAvatarFromDb();
+  const { features, mainAvatarSvg, handleSelectVariant, handleSelectColor, handleSelectType } =
+    useAvatarFeatures(initialFeatures);
 
   return (
     <div className="profile-page">

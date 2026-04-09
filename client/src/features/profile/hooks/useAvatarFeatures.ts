@@ -1,10 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { CATALOG, makeAvatarSvg } from '../services/avatar.service';
 import type { DynamicFeatures, FeatureMeta } from '../types/avatar.types';
 
-export function useAvatarFeatures() {
-  const [features, setFeatures] = useState<DynamicFeatures>(CATALOG.defaultFeatures);
+export function useAvatarFeatures(initialFeatures?: DynamicFeatures) {
+  const [features, setFeatures] = useState<DynamicFeatures>(
+    initialFeatures ?? CATALOG.defaultFeatures
+  );
+
+  // When the DB-loaded initial features arrive, reset state once
+  useEffect(() => {
+    if (initialFeatures) setFeatures(initialFeatures);
+  }, [initialFeatures]);
 
   const mainAvatarSvg = useMemo(() => makeAvatarSvg(features), [features]);
 
@@ -19,7 +26,6 @@ export function useAvatarFeatures() {
   const handleSelectColor = (meta: FeatureMeta, colorValue: string) => {
     if (!meta.colorProp) return;
     setFeatures((prev) => {
-      // Gradient mode requires 2 colors — toggle in/out of the selection (max 2)
       const isGradient =
         meta.typeProp &&
         (prev[meta.typeProp] as string[])?.[0] === 'gradientLinear';
@@ -28,13 +34,11 @@ export function useAvatarFeatures() {
         const current = (prev[meta.colorProp!] as string[]) ?? [];
         let next: string[];
         if (current.includes(colorValue)) {
-          // Deselect — keep at least 1 color
           next = current.filter(c => c !== colorValue);
           if (next.length === 0) next = [colorValue];
         } else if (current.length < 2) {
           next = [...current, colorValue];
         } else {
-          // Already 2 selected — replace the first, shift second to first
           next = [current[1], colorValue];
         }
         return { ...prev, [meta.colorProp!]: next };
