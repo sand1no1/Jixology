@@ -29,7 +29,7 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const containerColor = statusClassMap[projectStatus] ?? 'status-unassigned';
+  const containerColor = statusClassMap[projectStatus]?.cssClass ?? 'status-unassigned';
   const formattedDate = new Date(projectDueDate).toLocaleDateString();
 
   return (
@@ -65,9 +65,20 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
       {/* Footer: stack siempre visible, fecha y FTE solo en expanded */}
       <div className={styles.footer}>
         <div className={styles.stack}>
-          {projectStack.map((element) => (
-            <span key={element} className={styles.stackPill}>{element}</span>
-          ))}
+          {isExpanded ? (
+            projectStack.map((element) => (
+              <span key={element} className={styles.stackPill}>{element}</span>
+            ))
+          ) : (
+            <>
+              {projectStack[0] && (
+                <span className={styles.stackPill}>{projectStack[0]}</span>
+              )}
+              {projectStack.length > 1 && (
+                <span className={styles.stackPill}>+{projectStack.length - 1} más</span>
+              )}
+            </>
+          )}
         </div>
         {isExpanded && (
           <div className={styles.meta}>

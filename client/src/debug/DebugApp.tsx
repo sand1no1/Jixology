@@ -5,9 +5,11 @@ import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile from '@/features/profile/pages';
+import SearchBarComponent from '@/shared/components/SearchBarComponent';
+import ProjectsPage from '@/features/projects/pages/ProjectsPage';
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
-type DebugViewKey = 'login' | 'projects' | 'profile';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage';
 
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
@@ -86,7 +88,7 @@ export default function DebugApp() {
             projectId={4}
             projectName="Proyecto Delta"
             projectStatus={4}
-            projectStack={['React Native', 'Firebase']}
+            projectStack={['React Native daennieifen', 'Firebase efaerafva', '...']}
             completition={0}
             projectDescription="App móvil para gestión de inventario en campo. Pendiente de asignación de equipo."
             projectDueDate="2026-08-01"
@@ -104,6 +106,13 @@ export default function DebugApp() {
       ),
 
       profile: <Profile />,
+
+      searchBar: (
+        <div style={{ padding: '1.5rem' }}>
+          <SearchBarComponent infoText="Buscar proyectos..." />
+        </div>
+      ),
+      projectsPage: <ProjectsPage />,
       // myNewComponent: <MyNewComponent />,
     }),
     []
@@ -153,7 +162,9 @@ export default function DebugApp() {
           ))}
         </div>
 
-        <div>{views[activeView]}</div>
+        <div style={{ backgroundColor: 'var(--color-clarity-gray-1)', minHeight: '100vh' }}>
+          {views[activeView]}
+        </div>
       </div>
     </React.StrictMode>
   );
