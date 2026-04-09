@@ -2,7 +2,7 @@ import React from 'react';
 import './Profile.css';
 
 import UserCard from '../components/UserCard';
-import InventoryCard from '../components/InventoryCard/InventoryCard';
+import InventoryCard from '../components/InventoryCard';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 
 const Profile: React.FC = () => {

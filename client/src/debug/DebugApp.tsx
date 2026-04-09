@@ -6,9 +6,10 @@ import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile, { DEFAULT_FEATURES, makeAvatarSvg } from '@/features/profile/pages';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
+import ListUserCard from '@/features/profile/components/ListUserCard';
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'userCard' ;
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'userCard' | 'listUserCard';
 
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
@@ -118,6 +119,34 @@ export default function DebugApp() {
         />
       ),
 
+
+      listUserCard: (
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <ListUserCard
+            fullName="John Doe"
+            roles={[
+              { label: 'QA',    color: '#FEF3C7', textColor: '#D97706' },
+              { label: 'Front', color: '#EDE9FE', textColor: '#7C3AED' },
+            ]}
+            email="johndoe@example.com"
+          />
+          <ListUserCard
+            fullName="Ana García"
+            roles={[
+              { label: 'Back', color: '#DBEAFE', textColor: '#1D4ED8' },
+              { label: 'DevOps', color: '#D1FAE5', textColor: '#065F46' },
+            ]}
+            email="ana.garcia@example.com"
+          />
+          <ListUserCard
+            fullName="Carlos Martínez"
+            roles={[
+              { label: 'PM', color: '#FCE7F3', textColor: '#BE185D' },
+            ]}
+            email="carlos.martinez@example.com"
+          />
+        </div>
+      ),
 
       // myNewComponent: <MyNewComponent />,
     }),

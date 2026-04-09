@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 
-import AvatarTile from '../AvatarTile/AvatarTile';
-import ColorSwatch from '../ColorSwatch/ColorSwatch';
+import AvatarTile from '../AvatarTile';
+import ColorSwatch from '../ColorSwatch';
 import { OPTIONS, TAB_LABELS, PROB_PROP, COLOR_META, makeVariantTileSvg, makeColorTileSvg } from '../../services/avatar.service';
 import type { AvatarFeatures, ColorKey, FeatureKey } from '../../types/avatar.types';
 
