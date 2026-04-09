@@ -4,10 +4,11 @@ import '@/app/index.css';
 import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
-import Profile from '@/features/profile/pages';
+import Profile, { DEFAULT_FEATURES, makeAvatarSvg } from '@/features/profile/pages';
+import UserCard from '@/features/profile/components/UserCard/UserCard';
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
-type DebugViewKey = 'login' | 'projects' | 'profile';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'userCard' ;
 
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
@@ -104,6 +105,20 @@ export default function DebugApp() {
       ),
 
       profile: <Profile />,
+      
+      userCard: (
+        <UserCard
+          avatarSvg={makeAvatarSvg(DEFAULT_FEATURES)}
+          name="Juan Guarnizo"
+          age={99}
+          birthDate="01/01/1987"
+          phone="81 22544 4444"
+          email="juan.guarnizo@gmail.com"
+          aboutMe="Lorem ipsum dolor sit amet consectetur adipiscing elit, potenti justo nostra tristique ullamcorper curae sociis, bibendum enim turpis hendrerit mauris magnis."
+        />
+      ),
+
+
       // myNewComponent: <MyNewComponent />,
     }),
     []
