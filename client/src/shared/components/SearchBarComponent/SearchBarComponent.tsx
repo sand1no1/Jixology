@@ -3,8 +3,8 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import styles from './SearchBarComponent.module.css';
 
 export interface ISearchBarComponentProps {
-  infoText: String;
-  onChange?: (value: String) => void;
+  infoText: string;
+  onChange?: (value: string) => void;
   fontSize?: string;
   height?: string;
 }
