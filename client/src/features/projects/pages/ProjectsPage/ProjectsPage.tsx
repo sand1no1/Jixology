@@ -7,7 +7,7 @@ import type { Project } from '@/features/projects/types/Project';
 // --- Servicios ---
 import { fetchProjects } from '../../services/projectsMock';
 
-import { statusClassMap } from '@/shared/utils/statusClassMap';
+// import { statusClassMap } from '@/shared/utils/statusClassMap';
 
 // --- Componentes ---
 import ProjectCard from '@/features/projects/components/ProjectCard';
