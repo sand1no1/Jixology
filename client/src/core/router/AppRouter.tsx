@@ -3,14 +3,19 @@ import LoginPage from '@/features/auth/pages/LogInPage';
 import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
+import AppLayoutHs from '@/shared/layout/AppLayoutHs';
 
 export function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/perfil" replace />} />
+
+      <Route element={<AppLayoutHs />}>
+        <Route path="/perfil" element={<ProfilePage />} />
+        <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
+      </Route>
+
       <Route path="/inicio-sesion" element={<LoginPage />} />
-      <Route path="/perfil" element={<ProfilePage />} />
-      <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
       <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
     </Routes>
   );
