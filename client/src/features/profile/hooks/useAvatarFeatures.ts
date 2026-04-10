@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { CATALOG, makeAvatarSvg } from '../services/avatar.service';
-import type { DynamicFeatures, FeatureMeta } from '../types/avatar.types';
+import { makeAvatarSvg } from '../services/avatar.service';
+import type { AvatarCatalog, DynamicFeatures, FeatureMeta } from '../types/avatar.types';
 
-export function useAvatarFeatures(initialFeatures?: DynamicFeatures) {
-  const [features, setFeatures] = useState<DynamicFeatures>(
-    initialFeatures ?? CATALOG.defaultFeatures
-  );
+export function useAvatarFeatures(catalog: AvatarCatalog, initialFeatures: DynamicFeatures) {
+  const [features, setFeatures] = useState<DynamicFeatures>(initialFeatures);
 
-  // When the DB-loaded initial features arrive, reset state once
+  // Re-seed state when the catalog-derived initial features arrive
   useEffect(() => {
-    if (initialFeatures) setFeatures(initialFeatures);
+    setFeatures(initialFeatures);
   }, [initialFeatures]);
 
   const mainAvatarSvg = useMemo(() => makeAvatarSvg(features), [features]);
@@ -57,5 +55,5 @@ export function useAvatarFeatures(initialFeatures?: DynamicFeatures) {
     setFeatures((prev) => ({ ...prev, [meta.typeProp!]: [typeValue] }));
   };
 
-  return { features, mainAvatarSvg, handleSelectVariant, handleSelectColor, handleSelectType };
+  return { catalog, features, mainAvatarSvg, handleSelectVariant, handleSelectColor, handleSelectType };
 }

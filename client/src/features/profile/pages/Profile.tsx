@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import './Profile.css';
 
 import UserCard from '../components/UserCard';
 import InventoryCard from '../components/InventoryCard';
+import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
-import { useRandomAvatarFromDb } from '../hooks/useRandomAvatarFromDb';
+import { buildRandomFeatures } from '../hooks/useRandomAvatarFromDb';
 
 const Profile: React.FC = () => {
-  const { initialFeatures } = useRandomAvatarFromDb();
+  const { catalog, loading, error } = useAvatarCatalog();
+
+  const initialFeatures = useMemo(
+    () => (catalog ? buildRandomFeatures(catalog) : {}),
+    [catalog],
+  );
+
   const { features, mainAvatarSvg, handleSelectVariant, handleSelectColor, handleSelectType } =
-    useAvatarFeatures(initialFeatures);
+    useAvatarFeatures(catalog ?? { styleId: 1, styleName: '', features: [], defaultFeatures: {} }, initialFeatures);
+
+  if (loading) return <div className="profile-loading">Cargando catálogo…</div>;
+  if (error)   return <div className="profile-error">Error: {error}</div>;
 
   return (
     <div className="profile-page">
@@ -28,6 +38,7 @@ const Profile: React.FC = () => {
           <div className="section-tab">Cosméticos</div>
           <div className="section-body section-body--flush">
             <InventoryCard
+              catalog={catalog!}
               features={features}
               onSelectVariant={handleSelectVariant}
               onSelectColor={handleSelectColor}

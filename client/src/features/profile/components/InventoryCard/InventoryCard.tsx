@@ -2,10 +2,11 @@ import React, { useMemo, useState } from 'react';
 
 import AvatarTile from '../AvatarTile';
 import ColorSwatch from '../ColorSwatch';
-import { CATALOG, TYPE_LABELS, makeVariantTileSvg, makeColorTileSvg } from '../../services/avatar.service';
-import type { DynamicFeatures, FeatureMeta } from '../../types/avatar.types';
+import { TYPE_LABELS, makeVariantTileSvg, makeColorTileSvg } from '../../services/avatar.service';
+import type { AvatarCatalog, DynamicFeatures, FeatureMeta } from '../../types/avatar.types';
 
 interface InventoryCardProps {
+  catalog:         AvatarCatalog;
   features:        DynamicFeatures;
   onSelectVariant: (meta: FeatureMeta, value: string | null) => void;
   onSelectColor:   (meta: FeatureMeta, colorValue: string) => void;
@@ -13,13 +14,14 @@ interface InventoryCardProps {
 }
 
 const InventoryCard: React.FC<InventoryCardProps> = ({
+  catalog,
   features,
   onSelectVariant,
   onSelectColor,
   onSelectType,
 }) => {
   const [activeTab,    setActiveTab]    = useState<FeatureMeta>(
-    CATALOG.features.find(f => f.key === 'hair') ?? CATALOG.features[0]
+    catalog.features.find(f => f.key === 'hair') ?? catalog.features[0]
   );
   const [showingColor, setShowingColor] = useState(false);
 
@@ -64,7 +66,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   return (
     <div className="inv-card">
       <nav className="inv-tabs">
-        {CATALOG.features.map((meta) => (
+        {catalog.features.map((meta) => (
           <button
             key={meta.key}
             className={`inv-tab ${activeTab.key === meta.key ? 'inv-tab--active' : ''}`}
@@ -86,7 +88,6 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
 
       <div className="inv-grid">
         {activeTab.colorOnly ? (
-          // Color-only feature (Fondo, Piel): type toggle + color swatches
           <>
             {activeTab.typeProp && (
               <div className="inv-type-toggle">

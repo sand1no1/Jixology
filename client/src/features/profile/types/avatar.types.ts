@@ -7,12 +7,14 @@ export interface AvatarStyle {
 export interface AtributoAvatar {
   id: number;
   nombre: string;
+  nombre_es: string | null;
   id_avatar_style: number;
 }
 
 export interface ElementoInventarioAvatar {
   id: number;
   nombre: string;
+  nombre_es: string | null;
   id_atributo_avatar: number;
 }
 
