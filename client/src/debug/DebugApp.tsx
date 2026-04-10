@@ -7,9 +7,14 @@ import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile from '@/features/profile/pages';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
 import ProjectsPage from '@/features/projects/pages/ProjectsPage';
+import UserCard from '@/features/profile/components/UserCard/UserCard';
+import ListUserCard from '@/features/profile/components/ListUserCard';
 // import MyNewComponent from '@/somewhere/MyNewComponent';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard';
+
+
+// import MyNewComponent from '@/somewhere/MyNewComponent';
 
 export default function DebugApp() {
   const views = useMemo<Record<DebugViewKey, React.ReactNode>>(
@@ -113,6 +118,47 @@ export default function DebugApp() {
         </div>
       ),
       projectsPage: <ProjectsPage />,
+      
+      userCard: (
+        <UserCard
+          name="Juan Guarnizo"
+          age={99}
+          birthDate="01/01/1987"
+          phone="81 22544 4444"
+          email="juan.guarnizo@gmail.com"
+          aboutMe="Lorem ipsum dolor sit amet consectetur adipiscing elit, potenti justo nostra tristique ullamcorper curae sociis, bibendum enim turpis hendrerit mauris magnis."
+        />
+      ),
+
+
+      listUserCard: (
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <ListUserCard
+            fullName="John Doe"
+            roles={[
+              { label: 'QA',    color: '#FEF3C7', textColor: '#D97706' },
+              { label: 'Front', color: '#EDE9FE', textColor: '#7C3AED' },
+            ]}
+            email="johndoe@example.com"
+          />
+          <ListUserCard
+            fullName="Ana García"
+            roles={[
+              { label: 'Back', color: '#DBEAFE', textColor: '#1D4ED8' },
+              { label: 'DevOps', color: '#D1FAE5', textColor: '#065F46' },
+            ]}
+            email="ana.garcia@example.com"
+          />
+          <ListUserCard
+            fullName="Carlos Martínez"
+            roles={[
+              { label: 'PM', color: '#FCE7F3', textColor: '#BE185D' },
+            ]}
+            email="carlos.martinez@example.com"
+          />
+        </div>
+      ),
+
       // myNewComponent: <MyNewComponent />,
     }),
     []
