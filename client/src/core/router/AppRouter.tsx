@@ -3,6 +3,7 @@ import LoginPage from '@/features/auth/pages/LogInPage';
 import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
+import AdminPage from '@/features/admin/pages/AdminPage';
 
 export function AppRouter() {
   return (
@@ -12,6 +13,7 @@ export function AppRouter() {
       <Route path="/perfil" element={<ProfilePage />} />
       <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
       <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
+      <Route path="/admin-page" element={<AdminPage />} />
     </Routes>
   );
 }

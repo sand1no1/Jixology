@@ -18,7 +18,7 @@ type DevBypassSession = {
 
 const DEV_BYPASS_ENABLED = import.meta.env.VITE_ENABLE_DEV_BYPASS === 'true';
 const DEV_BYPASS_EMAIL =
-  import.meta.env.VITE_DEV_BYPASS_EMAIL || 'test@local.dev';
+  import.meta.env.VITE_DEV_BYPASS_EMAIL || 'test@example.com';
 const DEV_BYPASS_PASSWORD =
   import.meta.env.VITE_DEV_BYPASS_PASSWORD || '123456';
 
@@ -240,18 +240,27 @@ export default function LogInPage() {
             </button>
           </div>
 
-          {error && <p className="log-in-page__message log-in-page__message--error">{error}</p>}
-          {info && <p className="log-in-page__message log-in-page__message--success">{info}</p>}
+          {(error || info) && (
+            <div
+              className={`log-in-page__status-card ${
+                error
+                  ? 'log-in-page__status-card--error'
+                  : 'log-in-page__status-card--success'
+              }`}
+            >
+              <div className="log-in-page__status-title">
+                {error ? 'Error al iniciar sesión' : 'Operación exitosa'}
+              </div>
+
+              <p className="log-in-page__status-text">
+                {error || info}
+              </p>
+            </div>
+          )}
 
           <button type="submit" className="log-in-page__button" disabled={loading}>
             {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
-
-          {DEV_BYPASS_ENABLED && (
-            <div className="log-in-page__dev-note">
-              <strong>Modo prueba:</strong> {DEV_BYPASS_EMAIL} / {DEV_BYPASS_PASSWORD}
-            </div>
-          )}
         </form>
       </div>
     </AuthCardLayout>
