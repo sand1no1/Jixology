@@ -1,0 +1,6 @@
+.belowHeadbar {
+    display: flex;
+    flex-direction: row;
+    margin-top: 55px;
+    margin-left: 55px
+}

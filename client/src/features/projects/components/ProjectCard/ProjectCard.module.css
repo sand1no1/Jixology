@@ -1,5 +1,4 @@
 .container {
-    width: 25vw;
     min-width: 250px;
     max-height: 120px;
     border-radius: 16px;
@@ -18,7 +17,7 @@
 .statusBand {
     width: 100%;
     height: 8px;
-    background-color: var(--color-mahindra-red);
+    background-color: var(--color-blueprint-navy);
 }
 
 .cardElements {
