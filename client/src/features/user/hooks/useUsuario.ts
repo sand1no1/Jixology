@@ -8,7 +8,6 @@ export function useUsuario(userId: number) {
   const [error,    setError]    = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
     fetchUsuario(userId)
       .then(setUsuario)
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))

@@ -11,16 +11,15 @@ import type { DynamicFeatures } from '../types/avatar.types';
 export function useUserAvatarSvg(userId: number) {
   const { catalog, allElements, atributos, loading: loadingCatalog } = useAvatarCatalog();
   const [features, setFeatures] = useState<DynamicFeatures | null>(null);
-  const [loadingAvatar, setLoadingAvatar] = useState(false);
+  const [fetched,  setFetched]  = useState(false);
 
   useEffect(() => {
     if (!catalog || allElements.length === 0 || atributos.length === 0) return;
 
-    setLoadingAvatar(true);
     fetchUserActiveAvatar(userId, allElements, atributos)
       .then(active => setFeatures(active ?? catalog.defaultFeatures))
       .catch(() => setFeatures(catalog.defaultFeatures))
-      .finally(() => setLoadingAvatar(false));
+      .finally(() => setFetched(true));
   }, [userId, catalog, allElements, atributos]);
 
   const avatarSvg = useMemo(
@@ -28,5 +27,8 @@ export function useUserAvatarSvg(userId: number) {
     [features],
   );
 
-  return { avatarSvg, loading: loadingCatalog || loadingAvatar };
+  // loading until catalog is ready AND the fetch has completed
+  const loading = loadingCatalog || !fetched;
+
+  return { avatarSvg, loading };
 }
