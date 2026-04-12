@@ -2,5 +2,8 @@
     display: flex;
     flex-direction: row;
     margin-top: 55px;
-    margin-left: 55px
+    margin-left: 55px;
+    min-height: calc(100vh - 55px);
+    width: calc(100% - 55px);
+    box-sizing: border-box;
 }
