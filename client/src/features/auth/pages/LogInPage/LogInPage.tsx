@@ -259,7 +259,17 @@ export default function LogInPage() {
           )}
 
           <button type="submit" className="log-in-page__button" disabled={loading}>
-            {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+            {loading ? (
+              <>
+                <span
+                  className="log-in-page__button-spinner"
+                  aria-hidden="true"
+                />
+                <span className="log-in-page__button-text">Iniciando sesión...</span>
+              </>
+            ) : (
+              <span className="log-in-page__button-text">Iniciar sesión</span>
+            )}
           </button>
         </form>
       </div>
