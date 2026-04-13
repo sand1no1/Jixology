@@ -22,4 +22,7 @@ export interface Project {
   id_estatus: number;
   id_metodologia: number;
   id_creador: number;
+  total_backlog_items:     number;
+  completed_backlog_items: number;
+  completion_percentage:   number;
 }

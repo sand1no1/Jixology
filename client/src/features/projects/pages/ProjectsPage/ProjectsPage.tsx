@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styles from './ProjectsPage.module.css';
 
 // --- Interfaces ---
 import type { Project } from '@/features/projects/types/Project';
 
-// --- Servicios ---
-import { fetchProjects } from '../../services/projectsMock';
+// --- Hooks ---
+import { useProjectCards} from '../../hooks/useProjects';
 
 // import { statusClassMap } from '@/shared/utils/statusClassMap';
 
@@ -13,6 +13,8 @@ import { fetchProjects } from '../../services/projectsMock';
 import ProjectCard from '@/features/projects/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
+import EmptyState from '@/shared/components/EmptyState';
+import SkeletonCard from '@/shared/components/SkeletonCard';
 
 type FilterKey = 'TodosLosProyectos' | 'Completados' | 'EnProgreso' | 'Retrasado' | 'SinAsignar';
 
@@ -38,7 +40,7 @@ const renderCard = (project: Project) => (
     projectName={project.nombre}
     projectStatus={project.id_estatus}
     projectStack={[]}
-    completition={0}
+    completition={project.completion_percentage ?? 0}
     projectDescription={project.descripcion}
     projectDueDate={project.fecha_final}
     projectFTE={project.fte}
@@ -47,17 +49,11 @@ const renderCard = (project: Project) => (
 );
 
 const ProjectsPage: React.FC = () => {
-  const [projects, setProjects]     = useState<Project[]>([]);
-  const [loading, setLoading]       = useState(true);
+
+  // TODO: reemplazar con valores del contexto de auth
+  const { projects, loading } = useProjectCards(3, 202);
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
-
-  useEffect(() => {
-    fetchProjects().then((data) => {
-      setProjects(data);
-      setLoading(false);
-    });
-  }, []);
 
   const recentProjects = projects.slice(-4).reverse();
 
@@ -94,7 +90,14 @@ const ProjectsPage: React.FC = () => {
         ))}
       </div>
       {loading ? (
-        <p>Cargando proyectos...</p>
+        <div className={styles.grid}>
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      ) : projects.length === 0 ? (
+        <EmptyState
+          title="No hay proyectos disponibles"
+          subtitle="No tienes proyectos asignados o aún no se han creado."
+        />
       ) : isSearching || isFiltering ? (
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Resultados</h2>
