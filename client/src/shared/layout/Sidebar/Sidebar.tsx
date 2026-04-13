@@ -26,13 +26,13 @@ const Sidebar: React.FC<ISidebarProps> = () => {
             </a>
           </li>
           <li className={styles.menuItem}>
-            <a href="/projects">
+            <a href="/proyectos">
               <BookOpenIcon className={styles.icon} />
               <span><b>Proyectos</b></span>
             </a>
           </li>
           <li className={styles.menuItem}>
-            <a href="/projects/dummy">
+            <a href="/proyectos/dummy">
               <BookmarkIcon className={styles.icon} />
               <span><b>Dummy</b></span>
             </a>

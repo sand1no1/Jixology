@@ -17,13 +17,12 @@ export function AppRouter() {
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
         <Route path="/usuarios" element={<AdminPage />} />
-        <Route path="/projects" element={<ProjectPage />}/>
-        <Route path="/projects/dummy" element={<ProjectTask />}/>
+        <Route path="/proyectos" element={<ProjectPage />}/>
+        <Route path="/proyectos/dummy" element={<ProjectTask />}/>
       </Route>
 
       <Route path="/inicio-sesion" element={<LoginPage />} />
       <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
-      <Route path="/usuarios" element={<AdminPage />} />
     </Routes>
   );
 }

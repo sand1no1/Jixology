@@ -15,6 +15,8 @@ import StatusLabel from '@/shared/components/StatusLabel';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
 import EmptyState from '@/shared/components/EmptyState';
 import SkeletonCard from '@/shared/components/SkeletonCard';
+import CreateProject from '@/features/projects/components/CreateProject';
+import ProjectCreationToast from '@/features/projects/components/ProjectCreationToast';
 
 type FilterKey = 'TodosLosProyectos' | 'Completados' | 'EnProgreso' | 'Retrasado' | 'SinAsignar';
 
@@ -54,77 +56,94 @@ const ProjectsPage: React.FC = () => {
   const { projects, loading } = useProjectCards(3, 1);
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
 
   const recentProjects = projects.slice(-4).reverse();
 
   const filteredProjects = useMemo(() => {
     const statusId = FILTER_TO_STATUS_ID[activeFilter];
+
     return projects
-      .filter((p) => statusId === undefined || p.id_estatus === statusId)
-      .filter((p) => p.nombre.toLowerCase().includes(search.toLowerCase()));
+      .filter((project) => statusId === undefined || project.id_estatus === statusId)
+      .filter((project) =>
+        project.nombre.toLowerCase().includes(search.toLowerCase()),
+      );
   }, [projects, search, activeFilter]);
 
   const isSearching = search.trim().length > 0;
   const isFiltering = activeFilter !== 'TodosLosProyectos';
 
   return (
-    <div className={styles.container}>
-      <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-        <div style={{ flex: 9 }}>
-          <SearchBarComponent infoText="Buscar proyectos" onChange={setSearch} />
-        </div>
-        <button id={styles.createProject} style={{ flex: 1 }}>
-          Crear proyecto
-        </button>
-      </div>
-      <div className={styles.filterPills}>
-        {(Object.keys(FILTER_LABELS) as FilterKey[]).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setActiveFilter(key)}
-            className={`${styles.pill} ${activeFilter === key ? styles.pillActive : ''}`}
-          >
-            {FILTER_LABELS[key]}
-          </button>
-        ))}
-      </div>
-      {loading ? (
-        <div className={styles.grid}>
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
-      ) : projects.length === 0 ? (
-        <EmptyState
-          title="No hay proyectos disponibles"
-          subtitle="No tienes proyectos asignados o aún no se han creado."
-        />
-      ) : isSearching || isFiltering ? (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Resultados</h2>
-          <div className={styles.grid}>
-            {filteredProjects.map(renderCard)}
+    <>
+      <div className={styles.container}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ flex: 9 }}>
+            <SearchBarComponent infoText="Buscar proyectos" onChange={setSearch} />
           </div>
-        </section>
-      ) : (
-        <>
+          <button id={styles.createProject} style={{ flex: 1 }} onClick={() => setIsCreateProjectOpen(true)}>
+            Crear proyecto
+          </button>
+        </div>
+        <div className={styles.filterPills}>
+          {(Object.keys(FILTER_LABELS) as FilterKey[]).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setActiveFilter(key)}
+              className={`${styles.pill} ${activeFilter === key ? styles.pillActive : ''}`}
+            >
+              {FILTER_LABELS[key]}
+            </button>
+          ))}
+        </div>
+        {loading ? (
+          <div className={styles.grid}>
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+        ) : projects.length === 0 ? (
+          <EmptyState
+            title="No hay proyectos disponibles"
+            subtitle="No tienes proyectos asignados o aún no se han creado."
+          />
+        ) : isSearching || isFiltering ? (
           <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Proyectos recientes</h2>
-            <div className={styles.grid}>
-              {recentProjects.map(renderCard)}
-            </div>
+            <h2 className={styles.sectionTitle}>Resultados</h2>
+            <div className={styles.grid}>{filteredProjects.map(renderCard)}</div>
           </section>
+        ) : (
+          <>
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Proyectos recientes</h2>
+              <div className={styles.grid}>{recentProjects.map(renderCard)}</div>
+            </section>
 
-          <div className={styles.divider} />
+            <div className={styles.divider} />
 
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Todos los proyectos</h2>
-            <div className={styles.grid}>
-              {projects.map(renderCard)}
-            </div>
-          </section>
-        </>
-      )}
-    </div>
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Todos los proyectos</h2>
+              <div className={styles.grid}>{projects.map(renderCard)}</div>
+            </section>
+          </>
+        )}
+      </div>
+
+      <CreateProject
+        isOpen={isCreateProjectOpen}
+        onClose={() => setIsCreateProjectOpen(false)}
+        onCreated={(message) => {
+          setCreationSuccessMessage(message);
+          setIsCreateProjectOpen(false);
+        }}
+      />
+      {creationSuccessMessage ? (
+        <ProjectCreationToast
+          message={creationSuccessMessage}
+          onClose={() => setCreationSuccessMessage(null)}
+          autoCloseMs={3500}
+        />
+      ) : null}
+    </>
   );
 };
 
