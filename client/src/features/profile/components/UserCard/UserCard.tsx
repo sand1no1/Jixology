@@ -1,8 +1,9 @@
 import React from 'react';
 import styles from './UserCard.module.css';
-import { useRandomAvatarSvg } from '../../hooks/useRandomAvatarFromDb';
+import { useUserAvatarSvg } from '../../hooks/useUserAvatarSvg';
 
 interface UserCardProps {
+  userId: number;
   avatarSvg?: string;
   name: string;
   age: number;
@@ -12,9 +13,9 @@ interface UserCardProps {
   aboutMe: string;
 }
 
-const UserCard: React.FC<UserCardProps> = ({ avatarSvg: avatarSvgProp, name, age, birthDate, phone, email, aboutMe }) => {
-  const { avatarSvg: randomSvg } = useRandomAvatarSvg();
-  const avatarSvg = avatarSvgProp ?? randomSvg;
+const UserCard: React.FC<UserCardProps> = ({ userId, avatarSvg: avatarSvgProp, name, age, birthDate, phone, email, aboutMe }) => {
+  const { avatarSvg: dbSvg } = useUserAvatarSvg(userId);
+  const avatarSvg = avatarSvgProp ?? dbSvg;
 
   return (
     <div className={styles.profileCard}>

@@ -1,3 +1,14 @@
+// ── DB user avatar types ──────────────────────────────────────────────────────
+export interface UserInventoryItem {
+  id_usuario: number;
+  id_elemento: number;
+}
+
+export interface UserAvatarItem {
+  id_usuario: number;
+  id_elemento: number;
+}
+
 // ── DB catalog types ─────────────────────────────────────────────────────────
 export interface AvatarStyle {
   id: number;

@@ -4,6 +4,7 @@ import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 import AppLayoutHs from '@/shared/layout/AppLayoutHs';
+import AdminPage from '@/features/admin/pages/adminPage';
 
 export function AppRouter() {
   return (
@@ -17,6 +18,7 @@ export function AppRouter() {
 
       <Route path="/inicio-sesion" element={<LoginPage />} />
       <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
+      <Route path="/usuarios" element={<AdminPage />} />
     </Routes>
   );
 }
