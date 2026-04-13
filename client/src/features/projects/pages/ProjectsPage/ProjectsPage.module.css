@@ -62,7 +62,7 @@
 }
 
 #createProject {
-    background-color: var(--color-blueprint-navy);
+    background-color: var(--color-mahindra-red);
     color: var(--color-white);
     display: flex;
     align-items: center;
