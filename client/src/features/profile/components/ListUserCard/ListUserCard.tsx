@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import styles from './ListUserCard.module.css';
-import { useRandomAvatarSvg } from '../../hooks/useRandomAvatarFromDb';
+import { useUserAvatarSvg } from '../../hooks/useUserAvatarSvg';
 
 export interface Role {
   label: string;
@@ -10,6 +10,7 @@ export interface Role {
 }
 
 interface ListUserCardProps {
+  userId: number;
   fullName: string;
   roles: Role[];
   email: string;
@@ -17,9 +18,9 @@ interface ListUserCardProps {
   onEdit?: () => void;
 }
 
-const ListUserCard: React.FC<ListUserCardProps> = ({ fullName, roles, email, avatarSvg: avatarSvgProp, onEdit }) => {
-  const { avatarSvg: randomSvg } = useRandomAvatarSvg();
-  const avatarSvg = avatarSvgProp ?? randomSvg;
+const ListUserCard: React.FC<ListUserCardProps> = ({ userId, fullName, roles, email, avatarSvg: avatarSvgProp, onEdit }) => {
+  const { avatarSvg: dbSvg } = useUserAvatarSvg(userId);
+  const avatarSvg = avatarSvgProp ?? dbSvg;
 
   return (
     <div className={styles.row}>
