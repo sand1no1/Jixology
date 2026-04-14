@@ -28,3 +28,17 @@ export type RegisterUserFormValues = {
   id_zona_horaria: string;
   id_rol_global: string;
 };
+
+export type AdminUserListItem = {
+  id: number;
+  email: string;
+  nombre: string | null;
+  apellido: string | null;
+  id_rol_global: number;
+};
+
+export type AdminUserRoleBadge = {
+  label: string;
+  color: string;
+  textColor: string;
+};
