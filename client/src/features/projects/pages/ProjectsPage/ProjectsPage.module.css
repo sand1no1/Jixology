@@ -1,9 +1,10 @@
 .container {
-    display: flex;
-    flex-direction: column;
+    background: red;
     gap: 1rem;
     padding: 1.5rem;
     background-color: var(--color-clarity-gray-1);
+    width: 100%;
+    min-height: 80vh;
 }
 
 .section {

@@ -224,12 +224,26 @@ export async function fetchUserActiveAvatar(
 
   // Build DynamicFeatures — probability is inferred from presence of a variant row
   const features: DynamicFeatures = {};
+  const presentVariants = new Set<string>();
+
   for (const [attrNombre, values] of grouped) {
     if (attrNombre.endsWith('Probability')) continue; // never stored directly
     features[attrNombre] = values;
+    presentVariants.add(attrNombre);
     const probAttrName = `${attrNombre}Probability`;
     if (atributos.some(a => a.nombre === probAttrName)) {
       features[probAttrName] = 100; // stored variant → visible
+    }
+  }
+
+  // Features with a probability attribute that are absent from DB must be
+  // explicitly hidden (probability = 0) so DiceBear does not fall back to its
+  // seed-based default and show them unexpectedly.
+  for (const a of atributos) {
+    if (!a.nombre.endsWith('Probability')) continue;
+    const baseKey = a.nombre.slice(0, -'Probability'.length);
+    if (!presentVariants.has(baseKey)) {
+      features[a.nombre] = 0; // absent from DB → hidden
     }
   }
 
@@ -252,6 +266,12 @@ export async function saveUserActiveAvatar(
     if (key.endsWith('Probability')) continue; // inferred from presence — not stored
     const attr = attrByName.get(key);
     if (!attr) continue;
+
+    // If this feature has a probability and it is explicitly 0, skip it — element
+    // must NOT be saved so that on reload the absence is interpreted as "hidden".
+    const probKey = `${key}Probability`;
+    if (probKey in features && (features[probKey] as number) === 0) continue;
+
     const values = Array.isArray(val) ? val : [val];
     for (const v of values) {
       if (v === null || v === undefined) continue;
