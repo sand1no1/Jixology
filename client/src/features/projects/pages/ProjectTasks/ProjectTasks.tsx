@@ -34,6 +34,7 @@ const ProjectTasks: React.FC<IProjectTasksProps> = ({ children }) => { //Codigo 
         d.preventDefault();
         const belowElement = positionCheck(section, d.clientY)
         const draggable = document.querySelector(`.${styles.dragging}`)
+        if (!draggable) return;
         if (belowElement == null) {
           section.appendChild(draggable)
         } else {
@@ -42,10 +43,10 @@ const ProjectTasks: React.FC<IProjectTasksProps> = ({ children }) => { //Codigo 
       })
     })
 
-    function positionCheck(Section, Y) {
-      const list = [...Section.querySelectorAll('[draggable="true"]:not(.dragging)')]
+    function positionCheck(Section: HTMLElement, Y: number) {
+      const list = [...Section.querySelectorAll<HTMLElement>(`[draggable="true"]:not(.${styles.dragging})`)]
       
-      return list.reduce((closest, child) => {
+      return list.reduce<{ offset: number; element: HTMLElement | null }>((closest, child) => {
         const box = child.getBoundingClientRect()
         const offset = Y - box.top - box.height / 2
         if (offset < 0 && offset > closest.offset) {
@@ -54,7 +55,8 @@ const ProjectTasks: React.FC<IProjectTasksProps> = ({ children }) => { //Codigo 
           return closest
         }
         
-      }, {offset: Number.NEGATIVE_INFINITY}).element
+      }, {offset: Number.NEGATIVE_INFINITY, element: null}
+    ).element
     }
 
   }, []);

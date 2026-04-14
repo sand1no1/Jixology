@@ -4,7 +4,9 @@ import styles from './Sidebar.module.css';
 import {
   UserCircleIcon,
   BeakerIcon,
-  LockClosedIcon
+  LockClosedIcon,
+  BookOpenIcon,
+  BookmarkIcon
 } from '@heroicons/react/24/solid';
 
 export interface ISidebarProps {
@@ -26,7 +28,6 @@ const Sidebar: React.FC<ISidebarProps> = () => {
             <a href="/dashboard-usuario">
               <BeakerIcon className={styles.icon} />
               <span><b>Proyectos</b></span>
-              <span><b>Dashboard</b></span>
             </a>
           </li>
           <li className={styles.menuItem}>
@@ -37,7 +38,14 @@ const Sidebar: React.FC<ISidebarProps> = () => {
           </li>
           <li className={styles.menuItem}>
             <a href="/projects">
+              <BookOpenIcon className={styles.icon} />
               <span><b>Proyectos</b></span>
+            </a>
+          </li>
+          <li className={styles.menuItem}>
+            <a href="/projects/dummy">
+              <BookmarkIcon className={styles.icon} />
+              <span><b>Dummy</b></span>
             </a>
           </li>
         </ul>
