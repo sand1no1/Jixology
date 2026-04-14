@@ -9,16 +9,16 @@ import AdminPage from '@/features/admin/pages/adminPage';
 export function AppRouter() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/inicio-sesion" replace />} />
+      <Route path="/" element={<Navigate to="/perfil" replace />} />
 
       <Route element={<AppLayoutHs />}>
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
-        <Route path="/usuarios" element={<AdminPage />} />
       </Route>
 
       <Route path="/inicio-sesion" element={<LoginPage />} />
       <Route path="/correo-verificacion" element={<EmailVerificationPage />} />
+      <Route path="/usuarios" element={<AdminPage />} />
     </Routes>
   );
 }
