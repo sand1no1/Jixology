@@ -16,6 +16,7 @@ export function AppRouter() {
       <Route element={<AppLayoutHs />}>
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/dashboard-usuario" element={<UserDashboardPage />}/>
+        <Route path="/usuarios" element={<AdminPage />} />
         <Route path="/projects" element={<ProjectPage />}/>
         <Route path="/projects/dummy" element={<ProjectTask />}/>
       </Route>

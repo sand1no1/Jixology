@@ -63,7 +63,6 @@ export function useRegisterUser() {
       const payload = buildPayload();
       const response = await registerUserService(payload);
 
-      setSuccess(response.message || 'Usuario creado correctamente.');
       resetForm();
       return response;
     } catch (err) {
