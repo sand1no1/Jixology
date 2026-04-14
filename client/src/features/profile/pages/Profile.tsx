@@ -80,7 +80,7 @@ const Profile: React.FC = () => {
           <div className="section-footer">
             <button
               className="btn-save-avatar"
-              onClick={() => saveAvatar(features)}
+              onClick={() => saveAvatar(features).catch(err => console.error('Save avatar failed:', err))}
               disabled={saving}
             >
               {saving ? 'Guardando…' : 'Guardar avatar'}

@@ -53,11 +53,14 @@ export function useUserAvatar(
   const saveAvatar = useCallback(async (features: DynamicFeatures) => {
     setSaving(true);
     try {
-      await saveUserActiveAvatar(userId, features, allElements, atributos);
+      const styleAtributos = filteredCatalog
+        ? atributos.filter(a => a.id_avatar_style === filteredCatalog.styleId)
+        : atributos;
+      await saveUserActiveAvatar(userId, features, allElements, styleAtributos);
     } finally {
       setSaving(false);
     }
-  }, [userId, allElements, atributos]);
+  }, [userId, allElements, atributos, filteredCatalog]);
 
   return { filteredCatalog, initialFeatures, saveAvatar, saving, loadingAvatar };
 }
