@@ -1,0 +1,244 @@
+/* ═══════════════════════════════════════════════════════════════════
+   AvatarLootBox — slot-machine style roulette for avatar items
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Wrapper ────────────────────────────────────────────────────── */
+.lootbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 28px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Roulette viewport ──────────────────────────────────────────── */
+.lootbox__viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 2px solid var(--color-clarity-gray-2);
+  background: var(--color-clarity-gray-1);
+  height: 116px; /* 96px tile + 10px top + 10px bottom padding */
+  flex-shrink: 0;
+}
+
+/* ── Scrolling strip ────────────────────────────────────────────── */
+.lootbox__strip {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  will-change: transform;
+  /* transition applied dynamically via JS */
+}
+
+/* Idle/placeholder state: remove horizontal padding and center tiles
+   so the middle placeholder sits exactly under the selection indicator */
+.lootbox__strip--idle {
+  padding-inline: 0;
+  justify-content: center;
+}
+
+/* ── Individual roulette tile ───────────────────────────────────── */
+.lootbox__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 84px;
+  height: 96px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: 2px solid var(--color-clarity-gray-2);
+  background: var(--color-white);
+  transition: border-color 0.3s ease;
+}
+
+
+.lootbox__tile--placeholder .lootbox__tile-avatar {
+  background: var(--color-clarity-gray-2);
+  border-radius: 10px;
+  width: 62px;
+  height: 62px;
+  animation: lootbox-pulse 1.4s ease-in-out infinite;
+}
+
+.lootbox__tile-avatar {
+  width: 62px;
+  height: 62px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--color-clarity-gray-1);
+}
+
+.lootbox__tile-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lootbox__tile-label {
+  font-size: 0.58rem;
+  color: var(--color-anchor-gray-1);
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.2;
+  font-weight: 500;
+  opacity: 0.7;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Center selection indicator ─────────────────────────────────── */
+.lootbox__center-indicator {
+  position: absolute;
+  top: 10px;             /* matches strip padding-top */
+  height: 96px;          /* matches tile height */
+  left: calc(50% - 42px); /* centers 84px tile: 50% - 84/2 */
+  width: 84px;           /* matches tile width */
+  border: 2.5px solid var(--color-mahindra-red);
+  border-radius: 14px;   /* matches tile border-radius */
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Edge fade gradients ────────────────────────────────────────── */
+.lootbox__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 64px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.lootbox__fade--left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    var(--color-clarity-gray-1) 0%,
+    transparent 100%
+  );
+}
+
+.lootbox__fade--right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    var(--color-clarity-gray-1) 0%,
+    transparent 100%
+  );
+}
+
+/* ── Result reveal box ──────────────────────────────────────────── */
+.lootbox__result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 300px;
+  height: 280px;
+  border-radius: 20px;
+  border: 2px solid var(--color-clarity-gray-2);
+  background: var(--color-clarity-gray-1);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.lootbox__result--revealed {
+  border-color: var(--color-mahindra-red);
+  box-shadow:
+    0 0 0 4px rgba(227, 24, 55, 0.12),
+    0 8px 32px rgba(10, 8, 56, 0.10);
+}
+
+.lootbox__result-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-white);
+  box-shadow: 0 4px 16px rgba(10, 8, 56, 0.12);
+  animation: lootbox-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lootbox__result-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.lootbox__result-name {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-blueprint-navy);
+  letter-spacing: 0.01em;
+  text-align: center;
+  animation: lootbox-fadein 0.3s ease 0.1s both;
+}
+
+.lootbox__result-placeholder {
+  font-size: 3rem;
+  opacity: 0.3;
+  user-select: none;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.lootbox__btn {
+  padding: 12px 48px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 24px;
+  background: var(--color-mahindra-red);
+  color: var(--color-white);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+
+.lootbox__btn:hover:not(:disabled) {
+  background: var(--color-impact-red);
+  transform: translateY(-2px);
+}
+
+.lootbox__btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.lootbox__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lootbox__btn--secondary {
+  background: transparent;
+  border: 2px solid var(--color-blueprint-navy);
+  color: var(--color-blueprint-navy);
+}
+
+.lootbox__btn--secondary:hover:not(:disabled) {
+  background: var(--color-blueprint-navy);
+  color: var(--color-white);
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────── */
+@keyframes lootbox-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes lootbox-pop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes lootbox-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

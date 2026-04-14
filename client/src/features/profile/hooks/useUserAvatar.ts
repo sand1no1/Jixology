@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   fetchUserInventory,
   fetchUserActiveAvatar,
   saveUserActiveAvatar,
   filterCatalogByInventory,
+  addElementToInventory,
 } from '../services/avatar.service';
 import type {
   AvatarCatalog,
@@ -17,8 +18,11 @@ interface UseUserAvatarResult {
   filteredCatalog:  AvatarCatalog | null;
   initialFeatures:  DynamicFeatures;
   saveAvatar:       (features: DynamicFeatures) => Promise<void>;
+  addRandomItem:    () => Promise<ElementoInventarioAvatar | null>;
+  unownedItems:     ElementoInventarioAvatar[];
   saving:           boolean;
   loadingAvatar:    boolean;
+  addingItem:       boolean;
 }
 
 export function useUserAvatar(
@@ -29,8 +33,10 @@ export function useUserAvatar(
 ): UseUserAvatarResult {
   const [filteredCatalog, setFilteredCatalog] = useState<AvatarCatalog | null>(null);
   const [initialFeatures, setInitialFeatures] = useState<DynamicFeatures>({});
+  const [ownedIds,        setOwnedIds]        = useState<Set<number>>(new Set());
   const [loadingAvatar,   setLoadingAvatar]   = useState(false);
   const [saving,          setSaving]          = useState(false);
+  const [addingItem,      setAddingItem]      = useState(false);
 
   useEffect(() => {
     if (!catalog || allElements.length === 0 || atributos.length === 0) return;
@@ -41,8 +47,9 @@ export function useUserAvatar(
       fetchUserInventory(userId),
       fetchUserActiveAvatar(userId, allElements, atributos),
     ])
-      .then(([ownedIds, activeFeatures]) => {
-        const narrowed = filterCatalogByInventory(catalog, ownedIds, allElements, atributos);
+      .then(([ids, activeFeatures]) => {
+        setOwnedIds(ids);
+        const narrowed = filterCatalogByInventory(catalog, ids, allElements, atributos);
         setFilteredCatalog(narrowed);
         setInitialFeatures(activeFeatures ?? narrowed.defaultFeatures);
       })
@@ -62,5 +69,28 @@ export function useUserAvatar(
     }
   }, [userId, allElements, atributos, filteredCatalog]);
 
-  return { filteredCatalog, initialFeatures, saveAvatar, saving, loadingAvatar };
+  const addRandomItem = useCallback(async (): Promise<ElementoInventarioAvatar | null> => {
+    const unowned = allElements.filter(e => !ownedIds.has(e.id));
+    if (unowned.length === 0) return null;
+    const picked = unowned[Math.floor(Math.random() * unowned.length)];
+    setAddingItem(true);
+    try {
+      await addElementToInventory(userId, picked.id);
+      const newOwnedIds = new Set([...ownedIds, picked.id]);
+      setOwnedIds(newOwnedIds);
+      if (catalog) {
+        setFilteredCatalog(filterCatalogByInventory(catalog, newOwnedIds, allElements, atributos));
+      }
+      return picked;
+    } finally {
+      setAddingItem(false);
+    }
+  }, [userId, allElements, ownedIds, catalog, atributos]);
+
+  const unownedItems = useMemo(
+    () => allElements.filter(e => !ownedIds.has(e.id)),
+    [allElements, ownedIds],
+  );
+
+  return { filteredCatalog, initialFeatures, saveAvatar, addRandomItem, unownedItems, saving, loadingAvatar, addingItem };
 }
