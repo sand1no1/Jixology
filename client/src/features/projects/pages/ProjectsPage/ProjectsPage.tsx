@@ -51,7 +51,7 @@ const renderCard = (project: Project) => (
 const ProjectsPage: React.FC = () => {
 
   // TODO: reemplazar con valores del contexto de auth
-  const { projects, loading } = useProjectCards(3, 202);
+  const { projects, loading } = useProjectCards(3, 1);
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
 
