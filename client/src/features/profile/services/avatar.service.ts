@@ -184,6 +184,14 @@ export async function fetchCatalog(styleId = 1): Promise<{
 }
 
 // ── User inventory ────────────────────────────────────────────────────────────
+export async function addElementToInventory(userId: number, elementId: number): Promise<void> {
+  const { supabase } = await import('../../../core/supabase/supabase.client');
+  const { error } = await supabase
+    .from('usuario_inventario_avatar')
+    .insert({ id_usuario: userId, id_elemento: elementId, fecha_obtencion: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchUserInventory(userId: number): Promise<Set<number>> {
   const { supabase } = await import('../../../core/supabase/supabase.client');
   const { data, error } = await supabase

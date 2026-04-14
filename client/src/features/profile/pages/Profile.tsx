@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Profile.css';
 
 import UserCard from '../components/UserCard';
 import InventoryCard from '../components/InventoryCard';
+import { AvatarLootBox } from '../components/AvatarLootBox';
 import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
@@ -20,10 +21,11 @@ function calcAge(fechaNacimiento: string): number {
 }
 
 const Profile: React.FC = () => {
+  const [showLootbox, setShowLootbox] = useState(false);
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
   const { usuario, loading: loadingUser, error: userError } = useUsuario(HARDCODED_USER_ID);
 
-  const { filteredCatalog, initialFeatures, saveAvatar, saving, loadingAvatar } = useUserAvatar(
+  const { filteredCatalog, initialFeatures, saveAvatar, addRandomItem, unownedItems, saving, loadingAvatar, addingItem } = useUserAvatar(
     HARDCODED_USER_ID,
     catalog,
     allElements,
@@ -53,6 +55,22 @@ const Profile: React.FC = () => {
     : '—';
 
   return (
+    <>
+    {showLootbox && (
+      <div className="lootbox-overlay" onClick={e => { if (e.target === e.currentTarget) setShowLootbox(false); }}>
+        <div className="lootbox-modal">
+          <button className="lootbox-modal__close" onClick={() => setShowLootbox(false)}>✕</button>
+          <h2 className="lootbox-modal__title">Lootbox</h2>
+          <AvatarLootBox
+            unownedItems={unownedItems}
+            atributos={atributos}
+            baseFeatures={features}
+            onOpen={addRandomItem}
+            disabled={addingItem}
+          />
+        </div>
+      </div>
+    )}
     <div className="profile-page">
       <UserCard
         userId={HARDCODED_USER_ID}
@@ -79,9 +97,16 @@ const Profile: React.FC = () => {
           </div>
           <div className="section-footer">
             <button
+              className="btn-lootbox"
+              onClick={() => setShowLootbox(true)}
+              disabled={saving || addingItem}
+            >
+              🎁 Abrir lootbox
+            </button>
+            <button
               className="btn-save-avatar"
               onClick={() => saveAvatar(features).catch(err => console.error('Save avatar failed:', err))}
-              disabled={saving}
+              disabled={saving || addingItem}
             >
               {saving ? 'Guardando…' : 'Guardar avatar'}
             </button>
@@ -89,6 +114,7 @@ const Profile: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
