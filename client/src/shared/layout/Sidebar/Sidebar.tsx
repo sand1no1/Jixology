@@ -26,12 +26,18 @@ const Sidebar: React.FC<ISidebarProps> = () => {
             <a href="/dashboard-usuario">
               <BeakerIcon className={styles.icon} />
               <span><b>Proyectos</b></span>
+              <span><b>Dashboard</b></span>
             </a>
           </li>
           <li className={styles.menuItem}>
             <a href="/inicio-sesion">
               <LockClosedIcon className={styles.icon} />
               <span><b>Verificación</b></span>
+            </a>
+          </li>
+          <li className={styles.menuItem}>
+            <a href="/projects">
+              <span><b>Proyectos</b></span>
             </a>
           </li>
         </ul>
