@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
@@ -31,7 +31,6 @@ export default function RegisterUserPage() {
   const [search, setSearch] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [pageSuccess, setPageSuccess] = useState('');
-  const [isSuccessVisible, setIsSuccessVisible] = useState(false);
 
   const { users, loading: usersLoading, error: usersError, refreshUsers } =
     useAdminUsers(search);
@@ -44,25 +43,6 @@ export default function RegisterUserPage() {
     handleChange,
     submit,
   } = useRegisterUser();
-
-  useEffect(() => {
-    if (!pageSuccess) return;
-
-    setIsSuccessVisible(true);
-
-    const fadeTimer = window.setTimeout(() => {
-      setIsSuccessVisible(false);
-    }, 4000);
-
-    const clearTimer = window.setTimeout(() => {
-      setPageSuccess('');
-    }, 5000);
-
-    return () => {
-      window.clearTimeout(fadeTimer);
-      window.clearTimeout(clearTimer);
-    };
-  }, [pageSuccess]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,7 +78,6 @@ export default function RegisterUserPage() {
             <div className="admin-page__heading">
               <h1 className="admin-page__title">Usuarios del sistema</h1>
               <p className="admin-page__subtitle">
-                Consulta hasta 10 usuarios y crea nuevos usuarios desde el panel.
               </p>
             </div>
 
@@ -122,11 +101,8 @@ export default function RegisterUserPage() {
 
           {pageSuccess && (
             <div
-              className={`admin-page__feedback admin-page__feedback--success ${
-                isSuccessVisible
-                  ? 'admin-page__feedback--visible'
-                  : 'admin-page__feedback--hidden'
-              }`}
+              className="admin-page__feedback admin-page__feedback--success"
+              onAnimationEnd={() => setPageSuccess('')}
             >
               {pageSuccess}
             </div>
