@@ -11,8 +11,12 @@ import UserCard from '@/features/profile/components/UserCard/UserCard';
 import ListUserCard from '@/features/profile/components/ListUserCard';
 import type { Role } from '@/features/profile/components/ListUserCard/ListUserCard';
 import { useUsuario } from '@/features/user/hooks/useUsuario';
+import { AvatarLootBox } from '@/features/profile/components/AvatarLootBox';
+import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
+import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
+import { useAvatarFeatures } from '@/features/profile/hooks/useAvatarFeatures';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox';
 
 // ── DB-connected wrappers (hooks require real components) ─────────────────────
 
@@ -61,6 +65,31 @@ function DbListUserCard({ userId, roles }: { userId: number; roles: Role[] }) {
       roles={roles}
       email={usuario.email}
     />
+  );
+}
+
+function DbLootBox({ userId }: { userId: number }) {
+  const { catalog, allElements, atributos, loading } = useAvatarCatalog();
+  const { filteredCatalog, initialFeatures, addRandomItem, unownedItems, addingItem } = useUserAvatar(
+    userId, catalog, allElements, atributos,
+  );
+  const { features } = useAvatarFeatures(
+    filteredCatalog ?? { styleId: 1, styleName: '', features: [], defaultFeatures: {} },
+    initialFeatures,
+  );
+
+  if (loading || !filteredCatalog) return <p style={{ padding: '2rem', fontFamily: 'monospace' }}>Cargando…</p>;
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+      <AvatarLootBox
+        unownedItems={unownedItems}
+        atributos={atributos}
+        baseFeatures={features}
+        onOpen={addRandomItem}
+        disabled={addingItem}
+      />
+    </div>
   );
 }
 
@@ -196,6 +225,8 @@ export default function DebugApp() {
       ),
 
       profile: <Profile />,
+
+      lootbox: <DbLootBox userId={1} />,
     }),
     []
   );
