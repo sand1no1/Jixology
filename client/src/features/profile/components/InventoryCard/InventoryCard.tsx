@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import AvatarTile from '../AvatarTile';
 import ColorSwatch from '../ColorSwatch';
@@ -20,18 +20,18 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   onSelectColor,
   onSelectType,
 }) => {
-  const [activeTab,    setActiveTab]    = useState<FeatureMeta>(
-    catalog.features.find(f => f.key === 'hair') ?? catalog.features[0]
+  // Store only the key — derive the full FeatureMeta from the catalog so it
+  // stays fresh whenever the catalog updates (e.g. after a lootbox drop)
+  // without needing a synchronous setState inside an effect.
+  const [activeKey,    setActiveKey]    = useState<string>(
+    catalog.features.find(f => f.key === 'hair')?.key ?? catalog.features[0]?.key ?? ''
   );
   const [showingColor, setShowingColor] = useState(false);
 
-  // Keep activeTab in sync when the catalog updates (e.g. after a lootbox drop).
-  // Look up the matching feature by key so the tab's variant/color lists refresh.
-  useEffect(() => {
-    setActiveTab(prev =>
-      catalog.features.find(f => f.key === prev.key) ?? catalog.features[0]
-    );
-  }, [catalog]);
+  const activeTab = useMemo(
+    () => catalog.features.find(f => f.key === activeKey) ?? catalog.features[0],
+    [catalog, activeKey],
+  );
 
   const hasColor       = !activeTab.colorOnly && !!activeTab.colorProp;
   const isNoneSelected = activeTab.probProp
@@ -78,7 +78,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
           <button
             key={meta.key}
             className={`inv-tab ${activeTab.key === meta.key ? 'inv-tab--active' : ''}`}
-            onClick={() => { setActiveTab(meta); setShowingColor(false); }}
+            onClick={() => { setActiveKey(meta.key); setShowingColor(false); }}
           >
             {meta.label}
           </button>
