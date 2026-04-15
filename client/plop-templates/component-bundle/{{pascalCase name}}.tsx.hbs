@@ -1,7 +1,11 @@
-import React, { ReactNode } from 'react';
-import './{{pascalCase name}}.css';
+import React from 'react';
+{{#if wantInterface}} import type { ReactNode } from 'react';{{/if}}
+
+// --- Estilos ---
+import styles from './{{pascalCase name}}.module.css';
 
 {{#if wantInterface}}
+// --- Interfaces ---
 export interface I{{pascalCase name}}Props {
   children?: ReactNode;
 }
@@ -9,7 +13,7 @@ export interface I{{pascalCase name}}Props {
 
 const {{pascalCase name}}: React.FC{{#if wantInterface}}<I{{pascalCase name}}Props>{{/if}} = ({{#if wantInterface}}{ children }{{/if}}) => {
   return (
-    <div className="{{dashCase name}}">
+    <div className={styles.container}>
       {{#if wantInterface}}
       {children}
       {{else}}

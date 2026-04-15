@@ -1,0 +1,102 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Georama:opsz,wght@9..144,100..900&display=swap');
+
+:root {
+  font-family: 'Poppins', 'Georama', 'Aptos', 'Arial', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #213547;
+  background-color: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --status-green: #0A0838;
+  --status-yellow: #f59e0b;
+  --status-blue: #2563eb;
+  --status-gray: #6b7280;
+  --status-red: #dc2626;
+
+  /* Paleta de colores de Tech Mahindra */
+  /* ---------------------------------- */
+  --color-white:          #FFFFFF;
+  --color-clarity-gray-1: #F6F2EA;
+  --color-clarity-gray-2: #E5DFD3;
+  --color-anchor-gray-1:  #4A453D;
+  --color-anchor-gray-2:  #29251D;
+
+  --color-clarity-red:  #F8B4A3;
+  --color-mahindra-red: #E31837;
+  --color-impact-red:   #5F0229;
+
+  --color-blueprint-navy: #0A0838;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-width: 20rem;
+}
+/* Status colors globales para toda la app */
+.status-completed  { background-color: var(--status-blue); }
+.status-delayed    { background-color: var(--status-red); }
+.status-onTrack    { background-color: var(--status-yellow); }
+.status-unassigned { background-color: var(--status-gray); }
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
