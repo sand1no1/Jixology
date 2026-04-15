@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GiftIcon } from '@heroicons/react/24/outline';
 import './Profile.css';
 
 import UserCard from '../components/UserCard';
@@ -59,13 +60,12 @@ const Profile: React.FC = () => {
     {showLootbox && (
       <div className="lootbox-overlay" onClick={e => { if (e.target === e.currentTarget) setShowLootbox(false); }}>
         <div className="lootbox-modal">
-          <button className="lootbox-modal__close" onClick={() => setShowLootbox(false)}>✕</button>
-          <h2 className="lootbox-modal__title">Lootbox</h2>
           <AvatarLootBox
             unownedItems={unownedItems}
             atributos={atributos}
             baseFeatures={features}
             onOpen={addRandomItem}
+            onClose={() => setShowLootbox(false)}
             disabled={addingItem}
           />
         </div>
@@ -101,7 +101,7 @@ const Profile: React.FC = () => {
               onClick={() => setShowLootbox(true)}
               disabled={saving || addingItem}
             >
-              🎁 Abrir lootbox
+              <GiftIcon style={{ width: 16, height: 16 }} /> Abrir lootbox
             </button>
             <button
               className="btn-save-avatar"

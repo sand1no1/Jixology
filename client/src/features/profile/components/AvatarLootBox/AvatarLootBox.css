@@ -1,76 +1,122 @@
 /* ═══════════════════════════════════════════════════════════════════
-   AvatarLootBox — slot-machine style roulette for avatar items
+   AvatarLootBox — 3-D carousel roulette for avatar items
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── Wrapper ────────────────────────────────────────────────────── */
 .lootbox {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 20px;
-  padding: 28px;
+  padding: 28px 28px 32px;
   width: 100%;
+  flex: 1;
   box-sizing: border-box;
+}
+
+/* ── Header (title + close) ─────────────────────────────────────── */
+.lootbox__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  padding: 0 40px; /* space for the close button on the right */
+  box-sizing: border-box;
+}
+
+.lootbox__title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-blueprint-navy);
+  letter-spacing: -0.01em;
+}
+
+/* ── Close button ───────────────────────────────────────────────── */
+.lootbox__close {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-anchor-gray-1);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.lootbox__close svg {
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.5;
+}
+
+.lootbox__close:hover {
+  color: var(--color-blueprint-navy);
+  transform: translateY(-50%) scale(1.1);
 }
 
 /* ── Roulette viewport ──────────────────────────────────────────── */
 .lootbox__viewport {
   position: relative;
   overflow: hidden;
-  border-radius: 16px;
-  border: 2px solid var(--color-clarity-gray-2);
-  background: var(--color-clarity-gray-1);
-  height: 116px; /* 96px tile + 10px top + 10px bottom padding */
+  /* 96 * 1.4 = 134.4 → 148 px gives comfortable vertical breathing room */
+  height: 148px;
   flex-shrink: 0;
+  /* width set inline from CAROUSEL_RADIUS calculation */
 }
 
-/* ── Scrolling strip ────────────────────────────────────────────── */
-.lootbox__strip {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  will-change: transform;
-  /* transition applied dynamically via JS */
+/* ── Carousel container (tiles are absolutely positioned inside) ── */
+.lootbox__carousel {
+  position: relative;
+  width: 100%;
+  height: 100%;
 }
 
-/* Idle/placeholder state: remove horizontal padding and center tiles
-   so the middle placeholder sits exactly under the selection indicator */
-.lootbox__strip--idle {
-  padding-inline: 0;
-  justify-content: center;
-}
-
-/* ── Individual roulette tile ───────────────────────────────────── */
+/* ── Individual tiles ───────────────────────────────────────────── */
+/* position/transform/opacity/z-index set via inline style (tileStyle) */
 .lootbox__tile {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 84px;
-  height: 96px;
-  flex-shrink: 0;
   border-radius: 14px;
   border: 2px solid var(--color-clarity-gray-2);
   background: var(--color-white);
-  transition: border-color 0.3s ease;
+  box-shadow: 0 2px 12px rgba(10, 8, 56, 0.08);
+  transform-origin: center center;
+  overflow: hidden;
 }
 
+.lootbox__tile--winner {
+  border-color: var(--color-mahindra-red);
+  box-shadow:
+    0 0 0 3px rgba(227, 24, 55, 0.20),
+    0 4px 20px rgba(10, 8, 56, 0.12);
+}
 
 .lootbox__tile--placeholder .lootbox__tile-avatar {
   background: var(--color-clarity-gray-2);
   border-radius: 10px;
-  width: 62px;
-  height: 62px;
   animation: lootbox-pulse 1.4s ease-in-out infinite;
 }
 
+/* ── Avatar image inside tile ───────────────────────────────────── */
 .lootbox__tile-avatar {
   width: 62px;
   height: 62px;
   border-radius: 10px;
   overflow: hidden;
   background: var(--color-clarity-gray-1);
+  flex-shrink: 0;
 }
 
 .lootbox__tile-avatar svg {
@@ -83,7 +129,6 @@
   font-size: 0.58rem;
   color: var(--color-anchor-gray-1);
   text-align: center;
-  word-break: break-all;
   line-height: 1.2;
   font-weight: 500;
   opacity: 0.7;
@@ -94,16 +139,21 @@
 }
 
 /* ── Center selection indicator ─────────────────────────────────── */
+/* Matches the center tile at MAX_SCALE = 1.4 */
 .lootbox__center-indicator {
   position: absolute;
-  top: 10px;             /* matches strip padding-top */
-  height: 96px;          /* matches tile height */
-  left: calc(50% - 42px); /* centers 84px tile: 50% - 84/2 */
-  width: 84px;           /* matches tile width */
+  top:  50%;
+  left: 50%;
+  /* 84 * 1.4 = 117.6  →  118px wide  */
+  /* 96 * 1.4 = 134.4  →  134px tall  */
+  /* 14 * 1.4 = 19.6   →  20px radius */
+  width:  118px;
+  height: 134px;
+  transform: translate(-50%, -50%);
   border: 2.5px solid var(--color-mahindra-red);
-  border-radius: 14px;   /* matches tile border-radius */
+  border-radius: 20px;
   pointer-events: none;
-  z-index: 2;
+  z-index: 200;
 }
 
 /* ── Edge fade gradients ────────────────────────────────────────── */
@@ -111,85 +161,45 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 64px;
+  width: 80px;
   pointer-events: none;
-  z-index: 3;
+  z-index: 150;
 }
 
 .lootbox__fade--left {
   left: 0;
-  background: linear-gradient(
-    to right,
-    var(--color-clarity-gray-1) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(to right, #ffffff 0%, transparent 100%);
 }
 
 .lootbox__fade--right {
   right: 0;
-  background: linear-gradient(
-    to left,
-    var(--color-clarity-gray-1) 0%,
-    transparent 100%
-  );
+  background: linear-gradient(to left, #ffffff 0%, transparent 100%);
 }
 
-/* ── Result reveal box ──────────────────────────────────────────── */
-.lootbox__result {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 300px;
-  height: 280px;
-  border-radius: 20px;
-  border: 2px solid var(--color-clarity-gray-2);
-  background: var(--color-clarity-gray-1);
-  transition: border-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.lootbox__result--revealed {
-  border-color: var(--color-mahindra-red);
-  box-shadow:
-    0 0 0 4px rgba(227, 24, 55, 0.12),
-    0 8px 32px rgba(10, 8, 56, 0.10);
-}
-
-.lootbox__result-avatar {
-  width: 160px;
-  height: 160px;
-  border-radius: 20px;
-  overflow: hidden;
-  background: var(--color-white);
-  box-shadow: 0 4px 16px rgba(10, 8, 56, 0.12);
-  animation: lootbox-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.lootbox__result-avatar svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.lootbox__result-name {
+/* ── Winner name label (replaces the big result box) ───────────── */
+.lootbox__winner-name {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-blueprint-navy);
   letter-spacing: 0.01em;
   text-align: center;
-  animation: lootbox-fadein 0.3s ease 0.1s both;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  min-height: 1.4em; /* reserve space so layout doesn't jump */
 }
 
-.lootbox__result-placeholder {
-  font-size: 3rem;
-  opacity: 0.3;
-  user-select: none;
+.lootbox__winner-name--visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Buttons ────────────────────────────────────────────────────── */
 .lootbox__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 48px;
   font-size: 1rem;
   font-weight: 700;
@@ -227,18 +237,23 @@
   color: var(--color-white);
 }
 
+.lootbox__btn-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 /* ── Keyframes ──────────────────────────────────────────────────── */
 @keyframes lootbox-pulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
 
-@keyframes lootbox-pop {
-  from { transform: scale(0.6); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+@keyframes lootbox-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
-@keyframes lootbox-fadein {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+.lootbox__btn-icon--spin {
+  animation: lootbox-spin 1s linear infinite;
 }
