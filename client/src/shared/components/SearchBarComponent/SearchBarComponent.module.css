@@ -1,0 +1,35 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--color-white);
+    border-radius: 30px;
+    border: 2px solid var(--color-blueprint-navy);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 4px 12px;
+    color: var(--color-clarity-gray-2);
+}
+
+.magnifyingIcon {
+    color: var(--color-blueprint-navy);
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: inherit;
+    color: var(--color-clarity-gray-2);
+    width: 100%;
+}
+
+.input::placeholder {
+    color: var(--color-clarity-gray-2);
+}
+
+.inputActive {
+    color: var(--color-anchor-gray-1);
+}
