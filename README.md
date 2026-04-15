@@ -87,10 +87,6 @@ Supabase configuration, database migrations, and project resources.
 
 ## #######################################################################################################################################
 ## What to run after db reset --local
--- npx supabase functions serve register_user --no-verify-jwt 
-
-in supabase client to run the edgefunction for the first user.
-
 -- powershell -ExecutionPolicy Bypass -File .\scripts\bootstrap-users.ps1
 in a terminal to run the script that creates the first user
 
