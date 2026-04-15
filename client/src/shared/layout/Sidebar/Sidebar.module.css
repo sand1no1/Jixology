@@ -89,3 +89,7 @@
     opacity: 1;
     pointer-events: auto;
   }
+
+  .logOut {
+    margin-top: 115px;
+  }

@@ -8,6 +8,7 @@ import {
   BookOpenIcon,
   BookmarkIcon,
   UserPlusIcon,
+  MinusCircleIcon,
 } from '@heroicons/react/24/solid';
 
 export interface ISidebarProps {
@@ -54,6 +55,12 @@ const Sidebar: React.FC<ISidebarProps> = () => {
             <a href="/usuarios">
               <UserPlusIcon className={styles.icon} />
               <span><b>Crear Usuario</b></span>
+            </a>
+          </li>
+          <li className={styles.menuItem}>
+            <a href="/inicio-sesion" className={styles.logOut}>
+              <MinusCircleIcon className={styles.icon} />
+              <span><b>Cerrar Sesión</b></span>
             </a>
           </li>
         </ul>
