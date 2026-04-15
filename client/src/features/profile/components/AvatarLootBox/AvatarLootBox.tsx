@@ -113,7 +113,7 @@ const AvatarLootBox: React.FC<Props> = ({
   const [strip,        setStrip]        = useState<{ elem: ElementoInventarioAvatar; svg: string }[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(IDLE_IDX);
 
-  const rafRef       = useRef<number>();
+  const rafRef       = useRef<number | undefined>(undefined);
   const startTimeRef = useRef<number>(0);
 
   // Cleanup rAF on unmount
