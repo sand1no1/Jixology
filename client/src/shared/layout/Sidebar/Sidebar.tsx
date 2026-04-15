@@ -6,7 +6,8 @@ import {
   BeakerIcon,
   LockClosedIcon,
   BookOpenIcon,
-  BookmarkIcon
+  BookmarkIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/solid';
 
 export interface ISidebarProps {
@@ -19,21 +20,9 @@ const Sidebar: React.FC<ISidebarProps> = () => {
       <aside className={styles.sidebar}>
         <ul className={styles.menu}>
           <li className={styles.menuItem}>
-            <a href="/perfil">
-              <UserCircleIcon className={styles.icon} />
-              <span><b>Perfil</b></span>
-            </a>
-          </li>
-          <li className={styles.menuItem}>
             <a href="/dashboard-usuario">
               <BeakerIcon className={styles.icon} />
-              <span><b>Proyectos</b></span>
-            </a>
-          </li>
-          <li className={styles.menuItem}>
-            <a href="/inicio-sesion">
-              <LockClosedIcon className={styles.icon} />
-              <span><b>Verificación</b></span>
+              <span><b>Dashboard</b></span>
             </a>
           </li>
           <li className={styles.menuItem}>
@@ -46,6 +35,25 @@ const Sidebar: React.FC<ISidebarProps> = () => {
             <a href="/projects/dummy">
               <BookmarkIcon className={styles.icon} />
               <span><b>Dummy</b></span>
+            </a>
+          </li>
+          <li className={styles.menuItem}>
+            <a href="/perfil">
+              <UserCircleIcon className={styles.icon} />
+              <span><b>Perfil</b></span>
+            </a>
+          </li>
+          
+          <li className={styles.menuItem}>
+            <a href="/inicio-sesion">
+              <LockClosedIcon className={styles.icon} />
+              <span><b>Verificación</b></span>
+            </a>
+          </li>
+          <li className={styles.menuItem}>
+            <a href="/usuarios">
+              <UserPlusIcon className={styles.icon} />
+              <span><b>Crear Usuario</b></span>
             </a>
           </li>
         </ul>
