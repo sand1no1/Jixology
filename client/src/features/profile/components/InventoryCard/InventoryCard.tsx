@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import AvatarTile from '../AvatarTile';
 import ColorSwatch from '../ColorSwatch';
@@ -25,6 +25,14 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   );
   const [showingColor, setShowingColor] = useState(false);
 
+  // Keep activeTab in sync when the catalog updates (e.g. after a lootbox drop).
+  // Look up the matching feature by key so the tab's variant/color lists refresh.
+  useEffect(() => {
+    setActiveTab(prev =>
+      catalog.features.find(f => f.key === prev.key) ?? catalog.features[0]
+    );
+  }, [catalog]);
+
   const hasColor       = !activeTab.colorOnly && !!activeTab.colorProp;
   const isNoneSelected = activeTab.probProp
     ? ((features[activeTab.probProp] as number) ?? 100) === 0
@@ -45,7 +53,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
     for (const value of activeTab.variants) {
       tiles.push({
         value,
-        label:    value,
+        label:    activeTab.variantLabels[value] ?? value,
         svg:      makeVariantTileSvg(features, activeTab, value),
         selected: !isNoneSelected && (features[activeTab.key] as string[])?.[0] === value,
       });
