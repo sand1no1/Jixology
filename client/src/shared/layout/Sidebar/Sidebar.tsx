@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import {
   UserCircleIcon,
@@ -10,12 +11,24 @@ import {
   UserPlusIcon,
   MinusCircleIcon,
 } from '@heroicons/react/24/solid';
+import { signOutService } from '@/features/auth/services/auth.service';
 
 export interface ISidebarProps {
   children?: ReactNode;
 }
 
 const Sidebar: React.FC<ISidebarProps> = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await signOutService();
+      navigate('/inicio-sesion', { replace: true });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
   return (
     <>
       <aside className={styles.sidebar}>
@@ -44,7 +57,7 @@ const Sidebar: React.FC<ISidebarProps> = () => {
               <span><b>Perfil</b></span>
             </a>
           </li>
-          
+
           <li className={styles.menuItem}>
             <a href="/inicio-sesion">
               <LockClosedIcon className={styles.icon} />
@@ -58,10 +71,14 @@ const Sidebar: React.FC<ISidebarProps> = () => {
             </a>
           </li>
           <li className={styles.menuItem}>
-            <a href="/inicio-sesion" className={styles.logOut}>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={styles.logOut}
+            >
               <MinusCircleIcon className={styles.icon} />
               <span><b>Cerrar Sesión</b></span>
-            </a>
+            </button>
           </li>
         </ul>
       </aside>
