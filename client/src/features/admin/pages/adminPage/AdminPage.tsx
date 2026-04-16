@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { XCircleIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
@@ -77,8 +78,7 @@ export default function RegisterUserPage() {
           <div className="admin-page__topbar">
             <div className="admin-page__heading">
               <h1 className="admin-page__title">Usuarios del sistema</h1>
-              <p className="admin-page__subtitle">
-              </p>
+              <p className="admin-page__subtitle"></p>
             </div>
 
             <button
@@ -147,7 +147,7 @@ export default function RegisterUserPage() {
               onClick={() => setIsCreateModalOpen(false)}
               aria-label="Cerrar modal"
             >
-              ×
+              <XCircleIcon className="admin-page__modal-close-icon" />
             </button>
 
             <RegisterUserForm
