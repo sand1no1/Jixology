@@ -1,0 +1,41 @@
+name: functions-cd
+
+on:
+  push:
+    branches: [staging, main]
+    paths:
+      - "supabase/functions/**"
+      - "supabase/config.toml"
+      - ".github/workflows/functions-cd.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: functions-cd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-functions:
+    if: ${{ (github.ref == 'refs/heads/staging' && vars.ENABLE_FUNCTIONS_STAGING_DEPLOY == 'true') ||
+      (github.ref == 'refs/heads/main' && vars.ENABLE_FUNCTIONS_PROD_DEPLOY == 'true') }}
+    runs-on: ubuntu-latest
+
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.79.0
+
+      - name: Link Supabase project
+        run: supabase link --project-ref "$PROJECT_ID"
+
+      - name: Deploy all Edge Functions
+        run: supabase functions deploy

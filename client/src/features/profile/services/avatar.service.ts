@@ -63,6 +63,16 @@ function buildCatalogFromData(
     return elementos.filter(e => e.id_atributo_avatar === attr.id).map(e => e.nombre);
   };
 
+  const getElementLabels = (attrNombre: string): Record<string, string> => {
+    const attr = attrByName.get(attrNombre);
+    if (!attr) return {};
+    return Object.fromEntries(
+      elementos
+        .filter(e => e.id_atributo_avatar === attr.id && e.nombre_es)
+        .map(e => [e.nombre, e.nombre_es!]),
+    );
+  };
+
   // Type attrs that merge into their matching Color tab
   const mergedTypeAttrs = new Set(
     styleAttrs
@@ -90,14 +100,15 @@ function buildCatalogFromData(
     const probProp  = attrByName.has(`${key}Probability`) ? `${key}Probability` : undefined;
     return {
       key,
-      label:        attr.nombre_es ?? attr.nombre,
-      variants:     getElementNames(key),
+      label:         attr.nombre_es ?? attr.nombre,
+      variants:      getElementNames(key),
+      variantLabels: getElementLabels(key),
       colorProp,
-      colorOptions: colorProp ? getElementNames(colorProp) : [],
+      colorOptions:  colorProp ? getElementNames(colorProp) : [],
       probProp,
-      colorOnly:    false,
-      typeProp:     undefined,
-      typeOptions:  [],
+      colorOnly:     false,
+      typeProp:      undefined,
+      typeOptions:   [],
     };
   });
 
@@ -113,13 +124,14 @@ function buildCatalogFromData(
     const hasType      = mergedTypeAttrs.has(typeAttrName);
     features.push({
       key,
-      label:        colorAttr.nombre_es ?? colorAttr.nombre,
-      variants:     [],
-      colorProp:    key,
-      colorOptions: getElementNames(key),
-      probProp:     undefined,
-      colorOnly:    true,
-      typeProp:     hasType ? typeAttrName : undefined,
+      label:         colorAttr.nombre_es ?? colorAttr.nombre,
+      variants:      [],
+      variantLabels: {},
+      colorProp:     key,
+      colorOptions:  getElementNames(key),
+      probProp:      undefined,
+      colorOnly:     true,
+      typeProp:      hasType ? typeAttrName : undefined,
       typeOptions:  hasType ? getElementNames(typeAttrName) : [],
     });
   }
@@ -184,6 +196,14 @@ export async function fetchCatalog(styleId = 1): Promise<{
 }
 
 // ── User inventory ────────────────────────────────────────────────────────────
+export async function addElementToInventory(userId: number, elementId: number): Promise<void> {
+  const { supabase } = await import('../../../core/supabase/supabase.client');
+  const { error } = await supabase
+    .from('usuario_inventario_avatar')
+    .insert({ id_usuario: userId, id_elemento: elementId, fecha_obtencion: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchUserInventory(userId: number): Promise<Set<number>> {
   const { supabase } = await import('../../../core/supabase/supabase.client');
   const { data, error } = await supabase

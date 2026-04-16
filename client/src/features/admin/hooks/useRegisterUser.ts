@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { registerUserService } from '../services/admin.service';
+import { getUserIdByEmail, seedStartingAvatar } from '../services/avatarSetup.service';
 import type {
   RegisterUserFormValues,
   RegisterUserPayload,
@@ -60,10 +61,16 @@ export function useRegisterUser() {
     setSuccess('');
 
     try {
-      const payload = buildPayload();
+      const payload  = buildPayload();
       const response = await registerUserService(payload);
 
-      setSuccess(response.message || 'Usuario creado correctamente.');
+      // Seed starting avatar using the user's full name as the RNG seed
+      // (falls back to email when no name was provided)
+      const seed   = [values.nombre.trim(), values.apellido.trim()].filter(Boolean).join(' ')
+                     || payload.email;
+      const userId = await getUserIdByEmail(payload.email);
+      await seedStartingAvatar(userId, seed);
+
       resetForm();
       return response;
     } catch (err) {
