@@ -40,8 +40,10 @@ export interface FeatureMeta {
   key:          string;
   /** Display label (Spanish override or fallback to key). */
   label:        string;
-  /** Ordered list of variant names. Empty for color-only features. */
+  /** Ordered list of variant names (DiceBear keys). Empty for color-only features. */
   variants:     string[];
+  /** Spanish display label for each variant nombre. Falls back to nombre when absent. */
+  variantLabels: Record<string, string>;
   /** Nombre of the corresponding color attribute (e.g. 'hairColor'), or undefined. */
   colorProp:    string | undefined;
   /** Color option values for colorProp; empty array when colorProp is absent. */
