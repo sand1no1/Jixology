@@ -12,7 +12,7 @@ import type { MessagePopUpType } from '../../../shared/components/MessagePopUp';
 import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
-import { useUsuario } from '../../../features/user/hooks/useUsuario';
+import { useUserProfile } from '@/features/user/services/user.service';
 
 const HARDCODED_USER_ID = 1;
 const SKELETON_TILE_COUNT = 10;
@@ -38,7 +38,7 @@ const Profile: React.FC = () => {
   const [passiveDismissed, setPassiveDismissed] = useState(false);
 
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
-  const { usuario, loading: loadingUser, error: userError } = useUsuario(HARDCODED_USER_ID);
+  const { userProfile, loading: loadingUser, error: userError } = useUserProfile(HARDCODED_USER_ID);
 
   const { filteredCatalog, initialFeatures, saveAvatar, addRandomItem, unownedItems, saving, loadingAvatar, addingItem } = useUserAvatar(
     HARDCODED_USER_ID,
@@ -58,13 +58,13 @@ const Profile: React.FC = () => {
   const isEmpty       = !isLoading && !hasError && (!filteredCatalog || filteredCatalog.features.length === 0);
   const showInventory = !isLoading && !hasError && !!filteredCatalog && filteredCatalog.features.length > 0;
 
-  const nombre    = [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || '—';
-  const email     = usuario?.email ?? '—';
-  const telefono  = usuario?.telefono ?? '—';
-  const sobreMi   = usuario?.sobre_mi ?? '';
-  const age       = usuario?.fecha_nacimiento ? calcAge(usuario.fecha_nacimiento) : null;
-  const birthDate = usuario?.fecha_nacimiento
-    ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-MX')
+  const nombre    = [userProfile?.nombre, userProfile?.apellido].filter(Boolean).join(' ') || '—';
+  const email     = userProfile?.email ?? '—';
+  const telefono  = userProfile?.telefono ?? '—';
+  const sobreMi   = userProfile?.sobreMi ?? '';
+  const age       = userProfile?.fechaNacimiento ? calcAge(userProfile.fechaNacimiento) : null;
+  const birthDate = userProfile?.fechaNacimiento
+    ? new Date(userProfile.fechaNacimiento).toLocaleDateString('es-MX')
     : '—';
 
   const handleSaveAvatar = async () => {
