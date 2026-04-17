@@ -6,8 +6,7 @@ import type { Project } from '@/features/projects/types/Project';
 
 // --- Hooks ---
 import { useProjectCards} from '../../hooks/useProjects';
-
-// import { statusClassMap } from '@/shared/utils/statusClassMap';
+import { useRecentProjects } from '../../hooks/useRecentProjects';
 
 // --- Componentes ---
 import ProjectCard from '@/features/projects/components/ProjectCard';
@@ -58,8 +57,8 @@ const ProjectsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
-
-  const recentProjects = projects.slice(-4).reverse();
+  // const { recentIds, trackVisit } = useRecentProjects(user)
+  const { recentIds, trackVisit } = useRecentProjects(1); 
 
   const filteredProjects = useMemo(() => {
     const statusId = FILTER_TO_STATUS_ID[activeFilter];
