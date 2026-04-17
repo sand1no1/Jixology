@@ -10,7 +10,7 @@ import ProjectsPage from '@/features/projects/pages/ProjectsPage';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
 import ListUserCard from '@/features/profile/components/ListUserCard';
 import type { Role } from '@/features/profile/components/ListUserCard/ListUserCard';
-import { useUsuario } from '@/features/user/hooks/useUsuario';
+import { useUserProfile } from '@/features/user/services/user.service';
 import { AvatarLootBox } from '@/features/profile/components/AvatarLootBox';
 import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
 import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
@@ -30,14 +30,14 @@ function calcAge(fechaNacimiento: string): number {
 }
 
 function DbUserCard({ userId }: { userId: number }) {
-  const { usuario, loading } = useUsuario(userId);
-  if (loading || !usuario) return null;
+  const { userProfile, loading } = useUserProfile(userId);
+  if (loading || !userProfile) return null;
 
-  const nombre    = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ') || '—';
-  const birthDate = usuario.fecha_nacimiento
-    ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-MX')
+  const nombre    = [userProfile.nombre, userProfile.apellido].filter(Boolean).join(' ') || '—';
+  const birthDate = userProfile.fechaNacimiento
+    ? new Date(userProfile.fechaNacimiento).toLocaleDateString('es-MX')
     : '—';
-  const age = usuario.fecha_nacimiento ? calcAge(usuario.fecha_nacimiento) : 0;
+  const age = userProfile.fechaNacimiento ? calcAge(userProfile.fechaNacimiento) : 0;
 
   return (
     <UserCard
@@ -45,25 +45,25 @@ function DbUserCard({ userId }: { userId: number }) {
       name={nombre}
       age={age}
       birthDate={birthDate}
-      phone={usuario.telefono ?? '—'}
-      email={usuario.email}
-      aboutMe={usuario.sobre_mi ?? ''}
+      phone={userProfile.telefono ?? '—'}
+      email={userProfile.email}
+      aboutMe={userProfile.sobreMi ?? ''}
     />
   );
 }
 
 function DbListUserCard({ userId, roles }: { userId: number; roles: Role[] }) {
-  const { usuario, loading } = useUsuario(userId);
-  if (loading || !usuario) return null;
+  const { userProfile, loading } = useUserProfile(userId);
+  if (loading || !userProfile) return null;
 
-  const fullName = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ') || '—';
+  const fullName = [userProfile.nombre, userProfile.apellido].filter(Boolean).join(' ') || '—';
 
   return (
     <ListUserCard
       userId={userId}
       fullName={fullName}
       roles={roles}
-      email={usuario.email}
+      email={userProfile.email}
     />
   );
 }

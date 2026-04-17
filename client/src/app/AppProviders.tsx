@@ -1,4 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
+import { UserProvider } from '@/core/auth/userContext';
+
+
 
 type Props = {
   children: React.ReactNode;
@@ -7,8 +10,9 @@ type Props = {
 export function AppProviders({ children }: Props) {
   return (
     <BrowserRouter>
-      {children}
-      {/*<AuthProvider>{children}</AuthProvider>*/}
+      <UserProvider>
+        {children}
+      </UserProvider>
     </BrowserRouter>
   );
 }

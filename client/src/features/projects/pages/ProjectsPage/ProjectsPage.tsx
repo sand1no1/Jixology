@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import styles from './ProjectsPage.module.css';
+import { useUser } from '@/core/auth/userContext';  
+
 
 // --- Interfaces ---
 import type { Project } from '@/features/projects/types/Project';
@@ -7,7 +9,6 @@ import type { Project } from '@/features/projects/types/Project';
 // --- Hooks ---
 import { useProjectCards} from '../../hooks/useProjects';
 
-// import { statusClassMap } from '@/shared/utils/statusClassMap';
 
 // --- Componentes ---
 import ProjectCard from '@/features/projects/components/ProjectCard';
@@ -52,14 +53,15 @@ const renderCard = (project: Project) => (
 
 const ProjectsPage: React.FC = () => {
 
-  // TODO: reemplazar con valores del contexto de auth
-  const { projects, loading } = useProjectCards(3, 1);
+  const { user, loading: userLoading } = useUser(); 
+  const { projects, loading: projectsLoading, error } = useProjectCards(user?.idRolGlobal , user?.id, userLoading);
+  const loading = userLoading || projectsLoading;
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
 
-  const recentProjects = projects.slice(-4).reverse();
+  const recentProjects = useMemo(() => projects.slice(-4).reverse(), [projects]);
 
   const filteredProjects = useMemo(() => {
     const statusId = FILTER_TO_STATUS_ID[activeFilter];
@@ -74,14 +76,23 @@ const ProjectsPage: React.FC = () => {
   const isSearching = search.trim().length > 0;
   const isFiltering = activeFilter !== 'TodosLosProyectos';
 
+  if (error) {
+    console.log(error);
+    return (
+      <EmptyState
+        title="Error obteniendo los proyectos"
+        subtitle="Verifica tu conexión e intenta de nuevo."
+      />
+    );
+  }
   return (
     <>
       <div className={styles.container}>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div style={{ flex: 9 }}>
+        <div className={styles.topBar}>
+          <div className={styles.searchWrapper}>
             <SearchBarComponent infoText="Buscar proyectos" onChange={setSearch} />
           </div>
-          <button id={styles.createProject} style={{ flex: 1 }} onClick={() => setIsCreateProjectOpen(true)}>
+          <button className={`${styles.createProject} ${styles.createProjectWrapper}`} onClick={() => setIsCreateProjectOpen(true)}>
             Crear proyecto
           </button>
         </div>
