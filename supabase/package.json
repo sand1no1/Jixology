@@ -1,5 +1,9 @@
 {
+  "scripts": {
+    "begin-project": "npx supabase start && npx supabase db reset --local && start \"supabase-register-user\" /B cmd /c \"npx supabase functions serve register_user --no-verify-jwt\" && timeout /t 5 /nobreak > nul && cd .. && powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap-users.ps1 && node .\\client\\scripts\\post-bootstrap-seed.mjs"
+  },
   "devDependencies": {
+    "pg": "^8.12.0",
     "supabase": "^2.79.0"
   }
 }
