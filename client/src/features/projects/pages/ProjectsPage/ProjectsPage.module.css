@@ -65,7 +65,7 @@
     color: #ffffff;
 }
 
-#createProject {
+.createProject {
     background-color: var(--color-mahindra-red);
     color: var(--color-white);
     display: flex;
@@ -74,10 +74,24 @@
     font-weight: bolder;
 }
 
-#createProject span {
+.createProject span {
     color: var(--color-mahindra-red);
     font-weight: bolder;
-    font-size: 1.5rem; 
+    font-size: 1.5rem;
     line-height: 0;
     vertical-align: middle;
+}
+
+.topBar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.searchWrapper {
+    flex: 9;
+}
+
+.createProjectWrapper {
+    flex: 1;
 }

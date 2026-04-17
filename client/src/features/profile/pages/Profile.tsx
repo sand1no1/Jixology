@@ -8,7 +8,7 @@ import { AvatarLootBox } from '../components/AvatarLootBox';
 import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
-import { useUsuario } from '../../../features/user/hooks/useUsuario';
+import { useUserProfile } from '@/features/user/services/user.service';
 
 const HARDCODED_USER_ID = 1;
 
@@ -24,7 +24,7 @@ function calcAge(fechaNacimiento: string): number {
 const Profile: React.FC = () => {
   const [showLootbox, setShowLootbox] = useState(false);
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
-  const { usuario, loading: loadingUser, error: userError } = useUsuario(HARDCODED_USER_ID);
+  const { userProfile, loading: loadingUser, error: userError } = useUserProfile(HARDCODED_USER_ID);
 
   const { filteredCatalog, initialFeatures, saveAvatar, addRandomItem, unownedItems, saving, loadingAvatar, addingItem } = useUserAvatar(
     HARDCODED_USER_ID,
@@ -46,13 +46,13 @@ const Profile: React.FC = () => {
     return <div className="profile-error">Error: {catalogError ?? userError}</div>;
   }
 
-  const nombre    = [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || '—';
-  const email     = usuario?.email ?? '—';
-  const telefono  = usuario?.telefono ?? '—';
-  const sobreMi   = usuario?.sobre_mi ?? '';
-  const age       = usuario?.fecha_nacimiento ? calcAge(usuario.fecha_nacimiento) : null;
-  const birthDate = usuario?.fecha_nacimiento
-    ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-MX')
+  const nombre    = [userProfile?.nombre, userProfile?.apellido].filter(Boolean).join(' ') || '—';
+  const email     = userProfile?.email ?? '—';
+  const telefono  = userProfile?.telefono ?? '—';
+  const sobreMi   = userProfile?.sobreMi ?? '';
+  const age       = userProfile?.fechaNacimiento ? calcAge(userProfile.fechaNacimiento) : null;
+  const birthDate = userProfile?.fechaNacimiento
+    ? new Date(userProfile.fechaNacimiento).toLocaleDateString('es-MX')
     : '—';
 
   return (
