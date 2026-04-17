@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { CodeBracketIcon } from '@heroicons/react/24/outline';
 import styles from './ProjectsPage.module.css';
 import { useUser } from '@/core/auth/userContext';  
 
@@ -36,23 +37,7 @@ const FILTER_LABELS: Record<FilterKey, string> = {
   SinAsignar:        'Sin Asignar',
 };
 
-const renderCard = (project: Project) => (
-  <ProjectCard
-    key={project.id}
-    projectId={project.id}
-    projectName={project.nombre}
-    projectStatus={project.id_estatus}
-    projectStack={[]}
-    completition={project.completion_percentage ?? 0}
-    projectDescription={project.descripcion}
-    projectDueDate={project.fecha_final}
-    projectFTE={project.fte}
-    statusLabel={<StatusLabel statusId={project.id_estatus} />}
-  />
-);
-
 const ProjectsPage: React.FC = () => {
-
   const { user, loading: userLoading } = useUser(); 
   const { projects, loading: projectsLoading, error } = useProjectCards(user?.idRolGlobal , user?.id, userLoading);
   const loading = userLoading || projectsLoading;
@@ -60,8 +45,23 @@ const ProjectsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
-  // const { recentIds, trackVisit } = useRecentProjects(user)
-  const { recentIds, trackVisit } = useRecentProjects(1); 
+  const { recentIds, trackVisit } = useRecentProjects(user?.id); 
+
+  const renderCard = (project: Project) => (
+  <ProjectCard
+    key={project.id}
+    projectId={project.id}
+    projectName={project.nombre}
+    projectStatus={project.id_estatus}
+    projectStack={project.stack_tecnologico ?? []}
+    completition={project.completion_percentage ?? 0}
+    projectDescription={project.descripcion}
+    projectDueDate={project.fecha_final}
+    projectFTE={project.fte}
+    statusLabel={<StatusLabel statusId={project.id_estatus} />}
+    onClick={() => trackVisit(project.id)}
+  />
+);
 
   const filteredProjects = useMemo(() => {
     const statusId = FILTER_TO_STATUS_ID[activeFilter];
@@ -72,6 +72,12 @@ const ProjectsPage: React.FC = () => {
         project.nombre.toLowerCase().includes(search.toLowerCase()),
       );
   }, [projects, search, activeFilter]);
+
+  const recentProjects = useMemo( () => {
+    return recentIds.map( (id) => projects.find((p) => p.id === id))
+             .filter((p): p is Project => p !== undefined);
+
+  }, [projects, recentIds]);
 
   const isSearching = search.trim().length > 0;
   const isFiltering = activeFilter !== 'TodosLosProyectos';
@@ -124,11 +130,29 @@ const ProjectsPage: React.FC = () => {
           </section>
         ) : (
           <>
+            {recentProjects.length !== 0 && (
             <section className={styles.section}>
               <h2 className={styles.sectionTitle}>Proyectos recientes</h2>
-              <div className={styles.grid}>{recentProjects.map(renderCard)}</div>
+                <div className={styles.grid}>
+                  {recentProjects.map(p => (
+                    <ProjectCard
+                      key={p.id}
+                      projectId={p.id}
+                      projectName={p.nombre}
+                      projectStatus={p.id_estatus}
+                      projectStack={p.stack_tecnologico ?? []}
+                      completition={p.completion_percentage ?? 0}
+                      projectDescription={p.descripcion}
+                      projectDueDate={p.fecha_final}
+                      projectFTE={p.fte}
+                      statusLabel={<StatusLabel statusId={p.id_estatus} />}
+                      forceExpanded
+                      onClick={() => trackVisit(p.id)}
+                    />
+                  ))}
+                </div>
             </section>
-
+        )}
             <div className={styles.divider} />
 
             <section className={styles.section}>

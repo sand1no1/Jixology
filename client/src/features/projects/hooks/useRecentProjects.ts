@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 const MAX = 4;
 
-export function useRecentProjects(userId: number) {
+export function useRecentProjects(userId: number | undefined) {
   const key = `recent_projects_${userId}`;
 
   const [recentIds, setRecentIds] = useState<number[]>(() => {

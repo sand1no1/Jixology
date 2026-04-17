@@ -2,6 +2,7 @@ export interface Project {
   id: number;
   nombre: string;
   descripcion: string;
+  stack_tecnologico: string[] | null;
   cliente: string;
   fecha_inicial: string;         // ISO: "2026-01-15"
   fecha_final: string;           // ISO: "2026-06-15"

@@ -15,6 +15,8 @@ export interface IProjectCardProps {
   projectDueDate: string;      // ISO formato de supabase: "2026-06-15"
   projectDescription: string;
   projectFTE: number;
+  forceExpanded?: boolean;
+  onClick?: () => void;
 }
 
 const ProjectCard: React.FC<IProjectCardProps> = ({
@@ -26,8 +28,11 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
   projectDueDate,
   projectDescription,
   projectFTE,
+  forceExpanded,
+  onClick,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const isExpanded = forceExpanded || hovered;
 
   const containerColor = statusClassMap[projectStatus]?.cssClass ?? 'status-unassigned';
   const formattedDate = new Date(projectDueDate).toLocaleDateString();
@@ -35,8 +40,9 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
   return (
     <div
       className={`${styles.container} ${isExpanded ? styles.expanded : ''}`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
     >
       <div className={`${styles.statusBand} ${containerColor}`} />
 
