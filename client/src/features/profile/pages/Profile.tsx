@@ -4,13 +4,18 @@ import './Profile.css';
 
 import UserCard from '../components/UserCard';
 import InventoryCard from '../components/InventoryCard';
+import SkeletonUserCard from '../components/SkeletonUserCard';
+import SkeletonAvatarTile from '../components/SkeletonAvatarTile';
 import { AvatarLootBox } from '../components/AvatarLootBox';
+import MessagePopUp from '../../../shared/components/MessagePopUp';
+import type { MessagePopUpType } from '../../../shared/components/MessagePopUp';
 import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
 import { useUsuario } from '../../../features/user/hooks/useUsuario';
 
 const HARDCODED_USER_ID = 1;
+const SKELETON_TILE_COUNT = 10;
 
 function calcAge(fechaNacimiento: string): number {
   const birth = new Date(fechaNacimiento);
@@ -21,8 +26,17 @@ function calcAge(fechaNacimiento: string): number {
   return age;
 }
 
+interface PopupState {
+  type: MessagePopUpType;
+  title: string;
+  message: string;
+}
+
 const Profile: React.FC = () => {
-  const [showLootbox, setShowLootbox] = useState(false);
+  const [showLootbox,      setShowLootbox]      = useState(false);
+  const [popup,            setPopup]            = useState<PopupState | null>(null);
+  const [passiveDismissed, setPassiveDismissed] = useState(false);
+
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
   const { usuario, loading: loadingUser, error: userError } = useUsuario(HARDCODED_USER_ID);
 
@@ -39,12 +53,10 @@ const Profile: React.FC = () => {
       initialFeatures,
     );
 
-  if (loadingCatalog || loadingAvatar || loadingUser || !filteredCatalog) {
-    return <div className="profile-loading">Cargando perfil…</div>;
-  }
-  if (catalogError || userError) {
-    return <div className="profile-error">Error: {catalogError ?? userError}</div>;
-  }
+  const isLoading     = loadingCatalog || loadingAvatar || loadingUser;
+  const hasError      = !!(catalogError || userError);
+  const isEmpty       = !isLoading && !hasError && (!filteredCatalog || filteredCatalog.features.length === 0);
+  const showInventory = !isLoading && !hasError && !!filteredCatalog && filteredCatalog.features.length > 0;
 
   const nombre    = [usuario?.nombre, usuario?.apellido].filter(Boolean).join(' ') || '—';
   const email     = usuario?.email ?? '—';
@@ -55,65 +67,116 @@ const Profile: React.FC = () => {
     ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-MX')
     : '—';
 
+  const handleSaveAvatar = async () => {
+    try {
+      await saveAvatar(features);
+      setPopup({
+        type:    'notification',
+        title:   'Avatar guardado',
+        message: 'Tu avatar se ha guardado correctamente.',
+      });
+    } catch {
+      setPopup({
+        type:    'error',
+        title:   'Error al guardar',
+        message: 'No se pudo guardar el avatar. Intenta de nuevo.',
+      });
+    }
+  };
+
+  // Show DB / empty-inventory popups only if no other popup is active and not dismissed
+  const activePopup: PopupState | null =
+    popup ??
+    (passiveDismissed ? null :
+      hasError
+        ? { type: 'error',   title: 'Error de conexión', message: 'No se pudo conectar a la base de datos. Verifica tu conexión e intenta de nuevo.' }
+        : isEmpty
+        ? { type: 'warning', title: 'Inventario vacío',  message: 'Aún no tienes elementos. Abre una lootbox para obtener tu primer cosmético.' }
+        : null);
+
   return (
     <>
-    {showLootbox && (
-      <div className="lootbox-overlay" onClick={e => { if (e.target === e.currentTarget) setShowLootbox(false); }}>
-        <div className="lootbox-modal">
-          <AvatarLootBox
-            unownedItems={unownedItems}
-            atributos={atributos}
-            baseFeatures={features}
-            onOpen={addRandomItem}
-            onClose={() => setShowLootbox(false)}
-            disabled={addingItem}
-          />
-        </div>
-      </div>
-    )}
-    <div className="profile-page">
-      <UserCard
-        userId={HARDCODED_USER_ID}
-        avatarSvg={mainAvatarSvg}
-        name={nombre}
-        age={age ?? 0}
-        birthDate={birthDate}
-        phone={telefono}
-        email={email}
-        aboutMe={sobreMi}
-      />
-
-      <div className="profile-right">
-        <div className="profile-section profile-section--inventory">
-          <div className="section-tab">Cosméticos</div>
-          <div className="section-body section-body--flush">
-            <InventoryCard
-              catalog={filteredCatalog}
-              features={features}
-              onSelectVariant={handleSelectVariant}
-              onSelectColor={handleSelectColor}
-              onSelectType={handleSelectType}
+      {showLootbox && (
+        <div className="lootbox-overlay" onClick={e => { if (e.target === e.currentTarget) setShowLootbox(false); }}>
+          <div className="lootbox-modal">
+            <AvatarLootBox
+              unownedItems={unownedItems}
+              atributos={atributos}
+              baseFeatures={features}
+              onOpen={addRandomItem}
+              onClose={() => setShowLootbox(false)}
+              disabled={addingItem}
             />
           </div>
-          <div className="section-footer">
-            <button
-              className="btn-lootbox"
-              onClick={() => setShowLootbox(true)}
-              disabled={saving || addingItem}
-            >
-              <GiftIcon style={{ width: 16, height: 16 }} /> Abrir lootbox
-            </button>
-            <button
-              className="btn-save-avatar"
-              onClick={() => saveAvatar(features).catch(err => console.error('Save avatar failed:', err))}
-              disabled={saving || addingItem}
-            >
-              {saving ? 'Guardando…' : 'Guardar avatar'}
-            </button>
+        </div>
+      )}
+
+      {activePopup && (
+        <MessagePopUp
+          type={activePopup.type}
+          title={activePopup.title}
+          message={activePopup.message}
+          onClose={() => popup ? setPopup(null) : setPassiveDismissed(true)}
+        />
+      )}
+
+      <div className="profile-page">
+        {isLoading ? (
+          <SkeletonUserCard />
+        ) : (
+          <UserCard
+            userId={HARDCODED_USER_ID}
+            avatarSvg={mainAvatarSvg}
+            name={nombre}
+            age={age ?? 0}
+            birthDate={birthDate}
+            phone={telefono}
+            email={email}
+            aboutMe={sobreMi}
+          />
+        )}
+
+        <div className="profile-right">
+          <div className="profile-section profile-section--inventory">
+            <div className="section-tab">Cosméticos</div>
+            <div className="section-body section-body--flush">
+              {showInventory ? (
+                <InventoryCard
+                  catalog={filteredCatalog}
+                  features={features}
+                  onSelectVariant={handleSelectVariant}
+                  onSelectColor={handleSelectColor}
+                  onSelectType={handleSelectType}
+                />
+              ) : (
+                <div className="inv-card">
+                  <div className="inv-grid">
+                    {Array.from({ length: SKELETON_TILE_COUNT }).map((_, i) => (
+                      <SkeletonAvatarTile key={i} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="section-footer">
+              <button
+                className="btn-lootbox"
+                onClick={() => { setShowLootbox(true); setPopup(null); }}
+                disabled={isLoading || hasError || saving || addingItem}
+              >
+                <GiftIcon style={{ width: 16, height: 16 }} /> Abrir lootbox
+              </button>
+              <button
+                className="btn-save-avatar"
+                onClick={handleSaveAvatar}
+                disabled={!showInventory || saving || addingItem}
+              >
+                {saving ? 'Guardando…' : 'Guardar avatar'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
