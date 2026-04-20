@@ -8,8 +8,8 @@ import Profile from '@/features/profile/pages';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
 import ProjectsPage from '@/features/projects/pages/ProjectsPage';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
-import ListUserCard from '@/features/profile/components/ListUserCard';
-import type { Role } from '@/features/profile/components/ListUserCard/ListUserCard';
+import ListUserCard from '@/shared/components/ListUserCard';
+import type { Role } from '@/shared/components/ListUserCard';
 import { useUserProfile } from '@/features/user/services/user.service';
 import { AvatarLootBox } from '@/features/profile/components/AvatarLootBox';
 import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
@@ -224,7 +224,7 @@ export default function DebugApp() {
         </div>
       ),
 
-      profile: <Profile />,
+      profile: <Profile debugUserId={1} />,
 
       lootbox: <DbLootBox userId={1} />,
     }),
