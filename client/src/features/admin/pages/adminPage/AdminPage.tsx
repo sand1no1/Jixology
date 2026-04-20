@@ -5,7 +5,7 @@ import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
 import type { AdminUserRoleBadge } from '../../types/admin.types';
 import SearchBarComponent from '@/shared/components/SearchBarComponent/SearchBarComponent';
-import ListUserCard from '@/features/profile/components/ListUserCard/ListUserCard';
+import ListUserCard from '@/shared/components/ListUserCard';
 import './adminPage.css';
 
 function getRoleBadge(idRolGlobal: number): AdminUserRoleBadge[] {

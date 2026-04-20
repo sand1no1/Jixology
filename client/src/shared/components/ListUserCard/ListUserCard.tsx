@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
 import styles from './ListUserCard.module.css';
-import { useUserAvatarSvg } from '../../hooks/useUserAvatarSvg';
+import { useUserAvatarSvg } from '@/features/profile/hooks/useUserAvatarSvg';
 
 export interface Role {
   label: string;
