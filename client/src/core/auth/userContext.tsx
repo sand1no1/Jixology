@@ -1,49 +1,86 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { fetchCurrentUser, type UserProfile } from "./user.service";
-import { supabase } from "../supabase/supabase.client";
+import { createContext, useState, useEffect, useContext } from 'react';
+import { fetchCurrentUser, type UserProfile } from './user.service';
+import { supabase } from '../supabase/supabase.client';
 
 interface UserContextValue {
-    user: UserProfile | null;
-    loading: boolean;
-    logout: () => Promise<void>;
+  user: UserProfile | null;
+  loading: boolean;
+  logout: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue | null>(null);
 
-export function UserProvider({ children }: {children: React.ReactNode}) {
-    const [user, setUser] = useState<UserProfile | null>(null); 
-    const [loading, setLoading] = useState(true);
+export function UserProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        supabase.auth.getSession().then(async ({data}) => {
-            if (data.session) {
-                await fetchCurrentUser(data.session.user.id).then(setUser);
-            }
-            setLoading(false);
-        });
+  useEffect(() => {
+    let isMounted = true;
 
-    const { data: {subscription} } = supabase.auth.onAuthStateChange( (_event, session) => {
-        if (session) fetchCurrentUser(session.user.id).then(setUser);
-        else setUser(null);
-    });
-    
-    return () => subscription.unsubscribe();
-    }, []);
+    const syncUser = async (
+      session: Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']
+    ) => {
+      if (!isMounted) return;
 
-    const logout = async () => {
-        await supabase.auth.signOut();
+      setLoading(true);
+
+      try {
+        if (!session) {
+          setUser(null);
+          return;
+        }
+
+        const profile = await fetchCurrentUser(session.user.id);
+
+        if (!isMounted) return;
+        setUser(profile);
+      } catch (error) {
+        console.error('Error loading current user:', error);
+        if (!isMounted) return;
+        setUser(null);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     };
 
-    return (
-        <UserContext.Provider value={{ user, loading, logout}}>
-        {children}
-        </UserContext.Provider>
-    );
+    void supabase.auth.getSession().then(({ data }) => {
+      void syncUser(data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      void syncUser(session);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const logout = async () => {
+    setLoading(true);
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <UserContext.Provider value={{ user, loading, logout }}>
+      {children}
+    </UserContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useUser(): UserContextValue {
-    const context = useContext(UserContext);
-    if (!context) throw new Error('useUser debe usarse dentro de UserProvider');
-    return context;
-  }
+  const context = useContext(UserContext);
+  if (!context) throw new Error('useUser debe usarse dentro de UserProvider');
+  return context;
+}
