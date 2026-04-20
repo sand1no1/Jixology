@@ -224,7 +224,7 @@ export default function DebugApp() {
         </div>
       ),
 
-      profile: <Profile />,
+      profile: <Profile debugUserId={1} />,
 
       lootbox: <DbLootBox userId={1} />,
     }),

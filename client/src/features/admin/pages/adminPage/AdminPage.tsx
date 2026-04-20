@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
@@ -58,9 +58,8 @@ function UserProfileModal({ userId, rect, onMouseEnter, onMouseLeave }: {
 
   // Double rAF: paint the collapsed state first, then trigger the transition
   useEffect(() => {
-    let raf1: number;
     let raf2: number;
-    raf1 = requestAnimationFrame(() => {
+    const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => setExpanded(true));
     });
     return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
@@ -76,18 +75,27 @@ function UserProfileModal({ userId, rect, onMouseEnter, onMouseLeave }: {
     : '—';
 
   return (
-    <div style={computePopoverStyle(rect)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div
+      style={{
+        ...computePopoverStyle(rect),
+        borderRadius: '20px',
+        border: '1px solid rgba(31, 54, 80, 0.12)',
+        boxShadow: '0 8px 32px rgba(10, 8, 56, 0.16), 0 2px 8px rgba(10, 8, 56, 0.08)',
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       <div style={{
         overflow:   'hidden',
         maxHeight:  expanded ? `${FULL_CARD_HEIGHT}px` : `${AVATAR_ONLY_HEIGHT}px`,
-        transition: 'max-height 0.65s cubic-bezier(0.34, 1.1, 0.64, 1)',
+        transition: 'max-height 1s cubic-bezier(0.34, 1.1, 0.64, 1)',
         borderRadius: '20px',
       }}>
         {loading ? (
           <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-anchor-gray-1)' }}>Cargando...</p>
         ) : (
           <UserCard
-            userId={userId}
+            userId={userId} 
             name={nombre}
             age={age}
             birthDate={birthDate}
@@ -128,12 +136,12 @@ export default function RegisterUserPage() {
   const [selectedUser, setSelectedUser] = useState<{ userId: number; rect: DOMRect } | null>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const startHide = () => {
+  const startHide = useCallback(() => {
     hideTimer.current = setTimeout(() => setSelectedUser(null), 150);
-  };
-  const cancelHide = () => {
+  }, []);
+  const cancelHide = useCallback(() => {
     if (hideTimer.current) clearTimeout(hideTimer.current);
-  };
+  }, []);
 
   const { users, loading: usersLoading, error: usersError, refreshUsers } =
     useAdminUsers(search);
@@ -173,7 +181,7 @@ export default function RegisterUserPage() {
         />
       );
     });
-  }, [users]);
+  }, [users, cancelHide, startHide]);
 
   return (
     <main className="admin-page">

@@ -14,6 +14,7 @@ import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
 import { useUserProfile } from '@/features/user/services/user.service';
 import { useUser } from '@/core/auth/userContext';
+
 const SKELETON_TILE_COUNT = 10;
 
 function calcAge(fechaNacimiento: string): number {
@@ -31,13 +32,11 @@ interface PopupState {
   message: string;
 }
 
-const Profile: React.FC = () => {
+// ── Inner component — no auth dependency ─────────────────────────────────────
+function ProfileContent({ userId }: { userId: number }) {
   const [showLootbox,      setShowLootbox]      = useState(false);
   const [popup,            setPopup]            = useState<PopupState | null>(null);
   const [passiveDismissed, setPassiveDismissed] = useState(false);
-
-  const { user } = useUser();
-  const userId = user?.id ?? 0;
 
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
   const { userProfile, loading: loadingUser, error: userError } = useUserProfile(userId);
@@ -86,7 +85,6 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Show DB / empty-inventory popups only if no other popup is active and not dismissed
   const activePopup: PopupState | null =
     popup ??
     (passiveDismissed ? null :
@@ -181,6 +179,20 @@ const Profile: React.FC = () => {
       </div>
     </>
   );
+}
+
+// ── Auth wrapper — reads userId from UserProvider ─────────────────────────────
+function ProfileWithAuth() {
+  const { user } = useUser();
+  return <ProfileContent userId={user?.id ?? 0} />;
+}
+
+// ── Public export — uses auth by default, accepts debugUserId to bypass it ────
+const Profile: React.FC<{ debugUserId?: number }> = ({ debugUserId }) => {
+  if (debugUserId !== undefined) {
+    return <ProfileContent userId={debugUserId} />;
+  }
+  return <ProfileWithAuth />;
 };
 
 export default Profile;
