@@ -16,16 +16,23 @@ interface ListUserCardProps {
   email: string;
   avatarSvg?: string;
   onEdit?: () => void;
+  onAvatarEnter?: (rect: DOMRect) => void;
+  onAvatarLeave?: () => void;
 }
 
-const ListUserCard: React.FC<ListUserCardProps> = ({ userId, fullName, roles, email, avatarSvg: avatarSvgProp, onEdit }) => {
+const ListUserCard: React.FC<ListUserCardProps> = ({ userId, fullName, roles, email, avatarSvg: avatarSvgProp, onEdit, onAvatarEnter, onAvatarLeave }) => {
   const { avatarSvg: dbSvg } = useUserAvatarSvg(userId);
   const avatarSvg = avatarSvgProp ?? dbSvg;
 
   return (
     <div className={styles.row}>
       {/* Avatar */}
-      <div className={styles.avatar}>
+      <div
+        className={`${styles.avatar}${onAvatarEnter ? ` ${styles.avatarClickable}` : ''}`}
+        onMouseEnter={onAvatarEnter ? (e) => onAvatarEnter((e.currentTarget as HTMLElement).getBoundingClientRect()) : undefined}
+        onMouseLeave={onAvatarLeave}
+        aria-label={onAvatarEnter ? `Ver perfil de ${fullName}` : undefined}
+      >
         {avatarSvg
           ? <div className={styles.avatarSvg} dangerouslySetInnerHTML={{ __html: avatarSvg }} />
           : <UserIcon width={18} height={18} />

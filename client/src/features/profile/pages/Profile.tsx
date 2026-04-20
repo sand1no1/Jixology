@@ -13,8 +13,7 @@ import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
 import { useUserProfile } from '@/features/user/services/user.service';
-
-const HARDCODED_USER_ID = 1;
+import { useUser } from '@/core/auth/userContext';
 const SKELETON_TILE_COUNT = 10;
 
 function calcAge(fechaNacimiento: string): number {
@@ -37,11 +36,14 @@ const Profile: React.FC = () => {
   const [popup,            setPopup]            = useState<PopupState | null>(null);
   const [passiveDismissed, setPassiveDismissed] = useState(false);
 
+  const { user } = useUser();
+  const userId = user?.id ?? 0;
+
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
-  const { userProfile, loading: loadingUser, error: userError } = useUserProfile(HARDCODED_USER_ID);
+  const { userProfile, loading: loadingUser, error: userError } = useUserProfile(userId);
 
   const { filteredCatalog, initialFeatures, saveAvatar, addRandomItem, unownedItems, saving, loadingAvatar, addingItem } = useUserAvatar(
-    HARDCODED_USER_ID,
+    userId,
     catalog,
     allElements,
     atributos,
@@ -125,7 +127,7 @@ const Profile: React.FC = () => {
           <SkeletonUserCard />
         ) : (
           <UserCard
-            userId={HARDCODED_USER_ID}
+            userId={userId}
             avatarSvg={mainAvatarSvg}
             name={nombre}
             age={age ?? 0}
