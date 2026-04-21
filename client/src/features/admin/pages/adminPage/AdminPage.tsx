@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
@@ -130,6 +131,7 @@ function getRoleBadge(idRolGlobal: number): AdminUserRoleBadge[] {
 }
 
 export default function RegisterUserPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [pageSuccess, setPageSuccess] = useState('');
