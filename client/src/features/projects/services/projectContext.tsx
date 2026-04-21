@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import { fetchProjectContext, type ProjectContextData } from "./projects.services";
 import { supabase } from "@/core/supabase/supabase.client"; 
 import { useUser } from "@/core/auth/userContext";
@@ -6,7 +6,8 @@ import { useUser } from "@/core/auth/userContext";
 interface ProjectContextValue {
     project: ProjectContextData | null;
     loading: boolean;
-    hasAccess: boolean; 
+    isAdmin: boolean;
+    error: string | null;
 }
 
 const ProjectContext = createContext<ProjectContextValue | null>(null);
@@ -15,22 +16,34 @@ export function ProjectProvider({ projectId, children }: {projectId: number, chi
     const {user, loading: userLoading } = useUser(); 
     const [project, setProject] = useState<ProjectContextData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [hasAccess, setHasAccess] = useState(false); 
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (userLoading || !user) return;
 
-        const load = async () => {
-            setLoading(true);
-            try {
-                if (user.idRolGlobal === 1 || user.idRolGlobal === 2){
-                    setHasAccess(true);
-                    const data = await fetchProjectContext(projectId);
-                    setProject(data);
-                    return;
-                }
-                
-            }
+        if (user.idRolGlobal === 1 || user.idRolGlobal === 2){
+                    setIsAdmin(true);
         }
-    })
+        
+        setLoading(true);
+        fetchProjectContext(projectId)
+            .then(setProject)
+            .catch((err: Error) => setError(err.message))
+            .finally(() => setLoading(false));
+    }, [projectId, user, userLoading]); 
+
+    return (
+        <ProjectContext.Provider value={{ project, loading, isAdmin, error }}>
+            {children}
+        </ProjectContext.Provider>
+    );
+
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useProject(): ProjectContextValue {
+  const context = useContext(ProjectContext);
+  if (!context) throw new Error('useProject debe de usarse dentro de ProjectProvider');
+  return context;
 }

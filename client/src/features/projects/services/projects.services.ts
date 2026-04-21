@@ -51,7 +51,3 @@ export async function fetchProjectContext(projectId: number): Promise<ProjectCon
   };
 }
 
-export async function isUserProjectAccess(idUsuario: number, idProjecto: number): Promise<boolean> {
-
-
-}
