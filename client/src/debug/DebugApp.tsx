@@ -15,8 +15,10 @@ import { AvatarLootBox } from '@/features/profile/components/AvatarLootBox';
 import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
 import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
 import { useAvatarFeatures } from '@/features/profile/hooks/useAvatarFeatures';
+import BacklogListItem from '@/features/projectView/components/BacklogListItem';
+import type { BacklogStatus } from '@/features/projectView/components/BacklogListItem';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox';
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox' | 'backlogItem';
 
 // ── DB-connected wrappers (hooks require real components) ─────────────────────
 
@@ -223,6 +225,41 @@ export default function DebugApp() {
           />
         </div>
       ),
+
+      backlogItem: (() => {
+        const EN_PROGRESO: BacklogStatus = { label: 'En Progreso', color: '#DBEAFE', textColor: '#1D4ED8' };
+        const POR_HACER:   BacklogStatus = { label: 'Por Hacer',   color: '#F3F4F6', textColor: '#6B7280' };
+        const ACABADO:     BacklogStatus = { label: 'Acabado',     color: '#D1FAE5', textColor: '#065F46' };
+        const ALL_STATUSES = [EN_PROGRESO, POR_HACER, ACABADO];
+
+        const items = [
+          { code: 'HU-01', title: 'Historia de usuario 1',  status: EN_PROGRESO, priority: 'medium'   as const },
+          { code: 'HU-02', title: 'Historia de usuario 2',  status: EN_PROGRESO, priority: 'high'     as const },
+          { code: 'HU-03', title: 'Historia de usuario 3',  status: POR_HACER,   priority: 'low'      as const },
+          { code: 'HU-04', title: 'Historia de usuario 4',  status: POR_HACER,   priority: 'minimal'  as const },
+          { code: 'HU-05', title: 'Historia de usuario 5',  status: ACABADO,     priority: 'medium'   as const },
+          { code: 'HU-06', title: 'Historia de usuario 6',  status: EN_PROGRESO, priority: 'critical' as const },
+          { code: 'HU-07', title: 'Historia de usuario 7',  status: ACABADO,     priority: 'low'      as const },
+          { code: 'HU-08', title: 'Historia de usuario 8',  status: EN_PROGRESO, priority: 'minimal'  as const },
+          { code: 'HU-09', title: 'Historia de usuario 9',  status: EN_PROGRESO, priority: 'medium'   as const },
+          { code: 'HU-10', title: 'Historia de usuario 10', status: EN_PROGRESO, priority: 'high'     as const },
+        ];
+
+        return (
+          <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {items.map(item => (
+              <BacklogListItem
+                key={item.code}
+                code={item.code}
+                title={item.title}
+                status={item.status}
+                statuses={ALL_STATUSES}
+                priority={item.priority}
+              />
+            ))}
+          </div>
+        );
+      })(),
 
       profile: <Profile debugUserId={1} />,
 
