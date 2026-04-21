@@ -121,3 +121,14 @@
 .editBtn:hover {
   background: var(--color-clarity-gray-2);
 }
+
+/* ── Clickable avatar ────────────────────────────────────────── */
+.avatarClickable {
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.avatarClickable:hover {
+  opacity: 0.8;
+  transform: scale(1.08);
+}

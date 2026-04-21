@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '../../../core/supabase/supabase.client';
 
 export interface UserProfileDetail {
@@ -31,10 +31,19 @@ export async function fetchUserProfile(userId: number): Promise<UserProfileDetai
   };
 }
 
+export async function updateSobreMi(userId: number, sobreMi: string): Promise<void> {
+  const { error } = await supabase
+    .from('usuario')
+    .update({ sobre_mi: sobreMi })
+    .eq('id', userId);
+  if (error) throw new Error(error.message);
+}
+
 export function useUserProfile(userId: number | null | undefined) {
   const [userProfile, setUserProfile] = useState<UserProfileDetail | null>(null);
   const [loading, setLoading]         = useState(true);
   const [error, setError]             = useState<string | null>(null);
+  const [refreshCount, setRefreshCount] = useState(0);
 
   useEffect(() => {
     if (userId == null) return;
@@ -43,7 +52,9 @@ export function useUserProfile(userId: number | null | undefined) {
       .then(setUserProfile)
       .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
       .finally(() => setLoading(false));
-  }, [userId]);
+  }, [userId, refreshCount]);
 
-  return { userProfile, loading, error };
+  const refresh = useCallback(() => setRefreshCount(c => c + 1), []);
+
+  return { userProfile, loading, error, refresh };
 }
