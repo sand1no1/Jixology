@@ -3,19 +3,6 @@ import { PencilSquareIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outl
 import styles from './UserCard.module.css';
 import { useUserAvatarSvg } from '../../hooks/useUserAvatarSvg';
 
-export interface UserCardEditValues {
-  nombre: string;
-  apellido: string;
-  birthDate: string;
-  phone: string;
-  email: string;
-  aboutMe: string;
-  password?: string;
-  idRolGlobal?: string;
-  idZonaHoraria?: string;
-  jornada?: string;
-}
-
 interface UserCardProps {
   userId: number;
   avatarSvg?: string;
@@ -25,223 +12,108 @@ interface UserCardProps {
   phone: string;
   email: string;
   aboutMe: string;
-  editable?: boolean;
-  canEdit?: boolean;
-  formValues?: UserCardEditValues;
-  onFieldChange?: (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => void;
-  onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
-  onCancel?: () => void;
-  saving?: boolean;
+  onSave?: (sobreMi: string) => Promise<void>;
 }
 
 const UserCard: React.FC<UserCardProps> = ({
-  userId,
-  avatarSvg: avatarSvgProp,
-  name,
-  age,
-  birthDate,
-  phone,
-  email,
-  aboutMe,
-  editable = false,
-  canEdit = false,
-  formValues,
-  onFieldChange,
-  onSubmit,
-  onCancel,
-  saving = false,
+  userId, avatarSvg: avatarSvgProp, name, age, birthDate, phone, email, aboutMe, onSave,
 }) => {
   const { avatarSvg: dbSvg } = useUserAvatarSvg(userId);
   const avatarSvg = avatarSvgProp ?? dbSvg;
 
-  const showEditMode = editable && canEdit && formValues && onFieldChange && onSubmit;
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft,     setDraft]     = useState(aboutMe);
+  const [saving,    setSaving]    = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Keep draft in sync when the prop changes externally
+  useEffect(() => { setDraft(aboutMe); }, [aboutMe]);
+
+  const handleSave = async () => {
+    if (!onSave) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onSave(draft);
+      setIsEditing(false);
+    } catch {
+      setSaveError('No se pudo guardar. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setDraft(aboutMe);
+    setSaveError(null);
+    setIsEditing(false);
+  };
 
   return (
     <div className={styles.profileCard}>
+      {/* Edit button — top-right corner */}
+      {onSave && !isEditing && (
+        <button
+          className={styles.editCardBtn}
+          onClick={() => setIsEditing(true)}
+          type="button"
+          aria-label="Editar sobre mí"
+        >
+          <PencilSquareIcon width={16} height={16} />
+        </button>
+      )}
+
       <div className={styles.avatarWrapper}>
-        <div
-          className={styles.avatarCircle}
-          dangerouslySetInnerHTML={{ __html: avatarSvg }}
-        />
+        <div className={styles.avatarCircle} dangerouslySetInnerHTML={{ __html: avatarSvg }} />
       </div>
 
-      {showEditMode ? (
-        <form onSubmit={onSubmit} className={styles.editForm}>
-          <div className={styles.profileInfo}>
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Nombre</span>
-                <input
-                  className={styles.inputField}
-                  name="nombre"
-                  value={formValues.nombre}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
+      <div className={styles.profileInfo}>
+        <div className={styles.infoRow}><span>Nombre: {name}</span></div>
+        <div className={styles.infoRow}><span>Edad: {age}</span></div>
+        <div className={styles.infoRow}><span>Fecha de Nacimiento: {birthDate}</span></div>
+        <div className={styles.infoRow}><span>Telefono: {phone}</span></div>
+        <div className={styles.infoRow}><span>Correo: {email}</span></div>
+      </div>
 
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Apellido</span>
-                <input
-                  className={styles.inputField}
-                  name="apellido"
-                  value={formValues.apellido}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
+      <div className={styles.aboutMeSection}>
+        <div className={styles.aboutMeLabel}>Sobre mi</div>
 
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Fecha de nacimiento</span>
-                <input
-                  className={styles.inputField}
-                  name="fecha_nacimiento"
-                  type="date"
-                  value={formValues.birthDate}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
-
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Teléfono</span>
-                <input
-                  className={styles.inputField}
-                  name="telefono"
-                  value={formValues.phone}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
-
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Correo</span>
-                <input
-                  className={styles.inputField}
-                  name="email"
-                  type="email"
-                  value={formValues.email}
-                  onChange={onFieldChange}
-                  required
-                />
-              </label>
-            </div>
-
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Nueva contraseña</span>
-                <input
-                  className={styles.inputField}
-                  name="password"
-                  type="password"
-                  value={formValues.password ?? ''}
-                  onChange={onFieldChange}
-                  placeholder="Déjala vacía para no cambiarla"
-                />
-              </label>
-            </div>
-
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>ID rol global</span>
-                <input
-                  className={styles.inputField}
-                  name="id_rol_global"
-                  type="number"
-                  value={formValues.idRolGlobal ?? ''}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
-
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>ID zona horaria</span>
-                <input
-                  className={styles.inputField}
-                  name="id_zona_horaria"
-                  type="number"
-                  value={formValues.idZonaHoraria ?? ''}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
-
-            <div className={styles.infoRow}>
-              <label className={styles.fieldLabel}>
-                <span>Jornada</span>
-                <input
-                  className={styles.inputField}
-                  name="jornada"
-                  value={formValues.jornada ?? ''}
-                  onChange={onFieldChange}
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className={styles.aboutMeSection}>
-            <div className={styles.aboutMeLabel}>Sobre mí</div>
+        {isEditing ? (
+          <>
             <textarea
               className={styles.aboutMeTextarea}
-              name="sobre_mi"
-              value={formValues.aboutMe}
-              onChange={onFieldChange}
-            />
-          </div>
-
-          <div className={styles.editActions}>
-            <button
-              type="submit"
-              className={styles.saveBtn}
+              value={draft}
+              onChange={e => setDraft(e.target.value)}
+              rows={4}
               disabled={saving}
-            >
-              {saving ? 'Guardando...' : 'Guardar cambios'}
-            </button>
-
-            {onCancel && (
+              autoFocus
+            />
+            {saveError && <p className={styles.saveError}>{saveError}</p>}
+            <div className={styles.editActions}>
               <button
+                className={styles.saveBtn}
+                onClick={handleSave}
+                disabled={saving}
                 type="button"
-                className={styles.cancelBtn}
-                onClick={onCancel}
               >
+                <CheckIcon width={14} height={14} />
+                {saving ? 'Guardando…' : 'Guardar'}
+              </button>
+              <button
+                className={styles.cancelBtn}
+                onClick={handleCancel}
+                disabled={saving}
+                type="button"
+              >
+                <XMarkIcon width={14} height={14} />
                 Cancelar
               </button>
-            )}
-          </div>
-        </form>
-      ) : (
-        <>
-          <div className={styles.profileInfo}>
-            <div className={styles.infoRow}>
-              <span>Nombre: {name}</span>
             </div>
-            <div className={styles.infoRow}>
-              <span>Edad: {age}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Fecha de Nacimiento: {birthDate}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Telefono: {phone}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Correo: {email}</span>
-            </div>
-          </div>
-
-          <div className={styles.aboutMeSection}>
-            <div className={styles.aboutMeLabel}>Sobre mi</div>
-            <p className={styles.aboutMeText}>{aboutMe}</p>
-          </div>
-        </>
-      )}
+          </>
+        ) : (
+          <p className={styles.aboutMeText}>{aboutMe || '—'}</p>
+        )}
+      </div>
     </div>
   );
 };
