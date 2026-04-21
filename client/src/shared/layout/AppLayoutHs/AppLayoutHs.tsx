@@ -11,7 +11,7 @@ export interface IAppLayoutHsProps {
 
 const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children }) => {
   return (
-    <div className={styles.container}>
+    <div>
       <Header />
       <div className={styles.belowHeadbar}>
         <Sidebar />
