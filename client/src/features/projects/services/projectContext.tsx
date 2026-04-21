@@ -22,12 +22,26 @@ export function ProjectProvider({ projectId, children }: {projectId: number, chi
     useEffect(() => {
         if (userLoading || !user) return;
 
-        setLoading(true);
-        fetchProjectContext(projectId)
-            .then(setProject)
-            .catch((err: Error) => setError(err.message))
-            .finally(() => setLoading(false));
-    }, [projectId, user, userLoading]); 
+        let isMounted = true;
+
+        const load = async () => {
+            setLoading(true);
+            setProject(null);
+            setError(null);
+            try {
+                const data = await fetchProjectContext(projectId);
+                if (isMounted) setProject(data);
+            } catch (err) {
+                if (isMounted) setError((err as Error).message);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        void load();
+
+        return () => { isMounted = false; };
+    }, [projectId, user, userLoading]);
 
     return (
         <ProjectContext.Provider value={{ project, loading, isAdmin, error }}>
