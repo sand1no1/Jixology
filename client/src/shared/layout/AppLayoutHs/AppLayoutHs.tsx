@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import styles from './AppLayoutHs';
+import styles from './AppLayoutHs.module.css';
 import {Outlet} from "react-router-dom"
 import Header from '@/shared/layout/Header';
 import Sidebar from '@/shared/layout/Sidebar';
