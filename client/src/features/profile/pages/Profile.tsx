@@ -12,7 +12,7 @@ import type { MessagePopUpType } from '../../../shared/components/MessagePopUp';
 import { useAvatarCatalog } from '../hooks/useAvatarCatalog';
 import { useAvatarFeatures } from '../hooks/useAvatarFeatures';
 import { useUserAvatar } from '../hooks/useUserAvatar';
-import { useUserProfile } from '@/features/user/services/user.service';
+import { useUserProfile, updateSobreMi } from '@/features/user/services/user.service';
 import { useUser } from '@/core/auth/userContext';
 
 const SKELETON_TILE_COUNT = 10;
@@ -39,7 +39,7 @@ function ProfileContent({ userId }: { userId: number }) {
   const [passiveDismissed, setPassiveDismissed] = useState(false);
 
   const { catalog, allElements, atributos, loading: loadingCatalog, error: catalogError } = useAvatarCatalog();
-  const { userProfile, loading: loadingUser, error: userError } = useUserProfile(userId);
+  const { userProfile, loading: loadingUser, error: userError, refresh } = useUserProfile(userId);
 
   const { filteredCatalog, initialFeatures, saveAvatar, addRandomItem, unownedItems, saving, loadingAvatar, addingItem } = useUserAvatar(
     userId,
@@ -133,6 +133,10 @@ function ProfileContent({ userId }: { userId: number }) {
             phone={telefono}
             email={email}
             aboutMe={sobreMi}
+            onSave={async (newSobreMi) => {
+              await updateSobreMi(userId, newSobreMi);
+              refresh();
+            }}
           />
         )}
 

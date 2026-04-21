@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
@@ -130,6 +131,7 @@ function getRoleBadge(idRolGlobal: number): AdminUserRoleBadge[] {
 }
 
 export default function RegisterUserPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [pageSuccess, setPageSuccess] = useState('');
@@ -164,24 +166,26 @@ export default function RegisterUserPage() {
     await refreshUsers();
   };
 
-  const userCards = useMemo(() => {
-    return users.map((user) => {
-      const fullName =
-        [user.nombre, user.apellido].filter(Boolean).join(' ').trim() || 'Sin nombre';
+ const userCards = users.map((user) => {
+  const fullName =
+    [user.nombre, user.apellido].filter(Boolean).join(' ').trim() || 'Sin nombre';
 
-      return (
-        <ListUserCard
-          key={user.id}
-          userId={user.id}
-          fullName={fullName}
-          roles={getRoleBadge(user.id_rol_global)}
-          email={user.email}
-          onAvatarEnter={(rect) => { cancelHide(); setSelectedUser({ userId: user.id, rect }); }}
-          onAvatarLeave={startHide}
-        />
-      );
-    });
-  }, [users, cancelHide, startHide]);
+  return (
+    <ListUserCard
+      key={user.id}
+      userId={user.id}
+      fullName={fullName}
+      roles={getRoleBadge(user.id_rol_global)}
+      email={user.email}
+      onEdit={() => navigate(`/admin/users/${user.id}`)}
+      onAvatarEnter={(rect) => {
+        cancelHide();
+        setSelectedUser({ userId: user.id, rect });
+      }}
+      onAvatarLeave={startHide}
+    />
+  );
+});
 
   return (
     <main className="admin-page">
