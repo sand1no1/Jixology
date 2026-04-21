@@ -27,3 +27,12 @@ export interface Project {
   completed_backlog_items: number;
   completion_percentage:   number;
 }
+
+// Interfaz para contexto de Projctos.
+export type ProjectContextData = Pick<Project,
+  | 'id'
+  | 'nombre'
+  | 'cliente'
+  | 'id_metodologia'
+  | 'id_estatus'
+>;
