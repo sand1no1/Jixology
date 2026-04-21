@@ -176,7 +176,11 @@ export default function RegisterUserPage() {
           fullName={fullName}
           roles={getRoleBadge(user.id_rol_global)}
           email={user.email}
-          onAvatarEnter={(rect) => { cancelHide(); setSelectedUser({ userId: user.id, rect }); }}
+          onEdit={() => navigate(`/admin/users/${user.id}`)}
+          onAvatarEnter={(rect) => {
+            cancelHide();
+            setSelectedUser({ userId: user.id, rect });
+          }}
           onAvatarLeave={startHide}
         />
       );
