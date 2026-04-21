@@ -1,6 +1,5 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { fetchProjectContext, type ProjectContextData } from "./projects.services";
-import { supabase } from "@/core/supabase/supabase.client"; 
 import { useUser } from "@/core/auth/userContext";
 
 interface ProjectContextValue {
@@ -16,16 +15,13 @@ export function ProjectProvider({ projectId, children }: {projectId: number, chi
     const {user, loading: userLoading } = useUser(); 
     const [project, setProject] = useState<ProjectContextData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const isAdmin = !!user && (user.idRolGlobal === 1 || user.idRolGlobal === 2);
 
     useEffect(() => {
         if (userLoading || !user) return;
 
-        if (user.idRolGlobal === 1 || user.idRolGlobal === 2){
-                    setIsAdmin(true);
-        }
-        
         setLoading(true);
         fetchProjectContext(projectId)
             .then(setProject)
