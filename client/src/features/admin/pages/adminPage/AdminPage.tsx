@@ -177,7 +177,7 @@ export default function RegisterUserPage() {
       fullName={fullName}
       roles={getRoleBadge(user.id_rol_global)}
       email={user.email}
-      onEdit={() => navigate(`/admin/users/${user.id}`)}
+      onEdit={() => navigate(`/usuarios/${user.id}`)}
       onAvatarEnter={(rect) => {
         cancelHide();
         setSelectedUser({ userId: user.id, rect });
