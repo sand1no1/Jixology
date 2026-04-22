@@ -148,7 +148,7 @@ try {
     node $postBootstrapSeedPath
   }
 
-  Write-Host "✅ Setup local completado correctamente."
+  Write-Host "Setup local completado correctamente."
 }
 finally {
   Pop-Location

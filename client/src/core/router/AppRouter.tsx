@@ -8,6 +8,7 @@ import EmailVerificationPage from '@/features/verification/pages/EmailVerificati
 import AdminPage from '@/features/admin/pages/adminPage';
 import ProjectPage from '@/features/projects/pages/ProjectsPage';
 import ProjectTask from '@/features/projects/pages/ProjectTasks';
+import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
 
 // --- Layout ---
 import AppLayoutHs from '@/shared/layout/AppLayoutHs';
@@ -17,6 +18,7 @@ import AppLayoutHsProject from '@/shared/layout/AppLayoutHsProject';
 import { ProtectedRoute } from '@/core/router/ProtectedRoute';
 
 const ALL_ROLES = [1, 2, 3, 4];
+const ADMIN_VIEWS = [1,2];
 
 export function AppRouter() {
   return (
@@ -27,7 +29,10 @@ export function AppRouter() {
         <Route element={<AppLayoutHs />}>
           <Route path="/perfil"            element={<ProfilePage />} />
           <Route path="/dashboard-usuario" element={<UserDashboardPage />} />
-          <Route path="/usuarios"          element={<AdminPage />} />
+          <Route element={<ProtectedRoute allowedRoles={ADMIN_VIEWS} />}>
+            <Route path="/usuarios" element={<AdminPage />} />
+            <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
+          </Route>
           <Route path="/proyectos"         element={<ProjectPage />} />
         </Route>
       </Route>
