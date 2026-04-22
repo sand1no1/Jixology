@@ -17,9 +17,10 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onCreated: (message: string) => void;
+  userId: number;
 };
 
-export default function CreateProject({ isOpen, onClose, onCreated }: Props) {
+export default function CreateProject({ isOpen, onClose, onCreated, userId }: Props) {
   const [isAdditionalDataVisible, setIsAdditionalDataVisible] = useState(false);
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,6 +45,7 @@ export default function CreateProject({ isOpen, onClose, onCreated }: Props) {
     removeStackField,
     updateStackField,
   } = useCreateProjectForm({
+    userId,
     onSuccess: (message) => {
       onCreated(message);
       setIsAdditionalDataVisible(false);

@@ -43,7 +43,7 @@ const FILTER_LABELS: Record<FilterKey, string> = {
 
 const ProjectsPage: React.FC = () => {
   const { user, loading: userLoading } = useUser();
-  const { projects, setProjects, loading: projectsLoading, error } = useProjectCards(user?.idRolGlobal , user?.id, userLoading);
+  const { projects, setProjects, loading: projectsLoading, error, refetch } = useProjectCards(user?.idRolGlobal , user?.id, userLoading);
   const loading = userLoading || projectsLoading;
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
@@ -250,15 +250,18 @@ const ProjectsPage: React.FC = () => {
           </>
         )}
       </div>
-
-      <CreateProject
-        isOpen={isCreateProjectOpen}
-        onClose={() => setIsCreateProjectOpen(false)}
-        onCreated={(message) => {
-          setCreationSuccessMessage(message);
-          setIsCreateProjectOpen(false);
-        }}
-      />
+      {user ? (
+        <CreateProject
+          isOpen={isCreateProjectOpen}
+          onClose={() => setIsCreateProjectOpen(false)}
+          userId={user.id}
+          onCreated={async (message) => {
+            setCreationSuccessMessage(message);
+            setIsCreateProjectOpen(false);
+            await refetch();
+          }}
+        />
+      ) : null}
       {creationSuccessMessage ? (
         <ProjectCreationToast
           message={creationSuccessMessage}
