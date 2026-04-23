@@ -1,9 +1,8 @@
 $ErrorActionPreference = 'Stop'
+$SupabaseProjectId = "supabase_jixology"
 
 function Find-RepoRoot {
-  param(
-    [string]$StartDir
-  )
+  param([string]$StartDir)
 
   $current = (Resolve-Path $StartDir).Path
 
@@ -32,46 +31,109 @@ function Invoke-Step {
   )
 
   Write-Host "== $Label =="
-  & $Action
+  $global:LASTEXITCODE = 0
 
-  if ($LASTEXITCODE -ne 0) {
-    throw "$Label fallo con codigo $LASTEXITCODE"
+  try {
+    & $Action
+
+    if ($LASTEXITCODE -ne 0) {
+      throw "$Label fallo con codigo $LASTEXITCODE"
+    }
+  }
+  catch {
+    throw "$Label fallo. $($_.Exception.Message)"
   }
 }
 
-function Test-FunctionPostReady {
+function Invoke-WithRetry {
   param(
-    [string]$Url,
-    [int]$TimeoutSec = 3
+    [string]$Label,
+    [int]$MaxAttempts = 3,
+    [int]$DelaySec = 8,
+    [scriptblock]$Action
   )
 
-  try {
-    Invoke-WebRequest `
-      -Uri $Url `
-      -Method Post `
-      -ContentType "application/json" `
-      -Body "{}" `
-      -TimeoutSec $TimeoutSec `
-      -ErrorAction Stop | Out-Null
+  for ($i = 1; $i -le $MaxAttempts; $i++) {
+    try {
+      Write-Host "== $Label (intento $i/$MaxAttempts) =="
+      $global:LASTEXITCODE = 0
 
-    return $true
+      & $Action
+
+      if ($LASTEXITCODE -ne 0) {
+        throw "$Label fallo con codigo $LASTEXITCODE"
+      }
+
+      return
+    }
+    catch {
+      if ($i -eq $MaxAttempts) {
+        throw "$Label fallo tras $MaxAttempts intentos. $($_.Exception.Message)"
+      }
+
+      Write-Host "[$Label] intento $i fallo: $($_.Exception.Message)"
+      Start-Sleep -Seconds $DelaySec
+    }
+  }
+}
+
+function Remove-StaleSupabaseContainers {
+  param(
+    [string]$ProjectId
+  )
+
+  $patterns = @(
+    "supabase_kong_$ProjectId",
+    "supabase_auth_$ProjectId",
+    "supabase_rest_$ProjectId",
+    "supabase_realtime_$ProjectId",
+    "supabase_storage_$ProjectId",
+    "supabase_imgproxy_$ProjectId",
+    "supabase_meta_$ProjectId",
+    "supabase_studio_$ProjectId",
+    "supabase_inbucket_$ProjectId",
+    "supabase_vector_$ProjectId",
+    "supabase_db_$ProjectId",
+    "supabase_pooler_$ProjectId"
+  )
+
+  foreach ($name in $patterns) {
+    $existing = docker ps -aq --filter "name=^/${name}$"
+    if ($existing) {
+      Write-Host "Eliminando contenedor huerfano: $name"
+      docker rm -f $name | Out-Null
+    }
+  }
+}
+
+function Test-FunctionReady {
+  param(
+    [string]$FunctionName,
+    [int]$TimeoutSec = 5
+  )
+
+  $url = "http://127.0.0.1:54321/functions/v1/$FunctionName"
+
+  try {
+    $response = Invoke-WebRequest `
+      -Uri $url `
+      -Method Get `
+      -TimeoutSec $TimeoutSec `
+      -UseBasicParsing `
+      -ErrorAction Stop
+
+    return $response.StatusCode -eq 200
   }
   catch {
-    # Si hubo respuesta HTTP, aunque sea 400/401/405/500,
-    # significa que la funcion ya esta viva y aceptando POST.
-    if ($_.Exception.Response -ne $null) {
-      return $true
-    }
-
     return $false
   }
 }
 
 $scriptDir = $PSScriptRoot
 $repoRoot = Find-RepoRoot -StartDir $scriptDir
-$supabaseDir = Join-Path $repoRoot 'supabase'
 $bootstrapPath = Join-Path $repoRoot 'scripts\bootstrap-users.ps1'
 $postBootstrapSeedPath = Join-Path $repoRoot 'client\scripts\post-bootstrap-seed.mjs'
+$SupabaseCmd = Join-Path $scriptDir '..\node_modules\.bin\supabase.cmd'
 
 if (-not (Test-Path $bootstrapPath)) {
   throw "No existe bootstrap-users.ps1 en: $bootstrapPath"
@@ -81,79 +143,97 @@ if (-not (Test-Path $postBootstrapSeedPath)) {
   throw "No existe post-bootstrap-seed.mjs en: $postBootstrapSeedPath"
 }
 
-$functionUrl = if ($env:REGISTER_USER_FUNCTION_URL) {
-  $env:REGISTER_USER_FUNCTION_URL
-} else {
-  "http://127.0.0.1:54321/functions/v1/register_user"
+if (-not (Test-Path $SupabaseCmd)) {
+  throw "No se encontro el Supabase CLI local en: $SupabaseCmd"
 }
 
+$requiredFunctions = @(
+  "register_user"
+)
+
+$tmpDir = Join-Path $repoRoot 'tmp'
+New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
+
+$stdoutLog = Join-Path $tmpDir 'functions.stdout.log'
+$stderrLog = Join-Path $tmpDir 'functions.stderr.log'
+
 Write-Host "Repo root detectado en: $repoRoot"
-Write-Host "Supabase dir: $supabaseDir"
 Write-Host "Bootstrap path: $bootstrapPath"
 Write-Host "Post-bootstrap seed path: $postBootstrapSeedPath"
-Write-Host "Function URL: $functionUrl"
+Write-Host "Supabase CLI: $SupabaseCmd"
+Write-Host "Functions requeridas: $($requiredFunctions -join ', ')"
 
-Push-Location $supabaseDir
-
+Push-Location $repoRoot
 $functionProcess = $null
 
 try {
+  Write-Host "== Deteniendo Supabase local (si ya estaba corriendo) =="
+  try {
+    & $SupabaseCmd stop
+  } catch {
+    Write-Host "Supabase no estaba corriendo o no se pudo detener limpiamente. Continuando..."
+  }
+
+  Remove-StaleSupabaseContainers -ProjectId $SupabaseProjectId
+
   Invoke-Step "Iniciando Supabase local" {
-    npx supabase start
+    & $SupabaseCmd start
   }
 
-  Invoke-Step "Reseteando DB local" {
-    npx supabase db reset --local
+  Start-Sleep -Seconds 5
+
+  Invoke-WithRetry "Reseteando DB local" -MaxAttempts 3 -DelaySec 8 -Action {
+    & $SupabaseCmd db reset --local
   }
 
-  Write-Host "== Levantando Edge Function register_user =="
+  Write-Host "== Levantando Edge Functions locales =="
   $functionProcess = Start-Process `
-    -FilePath "cmd.exe" `
-    -ArgumentList "/c", "npx supabase functions serve register_user --no-verify-jwt" `
-    -WorkingDirectory $supabaseDir `
+    -FilePath $SupabaseCmd `
+    -ArgumentList @("functions", "serve") `
+    -WorkingDirectory $repoRoot `
     -PassThru `
+    -RedirectStandardOutput $stdoutLog `
+    -RedirectStandardError $stderrLog `
     -WindowStyle Hidden
 
-  Write-Host "== Esperando a que register_user este lista para POST =="
+  foreach ($fn in $requiredFunctions) {
+    Write-Host "== Esperando a que $fn este lista =="
 
-  $maxAttempts = 30
-  $attempt = 0
-  $ready = $false
+    $maxAttempts = 45
+    $attempt = 0
+    $ready = $false
 
-  while (-not $ready -and $attempt -lt $maxAttempts) {
-    $attempt++
+    while (-not $ready -and $attempt -lt $maxAttempts) {
+      $attempt++
 
-    if (Test-FunctionPostReady -Url $functionUrl -TimeoutSec 3) {
-      $ready = $true
-      break
+      if (Test-FunctionReady -FunctionName $fn -TimeoutSec 5) {
+        $ready = $true
+        break
+      }
+
+      Write-Host "Intento ${attempt}/${maxAttempts}: $fn aun no esta lista..."
+      Start-Sleep -Seconds 2
     }
 
-    Write-Host "Intento ${attempt}/${maxAttempts}: la funcion aun no acepta POST..."
-    Start-Sleep -Seconds 2
+    if (-not $ready) {
+      throw "La Edge Function $fn no quedo lista a tiempo. Revisa: $stderrLog"
+    }
   }
-
-  if (-not $ready) {
-    throw "La Edge Function register_user no quedo lista para POST a tiempo."
-  }
-
-  Write-Host "== Edge Function lista =="
-
-  $env:REGISTER_USER_FUNCTION_URL = $functionUrl
 
   Invoke-Step "Ejecutando bootstrap de usuarios" {
-    powershell -ExecutionPolicy Bypass -File $bootstrapPath
+    & $bootstrapPath -FunctionUrl "http://127.0.0.1:54321/functions/v1/register_user"
   }
 
   Invoke-Step "Ejecutando post-bootstrap seed" {
     node $postBootstrapSeedPath
   }
 
-  Write-Host "Setup local completado correctamente."
+  Write-Host "[ps1] Setup local completado correctamente."
 }
 finally {
   Pop-Location
 
   if ($functionProcess -and -not $functionProcess.HasExited) {
-    Stop-Process -Id $functionProcess.Id -Force
+    cmd /c "taskkill /PID $($functionProcess.Id) /T /F" | Out-Null
   }
 }
