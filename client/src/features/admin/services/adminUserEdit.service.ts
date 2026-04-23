@@ -23,6 +23,7 @@ export interface UpdateAdminUserPayload {
   id: number;
   auth_id: string;
   email: string;
+  original_email: string;
   password?: string;
   nombre: string | null;
   apellido: string | null;
@@ -50,9 +51,49 @@ export async function getAdminUserById(userId: number): Promise<AdminEditableUse
   return data as AdminEditableUser;
 }
 
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase();
+}
+
 export async function updateAdminUserService(
   payload: UpdateAdminUserPayload
 ): Promise<{ message: string }> {
+  const normalizedEmail = normalizeEmail(payload.email);
+  const normalizedOriginalEmail = normalizeEmail(payload.original_email);
+  const hasPasswordChange = !!payload.password?.trim();
+  const hasEmailChange = normalizedEmail !== normalizedOriginalEmail;
+
+  const needsEdgeFunction = hasPasswordChange || hasEmailChange;
+
+  if (!needsEdgeFunction) {
+    const { data, error } = await supabase
+      .from('usuario')
+      .update({
+        email: normalizedEmail,
+        nombre: payload.nombre,
+        apellido: payload.apellido,
+        telefono: payload.telefono,
+        fecha_nacimiento: payload.fecha_nacimiento,
+        sobre_mi: payload.sobre_mi,
+        jornada: payload.jornada,
+        id_zona_horaria: payload.id_zona_horaria,
+        id_rol_global: payload.id_rol_global,
+      })
+      .eq('id', payload.id)
+      .select('id')
+      .single();
+
+    if (error) {
+      throw new Error(error.message || 'No se pudo actualizar el usuario.');
+    }
+
+    if (!data) {
+      throw new Error('No se encontró el usuario para actualizar.');
+    }
+
+    return { message: 'Usuario actualizado correctamente.' };
+  }
+
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -61,7 +102,11 @@ export async function updateAdminUserService(
     body: UpdateAdminUserPayload;
     headers?: Record<string, string>;
   } = {
-    body: payload,
+    body: {
+      ...payload,
+      email: normalizedEmail,
+      password: payload.password?.trim() || undefined,
+    },
   };
 
   if (session?.access_token) {
