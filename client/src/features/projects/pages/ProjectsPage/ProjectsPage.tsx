@@ -1,10 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styles from './ProjectsPage.module.css';
-import { useUser } from '@/core/auth/userContext';  
-
+import { useUser } from '@/core/auth/userContext';
+import { useNavigate } from 'react-router-dom';
 
 // --- Interfaces ---
 import type { Project } from '@/features/projects/types/Project';
+import type { MenuComponent } from '@/shared/components/ContextMenu';
+
+// --- Servicios ---
+import { archiveProject, unarchiveProject, changeProjectStatus, getArchivedProjects } from '@/features/projects/services/projects.services';
 
 // --- Hooks ---
 import { useProjectCards} from '../../hooks/useProjects';
@@ -19,7 +23,7 @@ import SkeletonCard from '@/shared/components/SkeletonCard';
 import CreateProject from '@/features/projects/components/CreateProject';
 import ProjectCreationToast from '@/features/projects/components/ProjectCreationToast';
 
-type FilterKey = 'TodosLosProyectos' | 'Completados' | 'EnProgreso' | 'Retrasado' | 'SinAsignar';
+type FilterKey = 'TodosLosProyectos' | 'Completados' | 'EnProgreso' | 'Retrasado' | 'SinAsignar' | 'Archivados';
 
 const FILTER_TO_STATUS_ID: Partial<Record<FilterKey, number>> = {
   Completados: 1,
@@ -34,17 +38,84 @@ const FILTER_LABELS: Record<FilterKey, string> = {
   EnProgreso:        'En Progreso',
   Retrasado:         'Retrasado',
   SinAsignar:        'Sin Asignar',
+  Archivados:        'Archivados',
 };
 
 const ProjectsPage: React.FC = () => {
-  const { user, loading: userLoading } = useUser(); 
-  const { projects, loading: projectsLoading, error } = useProjectCards(user?.idRolGlobal , user?.id, userLoading);
+  const { user, loading: userLoading } = useUser();
+  const { projects, setProjects, loading: projectsLoading, error } = useProjectCards(user?.idRolGlobal , user?.id, userLoading);
   const loading = userLoading || projectsLoading;
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
-  const { recentIds, trackVisit } = useRecentProjects(user?.id); 
+  const { recentIds, trackVisit } = useRecentProjects(user?.id);
+  const navigate = useNavigate();
+
+  const [archivedProjects, setArchivedProjects] = useState<Project[]>([]);
+  const [archivedLoading, setArchivedLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeFilter !== 'Archivados' || !user || user.idRolGlobal == null) return;
+    setArchivedLoading(true);
+    getArchivedProjects(user.idRolGlobal, user.id)
+      .then((data) => {
+        console.log('[Archivados] proyectos recibidos:', data);
+        setArchivedProjects(data);
+      })
+      .catch((err) => console.error('[Archivados] error al obtener:', err))
+      .finally(() => setArchivedLoading(false));
+  }, [activeFilter, user]);
+
+  const STATUS_OPTIONS: { id: number; label: string }[] = [
+    { id: 1, label: 'Completado' },
+    { id: 2, label: 'En Progreso' },
+    { id: 3, label: 'Retrasado' },
+    { id: 4, label: 'Sin Asignar' },
+  ];
+
+  const buildMenuItems = (project: Project): MenuComponent[] => [
+    {
+      text: 'Abrir',
+      onClick: () => navigate(`/projects/${project.id}`),
+    },
+    {
+      text: 'Editar Proyecto',
+      onClick: () => navigate(`/projects/${project.id}/edit`),
+    },
+    ...(project.id_estatus !== 5 ? [{
+      text: 'Cambiar Estatus',
+      onClick: () => {},
+      subMenu: STATUS_OPTIONS
+        .filter((s) => s.id !== project.id_estatus)
+        .map((s) => ({
+          text: s.label,
+          statusId: s.id,
+          onClick: async () => {
+            await changeProjectStatus(project.id, user!.id, s.id);
+            setProjects((prev) =>
+              prev.map((p) => p.id === project.id ? { ...p, id_estatus: s.id } : p)
+            );
+          },
+        })),
+    }] : []),
+    project.id_estatus !== 5
+      ? {
+          text: 'Archivar Proyecto',
+          onClick: async () => {
+            await archiveProject(project.id, user!.id);
+            setProjects((prev) => prev.filter((p) => p.id !== project.id));
+          },
+        }
+      : {
+          text: 'Desarchivar Proyecto',
+          onClick: async () => {
+            await unarchiveProject(project.id, user!.id);
+            setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
+            setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+          },
+        },
+  ];
 
   const renderCard = (project: Project) => (
   <ProjectCard
@@ -59,6 +130,7 @@ const ProjectsPage: React.FC = () => {
     projectFTE={project.fte}
     statusLabel={<StatusLabel statusId={project.id_estatus} />}
     onClick={() => trackVisit(project.id)}
+    menuItems={buildMenuItems(project)}
   />
 );
 
@@ -113,7 +185,24 @@ const ProjectsPage: React.FC = () => {
             </button>
           ))}
         </div>
-        {loading ? (
+
+        {activeFilter === 'Archivados' ? (
+          archivedLoading ? (
+            <div className={styles.grid}>
+              {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
+          ) : archivedProjects.length === 0 ? (
+            <EmptyState
+              title="No hay proyectos archivados"
+              subtitle="Los proyectos archivados aparecerán aquí."
+            />
+          ) : (
+            <section className={styles.section}>
+              <h2 className={styles.sectionTitle}>Proyectos archivados</h2>
+              <div className={styles.grid}>{archivedProjects.map(renderCard)}</div>
+            </section>
+          )
+        ) : loading ? (
           <div className={styles.grid}>
             {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
@@ -147,6 +236,7 @@ const ProjectsPage: React.FC = () => {
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
                       onClick={() => trackVisit(p.id)}
+                      menuItems={buildMenuItems(p)}
                     />
                   ))}
                 </div>

@@ -52,7 +52,7 @@ async function main() {
     await runSqlFile(file);
   }
 
-  console.log('\n✅ Setup local completado correctamente.');
+  console.log('\nSetup local completado correctamente.');
 }
 
 main().catch((error) => {

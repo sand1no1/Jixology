@@ -1,4 +1,5 @@
 import { supabase } from '@/core/supabase/supabase.client';
+import { hasAdminRole } from '@/core/auth/user.service';
 
 // --- Tipos ---
 import type { Project } from '../types/Project';
@@ -17,7 +18,8 @@ export async function getProjects(globalRole: number, userId: number): Promise<P
   if (globalRole === 1 || globalRole === 2) {
     const { data, error } = await supabase
       .from('project_card_view')
-      .select('*');
+      .select('*')
+      .neq('id_estatus', 5);
 
     if (error) throw new Error(error.message);
     return data;
@@ -26,7 +28,29 @@ export async function getProjects(globalRole: number, userId: number): Promise<P
   const { data, error } = await supabase
     .from('project_card_view')
     .select('*, usuario_proyecto!inner(id_usuario)')
-    .eq('usuario_proyecto.id_usuario', userId);
+    .eq('usuario_proyecto.id_usuario', userId)
+    .neq('id_estatus', 5);
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function getArchivedProjects(globalRole: number, userId: number): Promise<Project[]> {
+  if (globalRole === 1 || globalRole === 2) {
+    const { data, error } = await supabase
+      .from('project_card_view')
+      .select('*')
+      .eq('id_estatus', 5);
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  const { data, error } = await supabase
+    .from('project_card_view')
+    .select('*, usuario_proyecto!inner(id_usuario)')
+    .eq('usuario_proyecto.id_usuario', userId)
+    .eq('id_estatus', 5);
 
   if (error) throw new Error(error.message);
   return data;
@@ -51,3 +75,38 @@ export async function fetchProjectContext(projectId: number): Promise<ProjectCon
   };
 }
 
+export async function changeProjectStatus(projectId: number, userId: number, newStatus: number): Promise<void> {
+  if (!await hasAdminRole(userId)){
+    throw { message: "No tienes permiso de modificar", status: 401 };
+  }
+
+  const { error } = await supabase
+                          .from('proyecto')
+                          .update({ id_estatus: newStatus })
+                          .eq('id', projectId);
+  if (error) throw new Error(error.message);
+}
+
+export async function archiveProject(projectId: number, userId: number): Promise<void> {
+  if (!await hasAdminRole(userId)){
+    throw { message: "No tienes permiso de modificar", status: 401 };
+  }
+
+  const { error } = await supabase
+                          .from('proyecto')
+                          .update({ id_estatus: 5 })
+                          .eq('id', projectId);
+  if (error) throw new Error(error.message);
+}
+
+export async function unarchiveProject(projectId: number, userId: number): Promise<void> {
+  if (!await hasAdminRole(userId)){
+    throw { message: "No tienes permiso de modificar", status: 401 };
+  }
+
+  const { error } = await supabase
+                          .from('proyecto')
+                          .update({ id_estatus: 4 })
+                          .eq('id', projectId);
+  if (error) throw new Error(error.message);
+}

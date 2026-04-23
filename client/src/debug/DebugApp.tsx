@@ -16,7 +16,11 @@ import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
 import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
 import { useAvatarFeatures } from '@/features/profile/hooks/useAvatarFeatures';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox';
+// --- Shared Components ---
+import ContextMenu from '@/shared/components/ContextMenu';
+import type { MenuComponent } from '@/shared/components/ContextMenu';
+
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox' | 'contextMenu';
 
 // ── DB-connected wrappers (hooks require real components) ─────────────────────
 
@@ -227,6 +231,20 @@ export default function DebugApp() {
       profile: <Profile debugUserId={1} />,
 
       lootbox: <DbLootBox userId={1} />,
+
+      contextMenu: (() => {
+        const items: MenuComponent[] = [
+          { text: 'Ver detalles',   onClick: () => console.log('Ver detalles') },
+          { text: 'Editar',         onClick: () => console.log('Editar') },
+          { text: 'Archivar',       onClick: () => console.log('Archivar') },
+          { text: 'Eliminar',       onClick: () => console.log('Eliminar') },
+        ];
+        return (
+          <div style={{ padding: '2rem' }}>
+            <ContextMenu width={200} elements={items} />
+          </div>
+        );
+      })(),
     }),
     []
   );

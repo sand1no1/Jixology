@@ -33,3 +33,15 @@ export async function fetchCurrentUser(authId: string): Promise<UserProfile | nu
       rol: rolGlobal?.nombre ?? null,
     };
 }
+
+export async function hasAdminRole(userId: number): Promise<boolean> {
+    const {data, error } = await supabase
+                        .from('usuario')
+                        .select('id')
+                        .eq('id', userId)
+                        .in('id_rol_global', [1, 2])
+                        .single();
+    
+    if (error) return false;
+    return !!data;
+}
