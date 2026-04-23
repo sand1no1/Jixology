@@ -57,6 +57,7 @@ const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     if (activeFilter !== 'Archivados' || !user || user.idRolGlobal == null) return;
+    setArchivedLoading(true);
     getArchivedProjects(user.idRolGlobal, user.id)
       .then((data) => {
         console.log('[Archivados] proyectos recibidos:', data);
@@ -102,16 +103,25 @@ const ProjectsPage: React.FC = () => {
       ? {
           text: 'Archivar Proyecto',
           onClick: async () => {
-            await archiveProject(project.id, user!.id);
-            setProjects((prev) => prev.filter((p) => p.id !== project.id));
+            try {
+              await archiveProject(project.id, user!.id);
+              setProjects((prev) => prev.filter((p) => p.id !== project.id));
+              setArchivedProjects((prev) => [...prev, { ...project, id_estatus: 5 }]);
+            } catch (err) {
+              console.error('[Archivar] error:', err);
+            }
           },
         }
       : {
           text: 'Desarchivar Proyecto',
           onClick: async () => {
-            await unarchiveProject(project.id, user!.id);
-            setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
-            setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+            try {
+              await unarchiveProject(project.id, user!.id);
+              setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
+              setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+            } catch (err) {
+              console.error('[Desarchivar] error:', err);
+            }
           },
         },
   ];
