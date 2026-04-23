@@ -24,5 +24,5 @@ export function useProjectCards(
       .finally(() => setLoading(false));
   }, [globalRole, userId, userLoading]);
 
-  return { projects, loading, error };
+  return { projects, setProjects, loading, error };
 }

@@ -23,7 +23,11 @@ import { useBacklogItems } from '@/features/backlogItem/hooks/useBacklogItems';
 import { useBacklogMeta } from '@/features/backlogItem/hooks/useBacklogMeta';
 import type { BacklogStatusRecord, BacklogPriorityRecord } from '@/features/backlogItem/types/backlog.types';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox' | 'backlogItem' | 'createBacklogItem';
+// --- Shared Components ---
+import ContextMenu from '@/shared/components/ContextMenu';
+import type { MenuComponent } from '@/shared/components/ContextMenu';
+
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox' | 'contextMenu'|  'backlogItem' | 'createBacklogItem';
 
 // ── Status colour map (by orden) ──────────────────────────────────────────────
 const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
@@ -342,6 +346,20 @@ export default function DebugApp() {
       profile: <Profile debugUserId={1} />,
 
       lootbox: <DbLootBox userId={1} />,
+
+      contextMenu: (() => {
+        const items: MenuComponent[] = [
+          { text: 'Ver detalles',   onClick: () => console.log('Ver detalles') },
+          { text: 'Editar',         onClick: () => console.log('Editar') },
+          { text: 'Archivar',       onClick: () => console.log('Archivar') },
+          { text: 'Eliminar',       onClick: () => console.log('Eliminar') },
+        ];
+        return (
+          <div style={{ padding: '2rem' }}>
+            <ContextMenu elements={items} />
+          </div>
+        );
+      })(),
     }),
     []
   );

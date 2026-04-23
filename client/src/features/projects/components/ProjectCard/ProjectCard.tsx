@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import type { ReactNode } from 'react';
 import styles from './ProjectCard.module.css';
 
 import { statusClassMap } from '@/shared/utils/statusClassMap';
 import PercentageBar from '@/shared/components/PercentageBar';
+import ContextMenu, { type MenuComponent} from '@/shared/components/ContextMenu';
 
 export interface IProjectCardProps {
   projectId: number;
@@ -17,6 +18,7 @@ export interface IProjectCardProps {
   projectFTE: number;
   forceExpanded?: boolean;
   onClick?: () => void;
+  menuItems?: MenuComponent[];
 }
 
 const ProjectCard: React.FC<IProjectCardProps> = ({
@@ -30,9 +32,22 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
   projectFTE,
   forceExpanded,
   onClick,
+  menuItems,
 }) => {
   const [hovered, setHovered] = useState(false);
   const isExpanded = forceExpanded || hovered;
+  const [menu, setMenu] = useState<{x: number, y: number } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!menuRef.current || !menu) return;
+    const { width, height } = menuRef.current.getBoundingClientRect();
+    const x = menu.x + width > window.innerWidth  ? menu.x - width : menu.x;
+    const y = menu.y + height > window.innerHeight ? menu.y - height : menu.y;
+    menuRef.current.style.left       = `${x}px`;
+    menuRef.current.style.top        = `${y}px`;
+    menuRef.current.style.visibility = 'visible';
+  }, [menu]);
 
   const containerColor = statusClassMap[projectStatus]?.cssClass ?? 'status-unassigned';
   const formattedDate = new Date(projectDueDate).toLocaleDateString();
@@ -43,7 +58,30 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={onClick}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setMenu({ x: e.clientX, y: e.clientY })
+      }}
     >
+      {(menu && menuItems) && (
+        <>
+          <div
+            style={{ position: 'fixed', inset: 0, zIndex: 999 }}
+            onClick={() => setMenu(null)}
+            onContextMenu={(e) => { e.preventDefault(); setMenu(null); }}
+          />
+          <div ref={menuRef} style={{ position: 'fixed', top: menu.y, left: menu.x, zIndex: 1000, visibility: 'hidden' }}>
+            <ContextMenu elements={menuItems.map(item => ({
+              ...item,
+              onClick: () => { item.onClick(); setMenu(null); },
+              subMenu: item.subMenu?.map(sub => ({
+                ...sub,
+                onClick: () => { sub.onClick(); setMenu(null); },
+              })),
+            }))}/>
+          </div>
+        </>
+      )}
       <div className={`${styles.statusBand} ${containerColor}`} />
 
       {/* Elementos base del projecto simepre visbiles*/}
