@@ -26,9 +26,13 @@
 
 /* MENU */
 .menu {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   list-style: none;
-  padding: 10px 0;
+  padding: 0px 0;
   margin: 0;
+  justify-content:space-between;
 }
 
 .menuItem {
@@ -98,8 +102,4 @@
 .sidebar:hover ~ .overlay {
   opacity: 1;
   pointer-events: auto;
-}
-
-.logOut {
-  margin-top: 115px;
 }
