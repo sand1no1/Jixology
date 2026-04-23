@@ -54,3 +54,12 @@
 .element:hover .label::after {
   width: 100%;
 }
+
+/* Active nav link */
+.elementActive {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.elementActive .label::after {
+  width: 100%;
+}

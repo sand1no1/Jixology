@@ -8,6 +8,7 @@ import EmailVerificationPage from '@/features/verification/pages/EmailVerificati
 import AdminPage from '@/features/admin/pages/adminPage';
 import ProjectPage from '@/features/projects/pages/ProjectsPage';
 import ProjectTask from '@/features/projects/pages/ProjectTasks';
+import ProjectBacklog from '@/features/projectView/pages/ProjectBacklog';
 import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
 
 // --- Layout ---
@@ -41,6 +42,7 @@ export function AppRouter() {
         <Route element={<AppLayoutHsProject />}>
           <Route path="/proyectos/dummy" element={<Navigate to="/proyectos/dummy/tasks" replace />} />
           <Route path="/proyectos/dummy/tasks"   element={<ProjectTask />} />
+          <Route path="/proyectos/dummy/backlog" element={<ProjectBacklog />} />
         </Route>
       </Route>
 
