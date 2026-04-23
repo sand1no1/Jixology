@@ -38,6 +38,10 @@ html {
   --color-impact-red:   #5F0229;
 
   --color-blueprint-navy: #0A0838;
+
+  /* Paleta de colores de Pato porque la de Tech Mahindra no es TAAAN versatil */
+  /* ---------------------------------- */
+  --color-clarity-gray-3: #f5f4f2;
 }
 
 html,

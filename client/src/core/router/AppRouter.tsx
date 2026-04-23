@@ -28,13 +28,13 @@ export function AppRouter() {
 
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
         <Route element={<AppLayoutHs />}>
+          <Route path="/proyectos"         element={<ProjectPage />} />
           <Route path="/perfil"            element={<ProfilePage />} />
           <Route path="/dashboard-usuario" element={<UserDashboardPage />} />
           <Route element={<ProtectedRoute allowedRoles={ADMIN_VIEWS} />}>
             <Route path="/usuarios" element={<AdminPage />} />
             <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
           </Route>
-          <Route path="/proyectos"         element={<ProjectPage />} />
         </Route>
       </Route>
 
