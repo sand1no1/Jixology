@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 // --- Servicios ---
 import { getProjects } from '../services/projects.services';
@@ -15,14 +15,29 @@ export function useProjectCards(
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState<string | null>(null);
 
-  useEffect(() => {
-    if (userLoading || globalRole == null || userId == null) return;
+  const refetch = useCallback(async (): Promise<void> => {
+    if (userLoading || globalRole == null || userId == null) {
+      return;
+    }
 
-    getProjects(globalRole, userId)
-      .then(setProjects)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
+    setLoading(true);
+    setError(null);
+
+    try {
+      const data = await getProjects(globalRole, userId);
+      setProjects(data);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Ocurrió un error al obtener proyectos.';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
   }, [globalRole, userId, userLoading]);
 
-  return { projects, setProjects, loading, error };
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
+
+  return { projects, setProjects, loading, error, refetch };
 }

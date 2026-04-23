@@ -83,6 +83,7 @@ export type CreateProjectPayload = {
   id_tipo: number | null;
   id_estatus: number;
   id_metodologia: number;
+  id_creador: number;
   stack_tecnologico: string[];
 };
 

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ChangeEvent, ComponentProps, FocusEvent } from 'react';
-import { createProjectMock, getCreateProjectCatalogs } from '@/features/projects/services/create.project';
+import {
+  createProject,
+  getCreateProjectCatalogs,
+} from '@/features/projects/services/create.project';
 import type {
   CreateProjectFormErrors,
   CreateProjectFormValues,
@@ -39,6 +42,7 @@ type UseCreateProjectFormReturn = {
 };
 
 type UseCreateProjectFormOptions = {
+  userId: number;
   onSuccess?: (message: string) => void;
 };
 
@@ -61,50 +65,35 @@ function buildInitialValues(catalogs?: ProjectCatalogs | null): CreateProjectFor
     id_modelo_facturacion: String(catalogs?.modelo_facturacion[0]?.id ?? ''),
     id_complejidad: String(catalogs?.complejidad_proyecto[0]?.id ?? ''),
     id_tipo: String(catalogs?.tipo_proyecto[0]?.id ?? ''),
-    id_estatus: String(catalogs?.estatus_proyecto[0]?.id ?? ''),
-    id_metodologia: String(catalogs?.metodologia_proyecto[0]?.id ?? ''),
+    id_estatus: '',
+    id_metodologia: '',
     stack_tecnologico: [''],
   };
 }
 
 function parseOptionalInteger(value: string): number | null {
-  if (value.trim() === '') {
-    return null;
-  }
+  if (value.trim() === '') return null;
 
   const parsedValue = Number(value);
-
-  if (!Number.isInteger(parsedValue)) {
-    return null;
-  }
+  if (!Number.isInteger(parsedValue)) return null;
 
   return parsedValue;
 }
 
 function parseOptionalNumber(value: string): number | null {
-  if (value.trim() === '') {
-    return null;
-  }
+  if (value.trim() === '') return null;
 
   const parsedValue = Number(value);
-
-  if (Number.isNaN(parsedValue)) {
-    return null;
-  }
+  if (Number.isNaN(parsedValue)) return null;
 
   return parsedValue;
 }
 
 function parseOptionalId(value: string): number | null {
-  if (value.trim() === '') {
-    return null;
-  }
+  if (value.trim() === '') return null;
 
   const parsedValue = Number.parseInt(value, 10);
-
-  if (Number.isNaN(parsedValue)) {
-    return null;
-  }
+  if (Number.isNaN(parsedValue)) return null;
 
   return parsedValue;
 }
@@ -243,7 +232,10 @@ function hasRequiredFields(values: CreateProjectFormValues): boolean {
   );
 }
 
-function normalizePayload(values: CreateProjectFormValues): CreateProjectPayload {
+function normalizePayload(
+  values: CreateProjectFormValues,
+  userId: number,
+): CreateProjectPayload {
   return {
     nombre: values.nombre.trim(),
     descripcion: values.descripcion.trim() || null,
@@ -264,11 +256,14 @@ function normalizePayload(values: CreateProjectFormValues): CreateProjectPayload
     id_tipo: parseOptionalId(values.id_tipo),
     id_estatus: parseRequiredId(values.id_estatus),
     id_metodologia: parseRequiredId(values.id_metodologia),
+    id_creador: userId,
     stack_tecnologico: normalizeStack(values.stack_tecnologico),
   };
 }
 
-export function useCreateProjectForm(options?: UseCreateProjectFormOptions): UseCreateProjectFormReturn {
+export function useCreateProjectForm(
+  options: UseCreateProjectFormOptions,
+): UseCreateProjectFormReturn {
   const [catalogs, setCatalogs] = useState<ProjectCatalogs | null>(null);
   const [values, setValues] = useState<CreateProjectFormValues>(buildInitialValues());
   const [errors, setErrors] = useState<CreateProjectFormErrors>({});
@@ -278,7 +273,6 @@ export function useCreateProjectForm(options?: UseCreateProjectFormOptions): Use
   const [loadError, setLoadError] = useState<string | null>(null);
   const [validationAttemptCount, setValidationAttemptCount] = useState(0);
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
-  const onSuccess = options?.onSuccess;
 
   const loadCatalogs = useCallback(async (): Promise<void> => {
     setIsInitialLoading(true);
@@ -302,10 +296,6 @@ export function useCreateProjectForm(options?: UseCreateProjectFormOptions): Use
           currentValues.id_complejidad ||
           String(response.complejidad_proyecto[0]?.id ?? ''),
         id_tipo: currentValues.id_tipo || String(response.tipo_proyecto[0]?.id ?? ''),
-        id_estatus: currentValues.id_estatus || String(response.estatus_proyecto[0]?.id ?? ''),
-        id_metodologia:
-          currentValues.id_metodologia ||
-          String(response.metodologia_proyecto[0]?.id ?? ''),
       }));
     } catch (error) {
       setLoadError(getErrorMessage(error));
@@ -420,9 +410,7 @@ export function useCreateProjectForm(options?: UseCreateProjectFormOptions): Use
       const nextStack =
         currentValues.stack_tecnologico.length === 1
           ? ['']
-          : currentValues.stack_tecnologico.filter(
-              (_, currentIndex) => currentIndex !== index,
-            );
+          : currentValues.stack_tecnologico.filter((_, currentIndex) => currentIndex !== index);
 
       const nextValues = {
         ...currentValues,
@@ -466,20 +454,16 @@ export function useCreateProjectForm(options?: UseCreateProjectFormOptions): Use
     setFeedback(null);
 
     try {
-      const payload = normalizePayload(values);
-      const response = await createProjectMock(payload);
-      const successMessage = `${response.message} ID mock: ${response.id}.`;
+      const payload = normalizePayload(values, options.userId);
+      const response = await createProject(payload);
+      const successMessage = `${response.message} ID: ${response.id}.`;
 
       setErrors({});
-      setFeedback({
-        type: 'success',
-        message: successMessage,
-      });
       setValues(buildInitialValues(catalogs));
       setValidationAttemptCount(0);
       setTouchedFields({});
 
-      onSuccess?.(successMessage);
+      options.onSuccess?.(successMessage);
     } catch (error) {
       setFeedback({
         type: 'error',
