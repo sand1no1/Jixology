@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import {
-  CalendarDaysIcon
-} from '@heroicons/react/24/solid';
+//import {
+//  CalendarDaysIcon
+//} from '@heroicons/react/24/solid';
 
 import userImg from '@/assets/images/ProfileDefualt.jpg';
 import styles from './ProjectTasks.module.css';
