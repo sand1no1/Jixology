@@ -11,6 +11,7 @@ import ProjectTask from '@/features/projects/pages/ProjectTasks';
 
 // --- Layout ---
 import AppLayoutHs from '@/shared/layout/AppLayoutHs';
+import AppLayoutHsProject from '@/shared/layout/AppLayoutHsProject';
 
 // --- Router ---
 import { ProtectedRoute } from '@/core/router/ProtectedRoute';
@@ -28,7 +29,13 @@ export function AppRouter() {
           <Route path="/dashboard-usuario" element={<UserDashboardPage />} />
           <Route path="/usuarios"          element={<AdminPage />} />
           <Route path="/proyectos"         element={<ProjectPage />} />
-          <Route path="/proyectos/dummy"   element={<ProjectTask />} />
+        </Route>
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
+        <Route element={<AppLayoutHsProject />}>
+          <Route path="/proyectos/dummy" element={<Navigate to="/proyectos/dummy/tasks" replace />} />
+          <Route path="/proyectos/dummy/tasks"   element={<ProjectTask />} />
         </Route>
       </Route>
 

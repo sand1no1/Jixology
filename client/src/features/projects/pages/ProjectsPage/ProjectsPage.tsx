@@ -57,7 +57,6 @@ const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     if (activeFilter !== 'Archivados' || !user || user.idRolGlobal == null) return;
-    setArchivedLoading(true);
     getArchivedProjects(user.idRolGlobal, user.id)
       .then((data) => {
         console.log('[Archivados] proyectos recibidos:', data);

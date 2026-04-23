@@ -1,9 +1,10 @@
 import React from 'react';
 import type { ReactNode } from 'react';
-import styles from './AppLayoutHs.module.css';
+import styles from './AppLayoutHsProject.module.css';
 import {Outlet} from "react-router-dom"
 import Header from '@/shared/layout/Header';
 import Sidebar from '@/shared/layout/Sidebar';
+import ProjectHeader from '@/shared/layout/HeaderProject';
 
 export interface IAppLayoutHsProps {
   children?: ReactNode;
@@ -11,12 +12,15 @@ export interface IAppLayoutHsProps {
 
 const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children }) => {
   return (
-    <div>
+    <div className={styles.container}>
       <Header />
       <div className={styles.belowHeadbar}>
         <Sidebar />
-        <Outlet />
-        {children}
+        <div className={styles.innerProject}>
+          <ProjectHeader />
+          <Outlet />
+          {children}
+        </div>
       </div>
     </div>
   );

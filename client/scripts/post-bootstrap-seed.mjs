@@ -13,7 +13,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 
 const DB_URL =
   process.env.SUPABASE_LOCAL_DB_URL ||
-  'postgresql://postgres:postgres@localhost:54322/postgres';
+  'postgresql://postgres:postgres@localhost:55000/postgres';
 
 const SQL_FILES = [
   path.join(ROOT, 'scripts', 'insertProjects.sql'),
