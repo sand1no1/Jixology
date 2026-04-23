@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 
 import AvatarTile from '../AvatarTile';
 import ColorSwatch from '../ColorSwatch';
+import SkeletonAvatarTile from '../SkeletonAvatarTile';
 import { TYPE_LABELS, makeVariantTileSvg, makeColorTileSvg } from '../../services/avatar.service';
 import type { AvatarCatalog, DynamicFeatures, FeatureMeta } from '../../types/avatar.types';
 
@@ -20,25 +21,25 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   onSelectColor,
   onSelectType,
 }) => {
-  // Store only the key — derive the full FeatureMeta from the catalog so it
-  // stays fresh whenever the catalog updates (e.g. after a lootbox drop)
-  // without needing a synchronous setState inside an effect.
   const [activeKey,    setActiveKey]    = useState<string>(
     catalog.features.find(f => f.key === 'hair')?.key ?? catalog.features[0]?.key ?? ''
   );
   const [showingColor, setShowingColor] = useState(false);
 
+  // May be undefined when catalog.features is empty
   const activeTab = useMemo(
-    () => catalog.features.find(f => f.key === activeKey) ?? catalog.features[0],
+    () => catalog.features.find(f => f.key === activeKey) ?? catalog.features[0] ?? null,
     [catalog, activeKey],
   );
 
-  const hasColor       = !activeTab.colorOnly && !!activeTab.colorProp;
-  const isNoneSelected = activeTab.probProp
+  // All derived values guard against null activeTab so hooks stay unconditional
+  const hasColor       = activeTab ? !activeTab.colorOnly && !!activeTab.colorProp : false;
+  const isNoneSelected = activeTab?.probProp
     ? ((features[activeTab.probProp] as number) ?? 100) === 0
     : false;
 
   const variantTiles = useMemo(() => {
+    if (!activeTab) return [];
     const tiles: { value: string | null; label: string; svg: string; selected: boolean }[] = [];
 
     if (activeTab.probProp) {
@@ -62,7 +63,7 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
   }, [activeTab, features, isNoneSelected]);
 
   const colorTiles = useMemo(() => {
-    if (!activeTab.colorProp) return [];
+    if (!activeTab?.colorProp) return [];
     const selectedColors = (features[activeTab.colorProp] as string[]) ?? [];
     return activeTab.colorOptions.map((c) => ({
       hex:      c,
@@ -70,6 +71,19 @@ const InventoryCard: React.FC<InventoryCardProps> = ({
       selected: selectedColors.includes(c),
     }));
   }, [activeTab, features]);
+
+  // All hooks are above — safe to early-return now
+  if (!activeTab) {
+    return (
+      <div className="inv-card">
+        <div className="inv-grid">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <SkeletonAvatarTile key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="inv-card">

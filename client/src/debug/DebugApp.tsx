@@ -8,15 +8,130 @@ import Profile from '@/features/profile/pages';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
 import ProjectsPage from '@/features/projects/pages/ProjectsPage';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
-import ListUserCard from '@/features/profile/components/ListUserCard';
-import type { Role } from '@/features/profile/components/ListUserCard/ListUserCard';
-import { useUsuario } from '@/features/user/hooks/useUsuario';
+import ListUserCard from '@/shared/components/ListUserCard';
+import type { Role } from '@/shared/components/ListUserCard';
+import { useUserProfile } from '@/features/user/services/user.service';
 import { AvatarLootBox } from '@/features/profile/components/AvatarLootBox';
 import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
 import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
 import { useAvatarFeatures } from '@/features/profile/hooks/useAvatarFeatures';
+import BacklogListItem from '@/features/projectView/components/BacklogListItem';
+import type { BacklogStatus, Priority } from '@/features/projectView/components/BacklogListItem';
+import CreateBacklogItemForm from '@/features/backlogItem/components/CreateBacklogItemForm';
+import SkeletonBacklogItem from '@/features/backlogItem/components/SkeletonBacklogItem/SkeletonBacklogItem';
+import { useBacklogItems } from '@/features/backlogItem/hooks/useBacklogItems';
+import { useBacklogMeta } from '@/features/backlogItem/hooks/useBacklogMeta';
+import type { BacklogStatusRecord, BacklogPriorityRecord } from '@/features/backlogItem/types/backlog.types';
 
-type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox';
+// --- Shared Components ---
+import ContextMenu from '@/shared/components/ContextMenu';
+import type { MenuComponent } from '@/shared/components/ContextMenu';
+
+type DebugViewKey = 'login' | 'projects' | 'profile' | 'searchBar' | 'projectsPage' | 'userCard' | 'listUserCard' | 'lootbox' | 'contextMenu'|  'backlogItem' | 'createBacklogItem';
+
+// ── Status colour map (by orden) ──────────────────────────────────────────────
+const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
+  1: { color: '#F3F4F6', textColor: '#6B7280' }, // Por Hacer   — gray
+  2: { color: '#DBEAFE', textColor: '#1D4ED8' }, // En Progreso — blue
+  3: { color: '#FEF3C7', textColor: '#D97706' }, // En Revisión — amber
+  4: { color: '#D1FAE5', textColor: '#065F46' }, // Acabado     — green
+};
+
+const PRIORITY_MAP: Record<string, Priority> = {
+  'Crítica': 'critical',
+  'Alta':    'high',
+  'Media':   'medium',
+  'Baja':    'low',
+  'Mínima':  'minimal',
+};
+
+function toBacklogStatus(record: BacklogStatusRecord): BacklogStatus {
+  const colors = STATUS_COLORS[record.orden] ?? { color: '#F3F4F6', textColor: '#6B7280' };
+  return { label: record.nombre, ...colors };
+}
+
+function toPriority(record: BacklogPriorityRecord | undefined): Priority {
+  if (!record) return 'medium';
+  return PRIORITY_MAP[record.nombre] ?? 'medium';
+}
+
+function DebugBacklogList() {
+  const { items, loading: itemsLoading } = useBacklogItems(null);
+  const { meta, loading: metaLoading } = useBacklogMeta(1);
+  const loading = itemsLoading || metaLoading;
+
+  const allStatuses = meta.statuses.map(toBacklogStatus);
+
+  if (loading) {
+    return (
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {Array.from({ length: 5 }).map((_, i) => <SkeletonBacklogItem key={i} />)}
+      </div>
+    );
+  }
+
+  if (!loading && items.length === 0) {
+    return (
+      <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {Array.from({ length: 8 }).map((_, i) => <SkeletonBacklogItem key={i} />)}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+      {items.map(item => {
+        const statusRecord = meta.statuses.find(s => s.id === item.id_estatus);
+        const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
+        const status: BacklogStatus = statusRecord
+          ? toBacklogStatus(statusRecord)
+          : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
+
+        return (
+          <BacklogListItem
+            key={item.id}
+            code={`HU-${String(item.id).padStart(2, '0')}`}
+            title={item.nombre}
+            status={status}
+            statuses={allStatuses}
+            priority={toPriority(priorityRecord)}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function DebugCreateBacklogItem() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        style={{
+          padding: '0.6rem 1.4rem',
+          borderRadius: '999px',
+          border: 'none',
+          background: 'var(--color-mahindra-red)',
+          color: '#fff',
+          fontWeight: 600,
+          cursor: 'pointer',
+        }}
+      >
+        + Nuevo ítem de backlog
+      </button>
+      {open && (
+        <CreateBacklogItemForm
+          projectId={1}
+          userId={1}
+          onClose={() => setOpen(false)}
+          onCreated={() => setOpen(false)}
+        />
+      )}
+    </div>
+  );
+}
 
 // ── DB-connected wrappers (hooks require real components) ─────────────────────
 
@@ -30,14 +145,14 @@ function calcAge(fechaNacimiento: string): number {
 }
 
 function DbUserCard({ userId }: { userId: number }) {
-  const { usuario, loading } = useUsuario(userId);
-  if (loading || !usuario) return null;
+  const { userProfile, loading } = useUserProfile(userId);
+  if (loading || !userProfile) return null;
 
-  const nombre    = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ') || '—';
-  const birthDate = usuario.fecha_nacimiento
-    ? new Date(usuario.fecha_nacimiento).toLocaleDateString('es-MX')
+  const nombre    = [userProfile.nombre, userProfile.apellido].filter(Boolean).join(' ') || '—';
+  const birthDate = userProfile.fechaNacimiento
+    ? new Date(userProfile.fechaNacimiento).toLocaleDateString('es-MX')
     : '—';
-  const age = usuario.fecha_nacimiento ? calcAge(usuario.fecha_nacimiento) : 0;
+  const age = userProfile.fechaNacimiento ? calcAge(userProfile.fechaNacimiento) : 0;
 
   return (
     <UserCard
@@ -45,25 +160,25 @@ function DbUserCard({ userId }: { userId: number }) {
       name={nombre}
       age={age}
       birthDate={birthDate}
-      phone={usuario.telefono ?? '—'}
-      email={usuario.email}
-      aboutMe={usuario.sobre_mi ?? ''}
+      phone={userProfile.telefono ?? '—'}
+      email={userProfile.email}
+      aboutMe={userProfile.sobreMi ?? ''}
     />
   );
 }
 
 function DbListUserCard({ userId, roles }: { userId: number; roles: Role[] }) {
-  const { usuario, loading } = useUsuario(userId);
-  if (loading || !usuario) return null;
+  const { userProfile, loading } = useUserProfile(userId);
+  if (loading || !userProfile) return null;
 
-  const fullName = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ') || '—';
+  const fullName = [userProfile.nombre, userProfile.apellido].filter(Boolean).join(' ') || '—';
 
   return (
     <ListUserCard
       userId={userId}
       fullName={fullName}
       roles={roles}
-      email={usuario.email}
+      email={userProfile.email}
     />
   );
 }
@@ -224,9 +339,27 @@ export default function DebugApp() {
         </div>
       ),
 
-      profile: <Profile />,
+      backlogItem: <DebugBacklogList />,
+
+      createBacklogItem: <DebugCreateBacklogItem />,
+
+      profile: <Profile debugUserId={1} />,
 
       lootbox: <DbLootBox userId={1} />,
+
+      contextMenu: (() => {
+        const items: MenuComponent[] = [
+          { text: 'Ver detalles',   onClick: () => console.log('Ver detalles') },
+          { text: 'Editar',         onClick: () => console.log('Editar') },
+          { text: 'Archivar',       onClick: () => console.log('Archivar') },
+          { text: 'Eliminar',       onClick: () => console.log('Eliminar') },
+        ];
+        return (
+          <div style={{ padding: '2rem' }}>
+            <ContextMenu elements={items} />
+          </div>
+        );
+      })(),
     }),
     []
   );

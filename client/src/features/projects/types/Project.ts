@@ -2,6 +2,7 @@ export interface Project {
   id: number;
   nombre: string;
   descripcion: string;
+  stack_tecnologico: string[] | null;
   cliente: string;
   fecha_inicial: string;         // ISO: "2026-01-15"
   fecha_final: string;           // ISO: "2026-06-15"
@@ -26,3 +27,12 @@ export interface Project {
   completed_backlog_items: number;
   completion_percentage:   number;
 }
+
+// Interfaz para contexto de Projctos.
+export type ProjectContextData = Pick<Project,
+  | 'id'
+  | 'nombre'
+  | 'cliente'
+  | 'id_metodologia'
+  | 'id_estatus'
+>;

@@ -10,15 +10,15 @@ type RegisterUserPayload = {
   fecha_nacimiento: string | null;
   sobre_mi: string | null;
   jornada: number | null;
-  id_zona_horaria: number;
-  id_rol_global: number;
+  id_zona_horaria: number | null;
+  id_rol_global: number | null;
 };
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -39,15 +39,60 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
+  // Health check para el script local
+  if (req.method === 'GET') {
+    try {
+      const { error } = await adminClient
+        .from('usuario')
+        .select('id', { head: true, count: 'exact' });
+
+      if (error) {
+        return Response.json(
+          { status: 'starting', error: error.message },
+          { status: 503, headers: corsHeaders }
+        );
+      }
+
+      return Response.json(
+        { status: 'ok' },
+        { status: 200, headers: corsHeaders }
+      );
+    } catch (error) {
+      return Response.json(
+        {
+          status: 'starting',
+          error: error instanceof Error ? error.message : 'Health check failed',
+        },
+        { status: 503, headers: corsHeaders }
+      );
+    }
+  }
+
+  if (req.method !== 'POST') {
+    return Response.json(
+      { error: 'Method not allowed.' },
+      { status: 405, headers: corsHeaders }
+    );
+  }
+
   let createdAuthUserId: string | null = null;
 
   try {
-    const body = (await req.json()) as RegisterUserPayload;
+    let body: RegisterUserPayload;
+
+    try {
+      body = (await req.json()) as RegisterUserPayload;
+    } catch {
+      return Response.json(
+        { error: 'JSON inválido.' },
+        { status: 400, headers: corsHeaders }
+      );
+    }
 
     const email = body.email?.trim().toLowerCase();
     const password = body.password;
 
-    if (!email || !password || !body.id_zona_horaria) {
+    if (!email || !password || body.id_zona_horaria == null) {
       return Response.json(
         { error: 'Faltan campos obligatorios.' },
         { status: 400, headers: corsHeaders }
@@ -120,9 +165,16 @@ Deno.serve(async (req) => {
           { status: 403, headers: corsHeaders }
         );
       }
+
+      if (body.id_rol_global == null) {
+        return Response.json(
+          { error: 'id_rol_global es obligatorio.' },
+          { status: 400, headers: corsHeaders }
+        );
+      }
     }
 
-    const roleToInsert = isBootstrapMode ? 1 : body.id_rol_global;
+    const roleToInsert = isBootstrapMode ? 1 : body.id_rol_global!;
 
     const { data: authData, error: authError } =
       await adminClient.auth.admin.createUser({
@@ -159,7 +211,9 @@ Deno.serve(async (req) => {
       .single();
 
     if (usuarioError) {
-      await adminClient.auth.admin.deleteUser(createdAuthUserId);
+      try {
+        await adminClient.auth.admin.deleteUser(createdAuthUserId);
+      } catch (_) {}
 
       return Response.json(
         { error: usuarioError.message || 'No se pudo insertar en public.usuario.' },
@@ -180,7 +234,9 @@ Deno.serve(async (req) => {
     );
   } catch (error) {
     if (createdAuthUserId) {
-      await adminClient.auth.admin.deleteUser(createdAuthUserId);
+      try {
+        await adminClient.auth.admin.deleteUser(createdAuthUserId);
+      } catch (_) {}
     }
 
     return Response.json(
