@@ -23,7 +23,7 @@ export interface ISidebarProps {
 
 const Sidebar: React.FC<ISidebarProps> = () => {
   const navigate = useNavigate();
-  const { user } = useUser()
+  const { user, loading } = useUser()
 
   const handleLogout = async () => {
     try {
