@@ -23,6 +23,7 @@ export interface ISidebarProps {
 
 const Sidebar: React.FC<ISidebarProps> = () => {
   const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
   const { user, loading } = useUser()
 
   const handleLogout = async () => {
