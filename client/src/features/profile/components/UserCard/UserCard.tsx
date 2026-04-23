@@ -101,9 +101,14 @@ const UserCard: React.FC<UserCardProps> = ({
   const isSelfEdit = editScope === 'self';
   const isFullEdit = editScope === 'full';
   const isAboutMeOnly = editScope === 'aboutMe';
+  const isPreviewOnly = editScope === 'none';
 
   return (
-    <div className={styles.profileCard}>
+    <div
+      className={`${styles.profileCard} ${
+        isPreviewOnly ? styles.profileCardPreview : ''
+      }`}
+    >
       {editScope !== 'none' && !isEditing && (
         <button
           className={styles.editCardBtn}
