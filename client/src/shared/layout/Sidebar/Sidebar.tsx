@@ -7,7 +7,7 @@ import { useUser } from '@/core/auth/userContext';
 import {
   UserCircleIcon,
   BeakerIcon,
-  LockClosedIcon,
+  //LockClosedIcon,
   BookOpenIcon,
   BookmarkIcon,
   UserPlusIcon,
@@ -23,7 +23,7 @@ export interface ISidebarProps {
 
 const Sidebar: React.FC<ISidebarProps> = () => {
   const navigate = useNavigate();
-  const { user, loading } = useUser()
+  const { user } = useUser()
 
   const handleLogout = async () => {
     try {
