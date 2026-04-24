@@ -179,7 +179,7 @@ const EditBacklogItemForm: React.FC<EditBacklogItemFormProps> = ({ item, meta, o
   const [error, setError] = useState<string | null>(null);
 
   // Re-sync form if item changes
-  useEffect(() => { setForm(itemToForm(item)); }, [item.id]);
+  useEffect(() => { setForm(itemToForm(item)); }, [item]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
