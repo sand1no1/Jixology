@@ -1,6 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  BellIcon,
+  BugAntIcon,
+  BriefcaseIcon,
+  ListBulletIcon,
+  BookOpenIcon,
+  BoltIcon,
   ChevronDoubleDownIcon,
   ChevronDoubleUpIcon,
   ChevronDownIcon,
@@ -9,7 +13,18 @@ import {
   MinusIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
+import ContextMenu from '@/shared/components/ContextMenu';
 import styles from './BacklogListItem.module.css';
+
+export type BacklogItemType = 'Bug' | 'Tarea' | 'Subtarea' | 'Historia de Usuario' | 'Épica';
+
+const TYPE_ICONS: Record<BacklogItemType, React.ReactNode> = {
+  Bug:                   <BugAntIcon     width={16} height={16} />,
+  Tarea:                 <BriefcaseIcon  width={16} height={16} />,
+  Subtarea:              <ListBulletIcon width={16} height={16} />,
+  'Historia de Usuario': <BookOpenIcon   width={16} height={16} />,
+  'Épica':               <BoltIcon       width={16} height={16} />,
+};
 
 export interface BacklogStatus {
   label: string;
@@ -27,14 +42,14 @@ interface PriorityOption {
 }
 
 const PRIORITY_OPTIONS: PriorityOption[] = [
-  { value: 'critical', icon: <ChevronDoubleUpIcon width={16} height={16} />,   label: 'Crítica', color: 'var(--color-mahindra-red)' },
-  { value: 'high',     icon: <ChevronUpIcon width={16} height={16} />,         label: 'Alta',    color: '#f97316' },
-  { value: 'medium',   icon: <MinusIcon width={16} height={16} />,             label: 'Media',   color: 'var(--color-anchor-gray-1)' },
-  { value: 'low',      icon: <ChevronDownIcon width={16} height={16} />,       label: 'Baja',    color: '#3b82f6' },
+  { value: 'critical', icon: <ChevronDoubleUpIcon   width={16} height={16} />, label: 'Crítica', color: 'var(--color-mahindra-red)' },
+  { value: 'high',     icon: <ChevronUpIcon         width={16} height={16} />, label: 'Alta',    color: '#f97316' },
+  { value: 'medium',   icon: <MinusIcon             width={16} height={16} />, label: 'Media',   color: 'var(--color-anchor-gray-1)' },
+  { value: 'low',      icon: <ChevronDownIcon       width={16} height={16} />, label: 'Baja',    color: '#3b82f6' },
   { value: 'minimal',  icon: <ChevronDoubleDownIcon width={16} height={16} />, label: 'Mínima',  color: '#1d4ed8' },
 ];
 
-type OpenDropdown = 'status' | 'priority' | null;
+type OpenDropdown = 'status' | 'priority' | 'menu' | null;
 
 interface BacklogListItemProps {
   code: string;
@@ -42,11 +57,12 @@ interface BacklogListItemProps {
   status: BacklogStatus;
   statuses?: BacklogStatus[];
   priority?: Priority;
+  itemType?: BacklogItemType;
   onStatusChange?: (status: BacklogStatus) => void;
   onPriorityChange?: (priority: Priority) => void;
-  onBellClick?: () => void;
   onAssign?: () => void;
-  onMoreOptions?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const BacklogListItem: React.FC<BacklogListItemProps> = ({
@@ -55,18 +71,19 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
   status,
   statuses = [],
   priority = 'medium',
+  itemType = 'Tarea',
   onStatusChange,
   onPriorityChange,
-  onBellClick,
   onAssign,
-  onMoreOptions,
+  onEdit,
+  onDelete,
 }) => {
-  const [open, setOpen]                   = useState<OpenDropdown>(null);
-  const [currentStatus, setCurrentStatus] = useState<BacklogStatus>(status);
+  const [open, setOpen]                       = useState<OpenDropdown>(null);
+  const [currentStatus, setCurrentStatus]     = useState<BacklogStatus>(status);
   const [currentPriority, setCurrentPriority] = useState<Priority>(priority ?? 'medium');
   const rowRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click
+  // Close any open dropdown/menu on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -80,12 +97,17 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
 
   const currentPriorityOption = PRIORITY_OPTIONS.find(o => o.value === currentPriority) ?? PRIORITY_OPTIONS[2];
 
+  const menuItems = [
+    { text: 'Editar',    onClick: () => { setOpen(null); onEdit?.();   } },
+    { text: 'Eliminar',  onClick: () => { setOpen(null); onDelete?.(); } },
+  ];
+
   return (
     <div className={styles.row} ref={rowRef}>
-      {/* Bell */}
-      <button className={styles.iconBtn} onClick={onBellClick} type="button" aria-label="Notificaciones">
-        <BellIcon width={16} height={16} />
-      </button>
+      {/* Type icon */}
+      <span className={styles.typeIcon} aria-label={itemType}>
+        {TYPE_ICONS[itemType]}
+      </span>
 
       {/* Code */}
       <span className={styles.code}>{code}</span>
@@ -162,10 +184,24 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
         <UserIcon width={16} height={16} />
       </button>
 
-      {/* More options */}
-      <button className={styles.iconBtn} onClick={onMoreOptions} type="button" aria-label="Más opciones">
-        <EllipsisVerticalIcon width={16} height={16} />
-      </button>
+      {/* More options — context menu */}
+      <div className={styles.menuWrapper}>
+        <button
+          className={`${styles.iconBtn} ${open === 'menu' ? styles.iconBtnActive : ''}`}
+          type="button"
+          aria-label="Más opciones"
+          aria-expanded={open === 'menu'}
+          onClick={() => setOpen(o => o === 'menu' ? null : 'menu')}
+        >
+          <EllipsisVerticalIcon width={16} height={16} />
+        </button>
+
+        {open === 'menu' && (
+          <div className={styles.contextMenuPopover}>
+            <ContextMenu elements={menuItems} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };
