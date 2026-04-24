@@ -6,7 +6,7 @@ import type {
   ProjectCatalogOption,
   ProjectCurrencyOption,
   ProjectStatusOption,
-} from '@/features/projects/types/create.project.types';
+} from '@/features/project/projectHub/types/create.project.types';
 
 function mapCatalogOption(row: { id: number; nombre: string }): ProjectCatalogOption {
   return {

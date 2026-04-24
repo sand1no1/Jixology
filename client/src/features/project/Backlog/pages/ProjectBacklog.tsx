@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import BacklogListItem from '@/features/projectView/components/BacklogListItem';
-import type { BacklogStatus, Priority, BacklogItemType } from '@/features/projectView/components/BacklogListItem';
-import CreateBacklogItemForm from '@/features/backlogItem/components/CreateBacklogItemForm';
-import EditBacklogItemForm from '@/features/backlogItem/components/EditBacklogItemForm/EditBacklogItemForm';
-import SkeletonBacklogItem from '@/features/backlogItem/components/SkeletonBacklogItem/SkeletonBacklogItem';
-import { useBacklogItems } from '@/features/backlogItem/hooks/useBacklogItems';
-import { useBacklogMeta } from '@/features/backlogItem/hooks/useBacklogMeta';
-import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord } from '@/features/backlogItem/types/backlog.types';
+import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
+import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
+import CreateBacklogItemForm from '@/features/project/Backlog/components/CreateBacklogItemForm';
+import EditBacklogItemForm from '@/features/project/Backlog/components/EditBacklogItemForm/EditBacklogItemForm';
+import SkeletonBacklogItem from '@/features/project/Backlog/components/SkeletonBacklogItem/SkeletonBacklogItem';
+import { useBacklogItems } from '@/features/project/Backlog/hooks/useBacklogItems';
+import { useBacklogMeta } from '@/features/project/Backlog/hooks/useBacklogMeta';
+import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
 
 const PROJECT_ID = 1;

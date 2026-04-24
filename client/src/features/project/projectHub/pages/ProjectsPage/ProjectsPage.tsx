@@ -4,24 +4,24 @@ import { useUser } from '@/core/auth/userContext';
 import { useNavigate } from 'react-router-dom';
 
 // --- Interfaces ---
-import type { Project } from '@/features/projects/types/Project';
+import type { Project } from '@/features/project/projectHub/types/Project';
 import type { MenuComponent } from '@/shared/components/ContextMenu';
 
 // --- Servicios ---
-import { archiveProject, unarchiveProject, changeProjectStatus, getArchivedProjects } from '@/features/projects/services/projects.services';
+import { archiveProject, unarchiveProject, changeProjectStatus, getArchivedProjects } from '@/features/project/projectHub/services/projects.services';
 
 // --- Hooks ---
 import { useProjectCards} from '../../hooks/useProjects';
 import { useRecentProjects } from '../../hooks/useRecentProjects';
 
 // --- Componentes ---
-import ProjectCard from '@/features/projects/components/ProjectCard';
+import ProjectCard from '@/features/project/projectHub/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
 import EmptyState from '@/shared/components/EmptyState';
 import SkeletonCard from '@/shared/components/SkeletonCard';
-import CreateProject from '@/features/projects/components/CreateProject';
-import ProjectCreationToast from '@/features/projects/components/ProjectCreationToast';
+import CreateProject from '@/features/project/projectHub/components/CreateProject';
+import ProjectCreationToast from '@/features/project/projectHub/components/ProjectCreationToast';
 
 type FilterKey = 'TodosLosProyectos' | 'Completados' | 'EnProgreso' | 'Retrasado' | 'SinAsignar' | 'Archivados';
 

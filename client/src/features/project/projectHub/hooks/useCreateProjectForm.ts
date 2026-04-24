@@ -3,14 +3,14 @@ import type { ChangeEvent, ComponentProps, FocusEvent } from 'react';
 import {
   createProject,
   getCreateProjectCatalogs,
-} from '@/features/projects/services/create.project';
+} from '@/features/project/projectHub/services/create.project';
 import type {
   CreateProjectFormErrors,
   CreateProjectFormValues,
   CreateProjectPayload,
   ProjectCatalogs,
   ProjectFormFeedback,
-} from '@/features/projects/types/create.project.types';
+} from '@/features/project/projectHub/types/create.project.types';
 
 export const minAllowedDate = '2000-01-01';
 export const maxAllowedDate = '2100-12-31';
