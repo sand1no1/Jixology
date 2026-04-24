@@ -1,6 +1,12 @@
 import { supabase } from '@/core/supabase/supabase.client';
-import type { CreateProjectPayload, CreateProjectResponse, ProjectCatalogs, ProjectCatalogOption, ProjectCurrencyOption, ProjectStatusOption, CreateProjectFormValues } from '@/features/projects/types/create.project.types';
-import { hasAdminRole } from '@/core/auth/user.service';
+import type {
+  CreateProjectPayload,
+  CreateProjectResponse,
+  ProjectCatalogs,
+  ProjectCatalogOption,
+  ProjectCurrencyOption,
+  ProjectStatusOption,
+} from '@/features/project/projectHub/types/create.project.types';
 
 function mapCatalogOption(row: { id: number; nombre: string }): ProjectCatalogOption {
   return {

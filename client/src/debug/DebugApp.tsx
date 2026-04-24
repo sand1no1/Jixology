@@ -1,12 +1,12 @@
 import React, { useMemo, useState } from 'react';
 import '@/app/index.css';
 
-import ProjectCard from '@/features/projects/components/ProjectCard';
+import ProjectCard from '@/features/project/projectHub/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
 import LogInPage from '@/features/auth/pages/LogInPage';
 import Profile from '@/features/profile/pages';
 import SearchBarComponent from '@/shared/components/SearchBarComponent';
-import ProjectsPage from '@/features/projects/pages/ProjectsPage';
+import ProjectsPage from '@/features/project/projectHub/pages/ProjectsPage';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
 import ListUserCard from '@/shared/components/ListUserCard';
 import type { Role } from '@/shared/components/ListUserCard';
@@ -15,13 +15,13 @@ import { AvatarLootBox } from '@/features/profile/components/AvatarLootBox';
 import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
 import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
 import { useAvatarFeatures } from '@/features/profile/hooks/useAvatarFeatures';
-import BacklogListItem from '@/features/projectView/components/BacklogListItem';
-import type { BacklogStatus, Priority } from '@/features/projectView/components/BacklogListItem';
-import CreateBacklogItemForm from '@/features/backlogItem/components/CreateBacklogItemForm';
-import SkeletonBacklogItem from '@/features/backlogItem/components/SkeletonBacklogItem/SkeletonBacklogItem';
-import { useBacklogItems } from '@/features/backlogItem/hooks/useBacklogItems';
-import { useBacklogMeta } from '@/features/backlogItem/hooks/useBacklogMeta';
-import type { BacklogStatusRecord, BacklogPriorityRecord } from '@/features/backlogItem/types/backlog.types';
+import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
+import type { BacklogStatus, Priority } from '@/features/project/Backlog/components/BacklogListItem';
+import CreateBacklogItemForm from '@/features/project/Backlog/components/CreateBacklogItemForm';
+import SkeletonBacklogItem from '@/features/project/Backlog/components/SkeletonBacklogItem/SkeletonBacklogItem';
+import { useBacklogItems } from '@/features/project/Backlog/hooks/useBacklogItems';
+import { useBacklogMeta } from '@/features/project/Backlog/hooks/useBacklogMeta';
+import type { BacklogStatusRecord, BacklogPriorityRecord } from '@/features/project/Backlog/types/backlog.types';
 
 // --- Shared Components ---
 import ContextMenu from '@/shared/components/ContextMenu';
