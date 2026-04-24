@@ -44,6 +44,17 @@ export interface SprintRecord {
   id_estatus: number;
 }
 
+export interface UpdateBacklogItemPayload {
+  nombre: string;
+  descripcion?: string | null;
+  id_tipo?: number | null;
+  id_estatus: number;
+  id_prioridad?: number | null;
+  id_sprint?: number | null;
+  fecha_inicio?: string | null;
+  fecha_vencimiento?: string | null;
+}
+
 export interface CreateBacklogItemPayload {
   nombre: string;
   descripcion?: string | null;

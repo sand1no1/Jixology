@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import BacklogListItem from '@/features/projectView/components/BacklogListItem';
-import type { BacklogStatus, Priority } from '@/features/projectView/components/BacklogListItem';
+import type { BacklogStatus, Priority, BacklogItemType } from '@/features/projectView/components/BacklogListItem';
 import CreateBacklogItemForm from '@/features/backlogItem/components/CreateBacklogItemForm';
+import EditBacklogItemForm from '@/features/backlogItem/components/EditBacklogItemForm/EditBacklogItemForm';
 import SkeletonBacklogItem from '@/features/backlogItem/components/SkeletonBacklogItem/SkeletonBacklogItem';
 import { useBacklogItems } from '@/features/backlogItem/hooks/useBacklogItems';
 import { useBacklogMeta } from '@/features/backlogItem/hooks/useBacklogMeta';
-import type { BacklogStatusRecord, BacklogPriorityRecord } from '@/features/backlogItem/types/backlog.types';
+import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord } from '@/features/backlogItem/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
 
 const PROJECT_ID = 1;
@@ -40,7 +41,8 @@ function toPriority(record: BacklogPriorityRecord | undefined): Priority {
 const ProjectBacklog: React.FC = () => {
   const { items, loading: itemsLoading, refresh } = useBacklogItems(PROJECT_ID);
   const { meta, loading: metaLoading } = useBacklogMeta(PROJECT_ID);
-  const [showForm, setShowForm] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingItem, setEditingItem] = useState<BacklogItemRecord | null>(null);
 
   const loading = itemsLoading || metaLoading;
   const allStatuses = meta.statuses.map(toBacklogStatus);
@@ -51,7 +53,7 @@ const ProjectBacklog: React.FC = () => {
         <button
           type="button"
           className={styles.newItemBtn}
-          onClick={() => setShowForm(true)}
+          onClick={() => setShowCreateForm(true)}
         >
           <PlusIcon width={16} height={16} />
           Nuevo ítem
@@ -65,8 +67,9 @@ const ProjectBacklog: React.FC = () => {
           <p className={styles.empty}>No hay ítems en el backlog.</p>
         ) : (
           items.map(item => {
-            const statusRecord  = meta.statuses.find(s => s.id === item.id_estatus);
+            const statusRecord   = meta.statuses.find(s => s.id === item.id_estatus);
             const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
+            const typeRecord     = meta.types.find(t => t.id === item.id_tipo);
             const status: BacklogStatus = statusRecord
               ? toBacklogStatus(statusRecord)
               : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
@@ -79,18 +82,29 @@ const ProjectBacklog: React.FC = () => {
                 status={status}
                 statuses={allStatuses}
                 priority={toPriority(priorityRecord)}
+                itemType={typeRecord?.nombre as BacklogItemType | undefined}
+                onEdit={() => setEditingItem(item)}
               />
             );
           })
         )}
       </div>
 
-      {showForm && (
+      {showCreateForm && (
         <CreateBacklogItemForm
           projectId={PROJECT_ID}
           userId={USER_ID}
-          onClose={() => setShowForm(false)}
-          onCreated={() => { refresh(); setShowForm(false); }}
+          onClose={() => setShowCreateForm(false)}
+          onCreated={() => { refresh(); setShowCreateForm(false); }}
+        />
+      )}
+
+      {editingItem && (
+        <EditBacklogItemForm
+          item={editingItem}
+          meta={meta}
+          onClose={() => setEditingItem(null)}
+          onUpdated={() => { refresh(); setEditingItem(null); }}
         />
       )}
     </div>

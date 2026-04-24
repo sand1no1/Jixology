@@ -6,6 +6,7 @@ import type {
   BacklogTypeRecord,
   SprintRecord,
   CreateBacklogItemPayload,
+  UpdateBacklogItemPayload,
 } from '../types/backlog.types';
 
 export async function fetchBacklogItems(projectId?: number): Promise<BacklogItemRecord[]> {
@@ -81,6 +82,27 @@ export async function createBacklogItem(payload: CreateBacklogItemPayload): Prom
       id_usuario_creador:    payload.id_usuario_creador,
       es_terminal:           false,
     })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function updateBacklogItem(id: number, payload: UpdateBacklogItemPayload): Promise<BacklogItemRecord> {
+  const { data, error } = await supabase
+    .from('backlog_item')
+    .update({
+      nombre:            payload.nombre,
+      descripcion:       payload.descripcion ?? null,
+      id_tipo:           payload.id_tipo ?? null,
+      id_estatus:        payload.id_estatus,
+      id_prioridad:      payload.id_prioridad ?? null,
+      id_sprint:         payload.id_sprint ?? null,
+      fecha_inicio:      payload.fecha_inicio ?? null,
+      fecha_vencimiento: payload.fecha_vencimiento ?? null,
+    })
+    .eq('id', id)
     .select()
     .single();
 
