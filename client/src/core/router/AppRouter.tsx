@@ -6,9 +6,9 @@ import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 import AdminPage from '@/features/admin/pages/adminPage';
-import ProjectPage from '@/features/projects/pages/ProjectsPage';
-import ProjectTask from '@/features/projects/pages/ProjectTasks';
-import ProjectBacklog from '@/features/projectView/pages/ProjectBacklog';
+import ProjectPage from '@/features/project/projectHub/pages/ProjectsPage';
+import ProjectTask from '@/features/project/ProjectTasks';
+import ProjectBacklog from '@/features/project/Backlog/pages/ProjectBacklog';
 import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
 
 // --- Layout ---
