@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+//import {
+//  CalendarDaysIcon
+//} from '@heroicons/react/24/solid';
 
 import userImg from '@/assets/images/ProfileDefualt.jpg';
 import styles from './ProjectTasks.module.css';
@@ -70,6 +73,7 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
 
       {task.date && (
         <div className={styles.TaskData}>
+          
           <label>{task.date}</label>
           <div>
             <label>{task.user}</label>
@@ -84,7 +88,10 @@ const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
 const TaskColumn: React.FC<{ column: Column }> = ({ column }) => {
   return (
     <div className={styles.ProjectList}>
-      <label className={styles.SectionTitle}>{column.title}</label>
+      <div className={styles.UpperTitle}>
+        <label className={styles.SectionTitle}>{column.title}</label>
+        <label>Hola</label>
+      </div>
 
       {column.tasks.map(task => (
         <TaskCard key={task.id} task={task} />

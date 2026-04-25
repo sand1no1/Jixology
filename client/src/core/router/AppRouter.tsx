@@ -6,8 +6,9 @@ import ProfilePage from '@/features/profile/pages';
 import UserDashboardPage from '@/features/user/pages/DashboardPage';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 import AdminPage from '@/features/admin/pages/adminPage';
-import ProjectPage from '@/features/projects/pages/ProjectsPage';
-import ProjectTask from '@/features/projects/pages/ProjectTasks';
+import ProjectPage from '@/features/project/projectHub/pages/ProjectsPage';
+import ProjectTask from '@/features/project/ProjectTasks';
+import ProjectBacklog from '@/features/project/Backlog/pages/ProjectBacklog';
 import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
 
 // --- Layout ---
@@ -27,13 +28,13 @@ export function AppRouter() {
 
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
         <Route element={<AppLayoutHs />}>
+          <Route path="/proyectos"         element={<ProjectPage />} />
           <Route path="/perfil"            element={<ProfilePage />} />
           <Route path="/dashboard-usuario" element={<UserDashboardPage />} />
           <Route element={<ProtectedRoute allowedRoles={ADMIN_VIEWS} />}>
             <Route path="/usuarios" element={<AdminPage />} />
             <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
           </Route>
-          <Route path="/proyectos"         element={<ProjectPage />} />
         </Route>
       </Route>
 
@@ -41,6 +42,7 @@ export function AppRouter() {
         <Route element={<AppLayoutHsProject />}>
           <Route path="/proyectos/dummy" element={<Navigate to="/proyectos/dummy/tasks" replace />} />
           <Route path="/proyectos/dummy/tasks"   element={<ProjectTask />} />
+          <Route path="/proyectos/dummy/backlog" element={<ProjectBacklog />} />
         </Route>
       </Route>
 

@@ -18,7 +18,16 @@
   border-color: var(--color-anchor-gray-1);
 }
 
-/* ── Icon buttons — bell, priority, assignee, more ───────────────── */
+/* ── Type icon ───────────────────────────────────────────────────── */
+.typeIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-anchor-gray-1);
+  flex-shrink: 0;
+}
+
+/* ── Icon buttons — priority, assignee, more ─────────────────────── */
 .iconBtn {
   display: flex;
   align-items: center;
@@ -184,4 +193,25 @@
 
 .dropdownItemActive {
   background: var(--color-clarity-gray-2);
+}
+
+/* ── Active state for icon buttons ───────────────────────────────── */
+.iconBtnActive {
+  background: var(--color-clarity-gray-1);
+  color: var(--color-blueprint-navy);
+}
+
+/* ── Context menu popover ────────────────────────────────────────── */
+.menuWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contextMenuPopover {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 200;
 }

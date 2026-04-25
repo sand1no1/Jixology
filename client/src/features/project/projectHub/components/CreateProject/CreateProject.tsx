@@ -3,7 +3,7 @@ import {
   useCreateProjectForm,
   minAllowedDate,
   maxAllowedDate
-} from '@/features/projects/hooks/useCreateProjectForm';
+} from '@/features/project/projectHub/hooks/useCreateProjectForm';
 import {
   ChevronDownIcon,
   ChevronUpIcon,
