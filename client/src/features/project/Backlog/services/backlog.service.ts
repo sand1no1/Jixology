@@ -5,6 +5,7 @@ import type {
   BacklogPriorityRecord,
   BacklogTypeRecord,
   SprintRecord,
+  UserRecord,
   CreateBacklogItemPayload,
   UpdateBacklogItemPayload,
 } from '../types/backlog.types';
@@ -63,6 +64,16 @@ export async function fetchSprintsByProject(projectId: number): Promise<SprintRe
   return data ?? [];
 }
 
+export async function fetchProjectMembers(projectId: number): Promise<UserRecord[]> {
+  const { data, error } = await supabase
+    .from('usuario_proyecto')
+    .select('usuario(id, nombre, apellido, email)')
+    .eq('id_proyecto', projectId);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: { usuario: UserRecord }) => row.usuario);
+}
+
 export async function createBacklogItem(payload: CreateBacklogItemPayload): Promise<BacklogItemRecord> {
   const { data, error } = await supabase
     .from('backlog_item')
@@ -93,14 +104,16 @@ export async function updateBacklogItem(id: number, payload: UpdateBacklogItemPa
   const { data, error } = await supabase
     .from('backlog_item')
     .update({
-      nombre:            payload.nombre,
-      descripcion:       payload.descripcion ?? null,
-      id_tipo:           payload.id_tipo ?? null,
-      id_estatus:        payload.id_estatus,
-      id_prioridad:      payload.id_prioridad ?? null,
-      id_sprint:         payload.id_sprint ?? null,
-      fecha_inicio:      payload.fecha_inicio ?? null,
-      fecha_vencimiento: payload.fecha_vencimiento ?? null,
+      nombre:                 payload.nombre,
+      descripcion:            payload.descripcion ?? null,
+      id_tipo:                payload.id_tipo ?? null,
+      id_estatus:             payload.id_estatus,
+      id_prioridad:           payload.id_prioridad ?? null,
+      id_sprint:              payload.id_sprint ?? null,
+      fecha_inicio:           payload.fecha_inicio ?? null,
+      fecha_vencimiento:      payload.fecha_vencimiento ?? null,
+      id_backlog_item_padre:  payload.id_backlog_item_padre  ?? null,
+      id_usuario_responsable: payload.id_usuario_responsable ?? null,
     })
     .eq('id', id)
     .select()

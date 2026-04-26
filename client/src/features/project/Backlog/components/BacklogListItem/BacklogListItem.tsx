@@ -14,6 +14,7 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 import ContextMenu from '@/shared/components/ContextMenu';
+import { useUserAvatarSvg } from '@/features/profile/hooks/useUserAvatarSvg';
 import styles from './BacklogListItem.module.css';
 
 export type BacklogItemType = 'Bug' | 'Tarea' | 'Subtarea' | 'Historia de Usuario' | 'Épica';
@@ -49,6 +50,19 @@ const PRIORITY_OPTIONS: PriorityOption[] = [
   { value: 'minimal',  icon: <ChevronDoubleDownIcon width={16} height={16} />, label: 'Mínima',  color: '#1d4ed8' },
 ];
 
+// ── UserAvatar ────────────────────────────────────────────────────
+function UserAvatar({ userId }: { userId: number }) {
+  const { avatarSvg } = useUserAvatarSvg(userId);
+  return (
+    <div className={styles.avatarCircle}>
+      {avatarSvg
+        ? <div className={styles.avatarSvg} dangerouslySetInnerHTML={{ __html: avatarSvg }} />
+        : <UserIcon width={14} height={14} />
+      }
+    </div>
+  );
+}
+
 type OpenDropdown = 'status' | 'priority' | 'menu' | null;
 
 interface BacklogListItemProps {
@@ -58,6 +72,7 @@ interface BacklogListItemProps {
   statuses?: BacklogStatus[];
   priority?: Priority;
   itemType?: BacklogItemType;
+  responsibleUserId?: number;
   onStatusChange?: (status: BacklogStatus) => void;
   onPriorityChange?: (priority: Priority) => void;
   onAssign?: () => void;
@@ -72,6 +87,7 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
   statuses = [],
   priority = 'medium',
   itemType = 'Tarea',
+  responsibleUserId,
   onStatusChange,
   onPriorityChange,
   onAssign,
@@ -180,9 +196,12 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
       </div>
 
       {/* Assignee */}
-      <button className={styles.iconBtn} onClick={onAssign} type="button" aria-label="Asignar">
-        <UserIcon width={16} height={16} />
-      </button>
+      {responsibleUserId != null
+        ? <UserAvatar userId={responsibleUserId} />
+        : <button className={styles.iconBtn} onClick={onAssign} type="button" aria-label="Asignar">
+            <UserIcon width={16} height={16} />
+          </button>
+      }
 
       {/* More options — context menu */}
       <div className={styles.menuWrapper}>

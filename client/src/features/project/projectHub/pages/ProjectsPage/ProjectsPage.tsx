@@ -17,7 +17,7 @@ import { useRecentProjects } from '../../hooks/useRecentProjects';
 // --- Componentes ---
 import ProjectCard from '@/features/project/projectHub/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
-import SearchBarComponent from '@/shared/components/SearchBarComponent';
+import FilterBar from '@/shared/components/FilterBar';
 import EmptyState from '@/shared/components/EmptyState';
 import SkeletonCard from '@/shared/components/SkeletonCard';
 import CreateProject from '@/features/project/projectHub/components/CreateProject';
@@ -164,26 +164,19 @@ const ProjectsPage: React.FC = () => {
   return (
     <>
       <div className={styles.container}>
-        <div className={styles.topBar}>
-          <div className={styles.searchWrapper}>
-            <SearchBarComponent infoText="Buscar proyectos" onChange={setSearch} />
-          </div>
+        <FilterBar
+          searchPlaceholder="Buscar proyectos"
+          onSearchChange={setSearch}
+          filters={(Object.keys(FILTER_LABELS) as FilterKey[])
+            .filter(k => k !== 'TodosLosProyectos')
+            .map(k => ({ id: k, label: FILTER_LABELS[k] }))}
+          activeFilter={activeFilter === 'TodosLosProyectos' ? null : activeFilter}
+          onFilterChange={v => setActiveFilter(v === null ? 'TodosLosProyectos' : v as FilterKey)}
+        >
           <button className={`${styles.createProject} ${styles.createProjectWrapper}`} onClick={() => setIsCreateProjectOpen(true)}>
             Crear proyecto
           </button>
-        </div>
-        <div className={styles.filterPills}>
-          {(Object.keys(FILTER_LABELS) as FilterKey[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveFilter(key)}
-              className={`${styles.pill} ${activeFilter === key ? styles.pillActive : ''}`}
-            >
-              {FILTER_LABELS[key]}
-            </button>
-          ))}
-        </div>
+        </FilterBar>
 
         {activeFilter === 'Archivados' ? (
           archivedLoading ? (
