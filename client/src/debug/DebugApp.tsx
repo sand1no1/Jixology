@@ -121,14 +121,13 @@ function DebugCreateBacklogItem() {
       >
         + Nuevo ítem de backlog
       </button>
-      {open && (
-        <CreateBacklogItemForm
-          projectId={1}
-          userId={1}
-          onClose={() => setOpen(false)}
-          onCreated={() => setOpen(false)}
-        />
-      )}
+      <CreateBacklogItemForm
+        projectId={1}
+        userId={1}
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onCreated={() => setOpen(false)}
+      />
     </div>
   );
 }
