@@ -49,7 +49,7 @@ const ProjectsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
-  const { recentIds, trackVisit } = useRecentProjects(user?.id);
+  const { recentIds } = useRecentProjects(user?.id);
   const navigate = useNavigate();
 
   const [archivedProjects, setArchivedProjects] = useState<Project[]>([]);
@@ -227,7 +227,7 @@ const ProjectsPage: React.FC = () => {
                       projectFTE={p.fte}
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
-                      onClick={() => navigate(`/proyectos/${project.id}`)}
+                      onClick={() => navigate(`/proyectos/${p.id}`)}
                       menuItems={buildMenuItems(p)}
                     />
                   ))}
