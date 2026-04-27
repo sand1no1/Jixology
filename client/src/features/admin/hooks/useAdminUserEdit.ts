@@ -33,6 +33,7 @@ const emptyValues: AdminUserEditFormValues = {
 
 export function useAdminUserEdit(userId?: number, enabled = true) {
   const [authId, setAuthId] = useState('');
+  const [originalEmail, setOriginalEmail] = useState('');
   const [values, setValues] = useState<AdminUserEditFormValues>(emptyValues);
   const [loading, setLoading] = useState(enabled);
   const [saving, setSaving] = useState(false);
@@ -61,6 +62,7 @@ export function useAdminUserEdit(userId?: number, enabled = true) {
       const user = await getAdminUserById(userId);
 
       setAuthId(user.auth_id);
+      setOriginalEmail(user.email ?? '');
       setValues({
         email: user.email ?? '',
         password: '',
@@ -98,6 +100,7 @@ export function useAdminUserEdit(userId?: number, enabled = true) {
       id: userId,
       auth_id: authId,
       email: values.email.trim().toLowerCase(),
+      original_email: originalEmail.trim().toLowerCase(),
       password: values.password.trim() || undefined,
       nombre: values.nombre.trim() || null,
       apellido: values.apellido.trim() || null,
@@ -112,7 +115,7 @@ export function useAdminUserEdit(userId?: number, enabled = true) {
         ? Number(values.id_rol_global)
         : null,
     };
-  }, [authId, userId, values]);
+  }, [authId, originalEmail, userId, values]);
 
   const submit = async () => {
     if (!payload) {
@@ -127,6 +130,7 @@ export function useAdminUserEdit(userId?: number, enabled = true) {
       const response = await updateAdminUserService(payload);
       setSuccess(response.message || 'Usuario actualizado correctamente.');
       setValues((prev) => ({ ...prev, password: '' }));
+      setOriginalEmail(payload.email);
       return response;
     } catch (err) {
       const message =

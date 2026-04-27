@@ -15,12 +15,22 @@ interface UpdateAdminUserPayload {
   id_rol_global: number | null;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': 'https://frontend-au36.onrender.com',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   try {
     if (req.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed.' }), {
         status: 405,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -28,7 +38,7 @@ Deno.serve(async (req) => {
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing Authorization header.' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -58,7 +68,7 @@ Deno.serve(async (req) => {
     if (requesterError || !requester) {
       return new Response(JSON.stringify({ error: 'Unauthorized.' }), {
         status: 401,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -73,7 +83,7 @@ Deno.serve(async (req) => {
         JSON.stringify({ error: 'Solo un administrador puede actualizar usuarios.' }),
         {
           status: 403,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
@@ -83,7 +93,7 @@ Deno.serve(async (req) => {
     if (!body.id || !body.auth_id || !body.email) {
       return new Response(JSON.stringify({ error: 'Payload incompleto.' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -103,7 +113,7 @@ Deno.serve(async (req) => {
     if (authError) {
       return new Response(JSON.stringify({ error: authError.message }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -125,7 +135,7 @@ Deno.serve(async (req) => {
     if (userError) {
       return new Response(JSON.stringify({ error: userError.message }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -133,14 +143,14 @@ Deno.serve(async (req) => {
       JSON.stringify({ message: 'Usuario actualizado correctamente.' }),
       {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error.';
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
