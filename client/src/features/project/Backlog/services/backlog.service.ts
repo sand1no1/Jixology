@@ -64,14 +64,14 @@ export async function fetchSprintsByProject(projectId: number): Promise<SprintRe
   return data ?? [];
 }
 
-export async function fetchProjectMembers(projectId: number): Promise<UserRecord[]> {
+export async function fetchProjectMembers(_projectId: number): Promise<UserRecord[]> {
   const { data, error } = await supabase
-    .from('usuario_proyecto')
-    .select('usuario(id, nombre, apellido, email)')
-    .eq('id_proyecto', projectId);
+    .from('usuario')
+    .select('id, nombre, apellido, email')
+    .order('nombre', { ascending: true });
 
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row: { usuario: UserRecord }) => row.usuario);
+  return data ?? [];
 }
 
 export async function createBacklogItem(payload: CreateBacklogItemPayload): Promise<BacklogItemRecord> {

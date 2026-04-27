@@ -10,7 +10,7 @@ import ContextMenu from '@/shared/components/ContextMenu';
 import type { MenuComponent } from '@/shared/components/ContextMenu';
 import { useBacklogItems } from '@/features/project/Backlog/hooks/useBacklogItems';
 import { useBacklogMeta } from '@/features/project/Backlog/hooks/useBacklogMeta';
-import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord } from '@/features/project/Backlog/types/backlog.types';
+import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord, SprintRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
 
 const PROJECT_ID = 1;
@@ -21,6 +21,14 @@ const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
   2: { color: '#DBEAFE', textColor: '#1D4ED8' },
   3: { color: '#FEF3C7', textColor: '#D97706' },
   4: { color: '#D1FAE5', textColor: '#065F46' },
+};
+
+const TYPE_PREFIX: Record<string, string> = {
+  'Historia de Usuario': 'HU',
+  'Tarea':               'TA',
+  'Bug':                 'BG',
+  'Épica':               'EP',
+  'Subtarea':            'ST',
 };
 
 const PRIORITY_MAP: Record<string, Priority> = {
@@ -99,12 +107,27 @@ const ProjectBacklog: React.FC = () => {
 
   const filteredItems = useMemo(() => {
     return items
-      .filter(item => filterStatus === null || item.id_estatus          === filterStatus)
-      .filter(item => filterType   === null || item.id_tipo             === filterType)
+      .filter(item => filterStatus === null || item.id_estatus             === filterStatus)
+      .filter(item => filterType   === null || item.id_tipo                === filterType)
       .filter(item => filterUser   === null || item.id_usuario_responsable === filterUser)
-      .filter(item => filterSprint === null || item.id_sprint           === filterSprint)
+      .filter(item => filterSprint === null || item.id_sprint              === filterSprint)
       .filter(item => item.nombre.toLowerCase().includes(search.toLowerCase()));
   }, [items, search, filterStatus, filterType, filterUser, filterSprint]);
+
+  const sprintGroups = useMemo<{ sprint: SprintRecord | null; items: BacklogItemRecord[] }[]>(() => {
+    const map = new Map<number | null, BacklogItemRecord[]>();
+    for (const item of filteredItems) {
+      const key = item.id_sprint ?? null;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(item);
+    }
+    const groups: { sprint: SprintRecord | null; items: BacklogItemRecord[] }[] = [];
+    for (const sprint of meta.sprints) {
+      if (map.has(sprint.id)) groups.push({ sprint, items: map.get(sprint.id)! });
+    }
+    if (map.has(null)) groups.push({ sprint: null, items: map.get(null)! });
+    return groups;
+  }, [filteredItems, meta.sprints]);
 
   // ── Bubble menu options ───────────────────────────────────────────
   const statusOptions: MenuComponent[] = [
@@ -175,34 +198,51 @@ const ProjectBacklog: React.FC = () => {
         <FilterBubble label="Sprint"      selectedLabel={selectedSprintLabel} elements={sprintOptions} />
       </div>
 
-      <div className={styles.list}>
+      <div className={styles.groups}>
         {loading ? (
-          Array.from({ length: 6 }).map((_, i) => <SkeletonBacklogItem key={i} />)
+          <div className={styles.list}>
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonBacklogItem key={i} />)}
+          </div>
         ) : filteredItems.length === 0 ? (
           <p className={styles.empty}>No hay ítems en el backlog.</p>
         ) : (
-          filteredItems.map(item => {
-            const statusRecord   = meta.statuses.find(s => s.id === item.id_estatus);
-            const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
-            const typeRecord     = meta.types.find(t => t.id === item.id_tipo);
-            const status: BacklogStatus = statusRecord
-              ? toBacklogStatus(statusRecord)
-              : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
+          sprintGroups.map(({ sprint, items: groupItems }) => (
+            <div key={sprint?.id ?? 'no-sprint'} className={styles.sprintGroup}>
+              <div className={styles.sprintHeader}>
+                <span className={styles.sprintName}>
+                  {sprint ? sprint.nombre : 'Sin sprint'}
+                </span>
+                <span className={styles.sprintCount}>
+                  {groupItems.length} {groupItems.length === 1 ? 'ítem' : 'ítems'}
+                </span>
+              </div>
 
-            return (
-              <BacklogListItem
-                key={item.id}
-                code={`HU-${String(item.id).padStart(2, '0')}`}
-                title={item.nombre}
-                status={status}
-                statuses={allStatuses}
-                priority={toPriority(priorityRecord)}
-                itemType={typeRecord?.nombre as BacklogItemType | undefined}
-                responsibleUserId={item.id_usuario_responsable ?? undefined}
-                onEdit={() => setEditingItem(item)}
-              />
-            );
-          })
+              <div className={styles.list}>
+                {groupItems.map(item => {
+                  const statusRecord   = meta.statuses.find(s => s.id === item.id_estatus);
+                  const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
+                  const typeRecord     = meta.types.find(t => t.id === item.id_tipo);
+                  const status: BacklogStatus = statusRecord
+                    ? toBacklogStatus(statusRecord)
+                    : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
+
+                  return (
+                    <BacklogListItem
+                      key={item.id}
+                      code={`${TYPE_PREFIX[typeRecord?.nombre ?? ''] ?? 'IT'}-${String(item.id).padStart(2, '0')}`}
+                      title={item.nombre}
+                      status={status}
+                      statuses={allStatuses}
+                      priority={toPriority(priorityRecord)}
+                      itemType={typeRecord?.nombre as BacklogItemType | undefined}
+                      responsibleUserId={item.id_usuario_responsable ?? undefined}
+                      onEdit={() => setEditingItem(item)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))
         )}
       </div>
 
