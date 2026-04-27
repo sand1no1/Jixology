@@ -6,7 +6,7 @@ import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useRegisterUserOptions } from '../../hooks/useUserOptions';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
 import type { AdminUserRoleBadge } from '../../types/admin.types';
-import SearchBarComponent from '@/shared/components/SearchBarComponent/SearchBarComponent';
+import FilterBar from '@/shared/components/FilterBar/FilterBar';
 import ListUserCard from '@/shared/components/ListUserCard';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
 import { useUserProfile } from '@/features/user/services/user.service';
@@ -50,7 +50,7 @@ function computeContextMenuStyle(position: { x: number; y: number }): React.CSSP
   const MARGIN = 8;
   const MENU_WIDTH = 190;
   const MENU_HEIGHT = 110;
-  const HORIZONTAL_OFFSET = 170; // move menu left from click
+  const HORIZONTAL_OFFSET = 170;
   const VERTICAL_OFFSET = 8;
 
   let left = position.x - HORIZONTAL_OFFSET;
@@ -355,40 +355,34 @@ export default function RegisterUserPage() {
               <h1 className="admin-page__title">Usuarios del sistema</h1>
               <p className="admin-page__subtitle"></p>
             </div>
-
-            <button
-              type="button"
-              className="admin-page__create-button"
-              onClick={() => {
-                setPageError('');
-                setPageSuccess('');
-                setIsCreateModalOpen(true);
-              }}
-            >
-              Crear usuario
-            </button>
           </div>
 
           <div className="admin-page__search">
-            <SearchBarComponent
-              infoText="Buscar usuario por nombre o correo..."
-              onChange={setSearch}
-              fontSize="0.95rem"
-              height="48px"
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as 'active' | 'inactive' | 'all')
+            <FilterBar
+              searchPlaceholder="Buscar usuario por nombre o correo..."
+              onSearchChange={setSearch}
+              filters={[
+                { id: 'active', label: 'Usuarios activos' },
+                { id: 'inactive', label: 'Usuarios inactivos' },
+              ]}
+              activeFilter={statusFilter === 'all' ? null : statusFilter}
+              onFilterChange={(id) =>
+                setStatusFilter(id === null ? 'all' : (id as 'active' | 'inactive'))
               }
+              allLabel="Todos"
             >
-              <option value="active">Usuarios activos</option>
-              <option value="inactive">Usuarios inactivos</option>
-              <option value="all">Todos</option>
-            </select>
+              <button
+                type="button"
+                className="admin-page__create-button"
+                onClick={() => {
+                  setPageError('');
+                  setPageSuccess('');
+                  setIsCreateModalOpen(true);
+                }}
+              >
+                Crear usuario
+              </button>
+            </FilterBar>
           </div>
 
           {pageSuccess && (
