@@ -1,6 +1,6 @@
 .row {
   display: grid;
-  grid-template-columns: 36px 1fr 220px 280px 30px;
+  grid-template-columns: 36px 1fr 220px 280px 40px;
   align-items: center;
   column-gap: 16px;
   padding: 12px 20px;
@@ -100,26 +100,34 @@
   font-weight: 500;
 }
 
-/* ── Edit button ─────────────────────────────────────────────── */
-.editBtn {
-  display: flex;
+/* ── Options button ──────────────────────────────────────────── */
+.optionsButton {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border-radius: 8px;
   border: none;
-  outline: none;
-  background: var(--color-clarity-gray-1);
+  background: transparent;
   color: var(--color-blueprint-navy);
   cursor: pointer;
+  padding: 0;
   flex-shrink: 0;
-  transition: background 0.15s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.editBtn:hover {
-  background: var(--color-clarity-gray-2);
+.optionsButton:hover {
+  background: transparent;
+  color: var(--color-blueprint-navy);
+  opacity: 0.75;
+  transform: scale(1.08);
+}
+
+.optionsButtonIcon {
+  width: 1.6rem;
+  height: 1.6rem;
+  display: block;
+  stroke-width: 2.4;
 }
 
 /* ── Clickable avatar ────────────────────────────────────────── */

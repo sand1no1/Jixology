@@ -258,6 +258,47 @@
   cursor: not-allowed;
 }
 
+/* ── Preview Card ─────────────────────────────────────────────────── */
+.profileCardPreview {
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  padding: 22px 18px 18px;
+  gap: 14px;
+  margin: 0 auto;
+}
+
+.profileCardPreview .avatarCircle {
+  width: 108px;
+  height: 108px;
+}
+
+.profileCardPreview .profileInfo {
+  gap: 0;
+}
+
+.profileCardPreview .infoRow {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0.7rem 0;
+}
+
+.profileCardPreview .infoRow span {
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.profileCardPreview .aboutMeSection {
+  min-height: 0;
+  padding-top: 0.85rem;
+}
+
+.profileCardPreview .aboutMeText {
+  margin: 0;
+  line-height: 1.5;
+}
 /* ── Responsive ─────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .profileCard {
