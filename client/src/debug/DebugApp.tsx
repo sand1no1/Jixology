@@ -105,6 +105,7 @@ function DebugBacklogList() {
             status={status}
             statuses={allStatuses}
             priority={toPriority(priorityRecord)}
+            itemType={typeRecord?.nombre as BacklogItemType | undefined}
           />
         );
       })}

@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   BugAntIcon,
-  BriefcaseIcon,
-  ListBulletIcon,
   BookOpenIcon,
   BoltIcon,
   ChevronDoubleDownIcon,
@@ -19,10 +17,37 @@ import styles from './BacklogListItem.module.css';
 
 export type BacklogItemType = 'Bug' | 'Tarea' | 'Subtarea' | 'Historia de Usuario' | 'Épica';
 
+function TaskIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="12" height="12" rx="1.5" />
+      <path d="M5 8L7.5 10.5L11 5.5" />
+    </svg>
+  );
+}
+
+function SubtaskIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+      {/* vertical connector — starts above top branch */}
+      <line x1="1.5" y1="0.5" x2="1.5" y2="12.5" />
+      {/* horizontal branches */}
+      <line x1="1.5" y1="4"   x2="5" y2="4" />
+      <line x1="1.5" y1="12.5" x2="5" y2="12.5" />
+      {/* top checkbox — 6×6 square */}
+      <rect x="5" y="1" width="6" height="6" />
+      <path d="M6.5 4L7.5 6.5L11.5 1.5" />
+      {/* bottom checkbox — 6×6 square, ends at y=15.5 to avoid clipping */}
+      <rect x="5" y="9.5" width="6" height="6" />
+      <path d="M6.5 12.5L7.5 15L11.5 10" />
+    </svg>
+  );
+}
+
 const TYPE_ICONS: Record<BacklogItemType, React.ReactNode> = {
   Bug:                   <BugAntIcon     width={16} height={16} />,
-  Tarea:                 <BriefcaseIcon  width={16} height={16} />,
-  Subtarea:              <ListBulletIcon width={16} height={16} />,
+  Tarea:                 <TaskIcon />,
+  Subtarea:              <SubtaskIcon />,
   'Historia de Usuario': <BookOpenIcon   width={16} height={16} />,
   'Épica':               <BoltIcon       width={16} height={16} />,
 };
