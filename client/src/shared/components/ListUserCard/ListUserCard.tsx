@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserIcon, PencilSquareIcon } from '@heroicons/react/24/outline';
+import { UserIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import styles from './ListUserCard.module.css';
 import { useUserAvatarSvg } from '@/features/profile/hooks/useUserAvatarSvg';
 
@@ -15,31 +15,46 @@ interface ListUserCardProps {
   roles: Role[];
   email: string;
   avatarSvg?: string;
-  onEdit?: () => void;
+  onEdit?: (position: { x: number; y: number }) => void;
   onAvatarEnter?: (rect: DOMRect) => void;
   onAvatarLeave?: () => void;
 }
 
-const ListUserCard: React.FC<ListUserCardProps> = ({ userId, fullName, roles, email, avatarSvg: avatarSvgProp, onEdit, onAvatarEnter, onAvatarLeave }) => {
+const ListUserCard: React.FC<ListUserCardProps> = ({
+  userId,
+  fullName,
+  roles,
+  email,
+  avatarSvg: avatarSvgProp,
+  onEdit,
+  onAvatarEnter,
+  onAvatarLeave,
+}) => {
   const { avatarSvg: dbSvg } = useUserAvatarSvg(userId);
   const avatarSvg = avatarSvgProp ?? dbSvg;
 
   return (
     <div className={styles.row}>
-      {/* Avatar */}
       <div
         className={`${styles.avatar}${onAvatarEnter ? ` ${styles.avatarClickable}` : ''}`}
-        onMouseEnter={onAvatarEnter ? (e) => onAvatarEnter((e.currentTarget as HTMLElement).getBoundingClientRect()) : undefined}
+        onMouseEnter={
+          onAvatarEnter
+            ? (e) => onAvatarEnter((e.currentTarget as HTMLElement).getBoundingClientRect())
+            : undefined
+        }
         onMouseLeave={onAvatarLeave}
         aria-label={onAvatarEnter ? `Ver perfil de ${fullName}` : undefined}
       >
-        {avatarSvg
-          ? <div className={styles.avatarSvg} dangerouslySetInnerHTML={{ __html: avatarSvg }} />
-          : <UserIcon width={18} height={18} />
-        }
+        {avatarSvg ? (
+          <div
+            className={styles.avatarSvg}
+            dangerouslySetInnerHTML={{ __html: avatarSvg }}
+          />
+        ) : (
+          <UserIcon width={18} height={18} />
+        )}
       </div>
 
-      {/* Name */}
       <span className={styles.name}>
         <span className={styles.nameLabel}>nombre completo: </span>
         {fullName}
@@ -47,7 +62,6 @@ const ListUserCard: React.FC<ListUserCardProps> = ({ userId, fullName, roles, em
 
       <div className={styles.spacer} />
 
-      {/* Roles */}
       <div className={styles.roles}>
         <span className={styles.rolesLabel}>Roles:</span>
         {roles.map((role) => (
@@ -61,15 +75,25 @@ const ListUserCard: React.FC<ListUserCardProps> = ({ userId, fullName, roles, em
         ))}
       </div>
 
-      {/* Email */}
       <span className={styles.email}>
         <span className={styles.emailLabel}>Correo: </span>
         <span className={styles.emailValue}>{email}</span>
       </span>
 
-      {/* Edit button */}
-      <button className={styles.editBtn} onClick={onEdit} type="button" aria-label="Editar usuario">
-        <PencilSquareIcon width={15} height={15} />
+      <button
+        type="button"
+        className={styles.optionsButton}
+        aria-label="Más opciones"
+        title="Más opciones"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit?.({
+            x: e.clientX,
+            y: e.clientY,
+          });
+        }}
+      >
+        <EllipsisVerticalIcon className={styles.optionsButtonIcon} />
       </button>
     </div>
   );

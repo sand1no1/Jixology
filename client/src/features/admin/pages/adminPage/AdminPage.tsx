@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { XCircleIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
+import { useRegisterUserOptions } from '../../hooks/useUserOptions';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
 import type { AdminUserRoleBadge } from '../../types/admin.types';
 import SearchBarComponent from '@/shared/components/SearchBarComponent/SearchBarComponent';
 import ListUserCard from '@/shared/components/ListUserCard';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
 import { useUserProfile } from '@/features/user/services/user.service';
+import ContextMenu, { type MenuComponent } from '@/shared/components/ContextMenu';
+import { setAdminUserActiveService } from '../../services/adminUserStatus.service';
 import './adminPage.css';
 
 function calcAge(fechaNacimiento: string): number {
@@ -20,11 +23,11 @@ function calcAge(fechaNacimiento: string): number {
   return age;
 }
 
-const POPUP_WIDTH  = 298; // 250px card + 48px padding
-const POPUP_HEIGHT = 500; // rough max height
+const POPUP_WIDTH = 298;
+const POPUP_HEIGHT = 500;
 
 function computePopoverStyle(rect: DOMRect): React.CSSProperties {
-  const GAP    = 16;
+  const GAP = 16;
   const MARGIN = 8;
 
   let left = rect.right + GAP;
@@ -32,7 +35,6 @@ function computePopoverStyle(rect: DOMRect): React.CSSProperties {
     left = rect.left - POPUP_WIDTH - GAP;
   }
 
-  // Start aligned with avatar top, then clamp into viewport
   let top = rect.top;
   if (top + POPUP_HEIGHT > window.innerHeight - MARGIN) {
     top = window.innerHeight - POPUP_HEIGHT - MARGIN;
@@ -44,11 +46,41 @@ function computePopoverStyle(rect: DOMRect): React.CSSProperties {
   return { position: 'fixed', left, top, zIndex: 1001 };
 }
 
-// Avatar section height: 32px top-padding + 8px avatar-padding-top + 150px avatar + 20px gap
-const AVATAR_ONLY_HEIGHT = 210;
-const FULL_CARD_HEIGHT   = 560;
+function computeContextMenuStyle(position: { x: number; y: number }): React.CSSProperties {
+  const MARGIN = 8;
+  const MENU_WIDTH = 190;
+  const MENU_HEIGHT = 110;
 
-function UserProfileModal({ userId, rect, onMouseEnter, onMouseLeave }: {
+  let left = position.x;
+  let top = position.y;
+
+  if (left + MENU_WIDTH > window.innerWidth - MARGIN) {
+    left = window.innerWidth - MENU_WIDTH - MARGIN;
+  }
+  if (top + MENU_HEIGHT > window.innerHeight - MARGIN) {
+    top = window.innerHeight - MENU_HEIGHT - MARGIN;
+  }
+
+  if (left < MARGIN) left = MARGIN;
+  if (top < MARGIN) top = MARGIN;
+
+  return {
+    position: 'fixed',
+    left,
+    top,
+    zIndex: 1100,
+  };
+}
+
+const AVATAR_ONLY_HEIGHT = 210;
+const FULL_CARD_HEIGHT = 560;
+
+function UserProfileModal({
+  userId,
+  rect,
+  onMouseEnter,
+  onMouseLeave,
+}: {
   userId: number;
   rect: DOMRect;
   onMouseEnter: () => void;
@@ -57,20 +89,23 @@ function UserProfileModal({ userId, rect, onMouseEnter, onMouseLeave }: {
   const { userProfile, loading } = useUserProfile(userId);
   const [expanded, setExpanded] = useState(false);
 
-  // Double rAF: paint the collapsed state first, then trigger the transition
   useEffect(() => {
     let raf2: number;
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => setExpanded(true));
     });
-    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
   }, []);
 
-  const nombre    = [userProfile?.nombre, userProfile?.apellido].filter(Boolean).join(' ') || '—';
-  const email     = userProfile?.email ?? '—';
-  const telefono  = userProfile?.telefono ?? '—';
-  const sobreMi   = userProfile?.sobreMi ?? '';
-  const age       = userProfile?.fechaNacimiento ? calcAge(userProfile.fechaNacimiento) : 0;
+  const nombre =
+    [userProfile?.nombre, userProfile?.apellido].filter(Boolean).join(' ') || '—';
+  const email = userProfile?.email ?? '—';
+  const telefono = userProfile?.telefono ?? '—';
+  const sobreMi = userProfile?.sobreMi ?? '';
+  const age = userProfile?.fechaNacimiento ? calcAge(userProfile.fechaNacimiento) : 0;
   const birthDate = userProfile?.fechaNacimiento
     ? new Date(userProfile.fechaNacimiento).toLocaleDateString('es-MX')
     : '—';
@@ -81,22 +116,33 @@ function UserProfileModal({ userId, rect, onMouseEnter, onMouseLeave }: {
         ...computePopoverStyle(rect),
         borderRadius: '20px',
         border: '1px solid rgba(31, 54, 80, 0.12)',
-        boxShadow: '0 8px 32px rgba(10, 8, 56, 0.16), 0 2px 8px rgba(10, 8, 56, 0.08)',
+        boxShadow:
+          '0 8px 32px rgba(10, 8, 56, 0.16), 0 2px 8px rgba(10, 8, 56, 0.08)',
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div style={{
-        overflow:   'hidden',
-        maxHeight:  expanded ? `${FULL_CARD_HEIGHT}px` : `${AVATAR_ONLY_HEIGHT}px`,
-        transition: 'max-height 1s cubic-bezier(0.34, 1.1, 0.64, 1)',
-        borderRadius: '20px',
-      }}>
+      <div
+        style={{
+          overflow: 'hidden',
+          maxHeight: expanded ? `${FULL_CARD_HEIGHT}px` : `${AVATAR_ONLY_HEIGHT}px`,
+          transition: 'max-height 1s cubic-bezier(0.34, 1.1, 0.64, 1)',
+          borderRadius: '20px',
+        }}
+      >
         {loading ? (
-          <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-anchor-gray-1)' }}>Cargando...</p>
+          <p
+            style={{
+              padding: '2rem',
+              textAlign: 'center',
+              color: 'var(--color-anchor-gray-1)',
+            }}
+          >
+            Cargando...
+          </p>
         ) : (
           <UserCard
-            userId={userId} 
+            userId={userId}
             name={nombre}
             age={age}
             birthDate={birthDate}
@@ -130,62 +176,172 @@ function getRoleBadge(idRolGlobal: number): AdminUserRoleBadge[] {
   ];
 }
 
+function getStatusBadge(activo: boolean): AdminUserRoleBadge[] {
+  return activo
+    ? [
+        {
+          label: 'Activo',
+          color: 'rgba(31, 54, 80, 0.10)',
+          textColor: 'var(--color-blueprint-navy)',
+        },
+      ]
+    : [
+        {
+          label: 'Inactivo',
+          color: 'rgba(221, 0, 49, 0.12)',
+          textColor: 'var(--color-mahindra-red)',
+        },
+      ];
+}
+
 export default function RegisterUserPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [pageSuccess, setPageSuccess] = useState('');
-  const [selectedUser, setSelectedUser] = useState<{ userId: number; rect: DOMRect } | null>(null);
+  const [pageError, setPageError] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'active' | 'inactive' | 'all'>('active');
+  const [selectedUser, setSelectedUser] = useState<{ userId: number; rect: DOMRect } | null>(
+    null
+  );
+  const [openUserMenu, setOpenUserMenu] = useState<{
+    userId: number;
+    position: { x: number; y: number };
+  } | null>(null);
+
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startHide = useCallback(() => {
     hideTimer.current = setTimeout(() => setSelectedUser(null), 150);
   }, []);
+
   const cancelHide = useCallback(() => {
     if (hideTimer.current) clearTimeout(hideTimer.current);
   }, []);
 
+  useEffect(() => {
+    const closeMenu = () => setOpenUserMenu(null);
+    window.addEventListener('click', closeMenu);
+    window.addEventListener('scroll', closeMenu);
+    window.addEventListener('resize', closeMenu);
+
+    return () => {
+      window.removeEventListener('click', closeMenu);
+      window.removeEventListener('scroll', closeMenu);
+      window.removeEventListener('resize', closeMenu);
+    };
+  }, []);
+
   const { users, loading: usersLoading, error: usersError, refreshUsers } =
-    useAdminUsers(search);
+    useAdminUsers(search, statusFilter);
+
+  const { values, loading, error, success, handleChange, submit } = useRegisterUser();
 
   const {
-    values,
-    loading,
-    error,
-    success,
-    handleChange,
-    submit,
-  } = useRegisterUser();
+    roles,
+    zonasHorarias,
+    loading: optionsLoading,
+    error: optionsError,
+  } = useRegisterUserOptions();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const response = await submit();
     setPageSuccess(response.message || 'Usuario creado correctamente.');
+    setPageError('');
     setIsCreateModalOpen(false);
     await refreshUsers();
   };
 
- const userCards = users.map((user) => {
-  const fullName =
-    [user.nombre, user.apellido].filter(Boolean).join(' ').trim() || 'Sin nombre';
+  const handleToggleUserActive = async (
+    userId: number,
+    activo: boolean,
+    fullName: string
+  ) => {
+    const confirmed = window.confirm(
+      activo
+        ? `¿Seguro que quieres reactivar a ${fullName}?`
+        : `¿Seguro que quieres desactivar a ${fullName}?`
+    );
 
-  return (
-    <ListUserCard
-      key={user.id}
-      userId={user.id}
-      fullName={fullName}
-      roles={getRoleBadge(user.id_rol_global)}
-      email={user.email}
-      onEdit={() => navigate(`/usuarios/${user.id}`)}
-      onAvatarEnter={(rect) => {
-        cancelHide();
-        setSelectedUser({ userId: user.id, rect });
-      }}
-      onAvatarLeave={startHide}
-    />
-  );
-});
+    if (!confirmed) return;
+
+    try {
+      const response = await setAdminUserActiveService(userId, activo);
+      setPageSuccess(
+        response.message ||
+          (activo
+            ? 'Usuario reactivado correctamente.'
+            : 'Usuario desactivado correctamente.')
+      );
+      setPageError('');
+      setOpenUserMenu(null);
+      await refreshUsers();
+    } catch (err) {
+      setPageError(
+        err instanceof Error
+          ? err.message
+          : activo
+            ? 'No se pudo reactivar el usuario.'
+            : 'No se pudo desactivar el usuario.'
+      );
+    }
+  };
+
+  const userCards = users.map((user) => {
+    const fullName =
+      [user.nombre, user.apellido].filter(Boolean).join(' ').trim() || 'Sin nombre';
+
+    return (
+      <ListUserCard
+        key={user.id}
+        userId={user.id}
+        fullName={fullName}
+        roles={[...getRoleBadge(user.id_rol_global), ...getStatusBadge(user.activo)]}
+        email={user.email}
+        onEdit={(position) => {
+          setOpenUserMenu((prev) =>
+            prev?.userId === user.id ? null : { userId: user.id, position }
+          );
+        }}
+        onAvatarEnter={(rect) => {
+          cancelHide();
+          setSelectedUser({ userId: user.id, rect });
+        }}
+        onAvatarLeave={startHide}
+      />
+    );
+  });
+
+  const userMenuElements: MenuComponent[] | undefined = openUserMenu
+    ? (() => {
+        const user = users.find((u) => u.id === openUserMenu.userId);
+        const fullName =
+          [user?.nombre, user?.apellido].filter(Boolean).join(' ').trim() ||
+          'este usuario';
+
+        return [
+          {
+            text: 'Editar perfil',
+            onClick: () => {
+              navigate(`/usuarios/${openUserMenu.userId}`);
+              setOpenUserMenu(null);
+            },
+          },
+          {
+            text: user?.activo ? 'Desactivar usuario' : 'Reactivar usuario',
+            onClick: () => {
+              void handleToggleUserActive(
+                openUserMenu.userId,
+                !(user?.activo ?? true),
+                fullName
+              );
+            },
+          },
+        ];
+      })()
+    : undefined;
 
   return (
     <main className="admin-page">
@@ -200,7 +356,11 @@ export default function RegisterUserPage() {
             <button
               type="button"
               className="admin-page__create-button"
-              onClick={() => setIsCreateModalOpen(true)}
+              onClick={() => {
+                setPageError('');
+                setPageSuccess('');
+                setIsCreateModalOpen(true);
+              }}
             >
               Crear usuario
             </button>
@@ -215,6 +375,19 @@ export default function RegisterUserPage() {
             />
           </div>
 
+          <div style={{ marginBottom: '1rem' }}>
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as 'active' | 'inactive' | 'all')
+              }
+            >
+              <option value="active">Usuarios activos</option>
+              <option value="inactive">Usuarios inactivos</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+
           {pageSuccess && (
             <div
               className="admin-page__feedback admin-page__feedback--success"
@@ -224,15 +397,13 @@ export default function RegisterUserPage() {
             </div>
           )}
 
-          {usersError && (
+          {(pageError || usersError) && (
             <div className="admin-page__feedback admin-page__feedback--error">
-              {usersError}
+              {pageError || usersError}
             </div>
           )}
 
-          <div className="admin-page__results-info">
-            Mostrando máximo 10 usuarios
-          </div>
+          <div className="admin-page__results-info">Mostrando máximo 10 usuarios</div>
 
           <div className="admin-page__list">
             {usersLoading ? (
@@ -240,13 +411,20 @@ export default function RegisterUserPage() {
             ) : userCards.length > 0 ? (
               userCards
             ) : (
-              <div className="admin-page__empty-state">
-                No se encontraron usuarios.
-              </div>
+              <div className="admin-page__empty-state">No se encontraron usuarios.</div>
             )}
           </div>
         </section>
       </div>
+
+      {openUserMenu && (
+        <div
+          style={computeContextMenuStyle(openUserMenu.position)}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <ContextMenu elements={userMenuElements} />
+        </div>
+      )}
 
       {selectedUser !== null && (
         <UserProfileModal
@@ -262,10 +440,7 @@ export default function RegisterUserPage() {
           className="admin-page__modal-overlay"
           onClick={() => setIsCreateModalOpen(false)}
         >
-          <div
-            className="admin-page__modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="admin-page__modal" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               className="admin-page__modal-close"
@@ -280,6 +455,10 @@ export default function RegisterUserPage() {
               loading={loading}
               error={error}
               success={success}
+              zonaHorariaOptions={zonasHorarias}
+              rolOptions={roles}
+              optionsLoading={optionsLoading}
+              optionsError={optionsError}
               onChange={handleChange}
               onSubmit={handleSubmit}
             />
