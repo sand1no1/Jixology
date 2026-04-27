@@ -33,6 +33,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         const profile = await fetchCurrentUser(session.user.id);
 
         if (!isMounted) return;
+
+        if (!profile || profile.activo === false) {
+          await supabase.auth.signOut();
+          if (!isMounted) return;
+          setUser(null);
+          return;
+        }
+
         setUser(profile);
       } catch (error) {
         console.error('Error loading current user:', error);
