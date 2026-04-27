@@ -158,18 +158,22 @@ interface FormState {
   id_sprint: string;
   fecha_inicio: string;
   fecha_vencimiento: string;
+  id_backlog_item_padre: string;
+  id_usuario_responsable: string;
 }
 
 function itemToForm(item: BacklogItemRecord): FormState {
   return {
-    nombre:            item.nombre,
-    descripcion:       item.descripcion ?? '',
-    id_tipo:           item.id_tipo      != null ? String(item.id_tipo)      : '',
-    id_estatus:        String(item.id_estatus),
-    id_prioridad:      item.id_prioridad != null ? String(item.id_prioridad) : '',
-    id_sprint:         item.id_sprint    != null ? String(item.id_sprint)    : '',
-    fecha_inicio:      item.fecha_inicio      ?? '',
-    fecha_vencimiento: item.fecha_vencimiento ?? '',
+    nombre:                 item.nombre,
+    descripcion:            item.descripcion ?? '',
+    id_tipo:                item.id_tipo                != null ? String(item.id_tipo)                : '',
+    id_estatus:             String(item.id_estatus),
+    id_prioridad:           item.id_prioridad           != null ? String(item.id_prioridad)           : '',
+    id_sprint:              item.id_sprint              != null ? String(item.id_sprint)              : '',
+    fecha_inicio:           item.fecha_inicio           ?? '',
+    fecha_vencimiento:      item.fecha_vencimiento      ?? '',
+    id_backlog_item_padre:  item.id_backlog_item_padre  != null ? String(item.id_backlog_item_padre)  : '',
+    id_usuario_responsable: item.id_usuario_responsable != null ? String(item.id_usuario_responsable) : '',
   };
 }
 
@@ -190,14 +194,16 @@ const EditBacklogItemForm: React.FC<EditBacklogItemFormProps> = ({ item, meta, o
     setSubmitting(true);
     setError(null);
     const payload: UpdateBacklogItemPayload = {
-      nombre:            form.nombre.trim(),
-      descripcion:       form.descripcion || null,
-      id_tipo:           form.id_tipo      ? Number(form.id_tipo)      : null,
-      id_estatus:        Number(form.id_estatus),
-      id_prioridad:      form.id_prioridad ? Number(form.id_prioridad) : null,
-      id_sprint:         form.id_sprint    ? Number(form.id_sprint)    : null,
-      fecha_inicio:      form.fecha_inicio      || null,
-      fecha_vencimiento: form.fecha_vencimiento || null,
+      nombre:                 form.nombre.trim(),
+      descripcion:            form.descripcion || null,
+      id_tipo:                form.id_tipo                ? Number(form.id_tipo)                : null,
+      id_estatus:             Number(form.id_estatus),
+      id_prioridad:           form.id_prioridad           ? Number(form.id_prioridad)           : null,
+      id_sprint:              form.id_sprint              ? Number(form.id_sprint)              : null,
+      fecha_inicio:           form.fecha_inicio           || null,
+      fecha_vencimiento:      form.fecha_vencimiento      || null,
+      id_backlog_item_padre:  form.id_backlog_item_padre  ? Number(form.id_backlog_item_padre)  : null,
+      id_usuario_responsable: form.id_usuario_responsable ? Number(form.id_usuario_responsable) : null,
     };
     try {
       await updateBacklogItem(item.id, payload);
@@ -274,6 +280,35 @@ const EditBacklogItemForm: React.FC<EditBacklogItemFormProps> = ({ item, meta, o
             <select name="id_sprint" className={styles.select} value={form.id_sprint} onChange={handleChange}>
               <option value="">Sin sprint</option>
               {meta.sprints.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {/* Row: Item padre + Responsable */}
+        <div className={styles.row}>
+          <div className={styles.field}>
+            <label className={styles.label}>Ítem padre</label>
+            <select name="id_backlog_item_padre" className={styles.select} value={form.id_backlog_item_padre} onChange={handleChange}>
+              <option value="">Sin ítem padre</option>
+              {meta.items
+                .filter(i => i.id !== item.id)
+                .map(i => (
+                  <option key={i.id} value={i.id}>
+                    HU-{String(i.id).padStart(2, '0')} — {i.nombre}
+                  </option>
+                ))}
+            </select>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Responsable</label>
+            <select name="id_usuario_responsable" className={styles.select} value={form.id_usuario_responsable} onChange={handleChange}>
+              <option value="">Sin responsable</option>
+              {meta.users.map(user => (
+                <option key={user.id} value={user.id}>
+                  {[user.nombre, user.apellido].filter(Boolean).join(' ') || user.email}
+                </option>
+              ))}
             </select>
           </div>
         </div>

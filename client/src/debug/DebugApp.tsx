@@ -37,6 +37,14 @@ const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
   4: { color: '#D1FAE5', textColor: '#065F46' }, // Acabado     — green
 };
 
+const TYPE_PREFIX: Record<string, string> = {
+  'Historia de Usuario': 'HU',
+  'Tarea':               'TA',
+  'Bug':                 'BG',
+  'Épica':               'EP',
+  'Subtarea':            'ST',
+};
+
 const PRIORITY_MAP: Record<string, Priority> = {
   'Crítica': 'critical',
   'Alta':    'high',
@@ -81,16 +89,18 @@ function DebugBacklogList() {
   return (
     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
       {items.map(item => {
-        const statusRecord = meta.statuses.find(s => s.id === item.id_estatus);
+        const statusRecord   = meta.statuses.find(s => s.id === item.id_estatus);
         const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
+        const typeRecord     = meta.types.find(t => t.id === item.id_tipo);
         const status: BacklogStatus = statusRecord
           ? toBacklogStatus(statusRecord)
           : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
+        const prefix = TYPE_PREFIX[typeRecord?.nombre ?? ''] ?? 'IT';
 
         return (
           <BacklogListItem
             key={item.id}
-            code={`HU-${String(item.id).padStart(2, '0')}`}
+            code={`${prefix}-${String(item.id).padStart(2, '0')}`}
             title={item.nombre}
             status={status}
             statuses={allStatuses}
@@ -121,14 +131,13 @@ function DebugCreateBacklogItem() {
       >
         + Nuevo ítem de backlog
       </button>
-      {open && (
-        <CreateBacklogItemForm
-          projectId={1}
-          userId={1}
-          onClose={() => setOpen(false)}
-          onCreated={() => setOpen(false)}
-        />
-      )}
+      <CreateBacklogItemForm
+        projectId={1}
+        userId={1}
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        onCreated={() => setOpen(false)}
+      />
     </div>
   );
 }

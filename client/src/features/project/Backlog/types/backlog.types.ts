@@ -53,6 +53,8 @@ export interface UpdateBacklogItemPayload {
   id_sprint?: number | null;
   fecha_inicio?: string | null;
   fecha_vencimiento?: string | null;
+  id_backlog_item_padre?: number | null;
+  id_usuario_responsable?: number | null;
 }
 
 export interface CreateBacklogItemPayload {
@@ -70,9 +72,25 @@ export interface CreateBacklogItemPayload {
   id_usuario_creador: number;
 }
 
+export interface UserRecord {
+  id: number;
+  nombre: string | null;
+  apellido: string | null;
+  email: string;
+}
+
+export interface SugerenciaRecord {
+  id: number;
+  aceptada: boolean;
+  id_usuario_acepto: number | null;
+}
+
 export interface BacklogMeta {
-  statuses:   BacklogStatusRecord[];
-  priorities: BacklogPriorityRecord[];
-  types:      BacklogTypeRecord[];
-  sprints:    SprintRecord[];
+  statuses:    BacklogStatusRecord[];
+  priorities:  BacklogPriorityRecord[];
+  types:       BacklogTypeRecord[];
+  sprints:     SprintRecord[];
+  items:       BacklogItemRecord[];
+  users:       UserRecord[];
+  sugerencias: SugerenciaRecord[];
 }
