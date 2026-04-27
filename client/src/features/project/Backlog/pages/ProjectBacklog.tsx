@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
 import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
@@ -16,8 +16,6 @@ import { useUser } from '@/core/auth/userContext';
 import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord, SprintRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
 
-const PROJECT_ID = 1;
-const USER_ID = 1;
 
 const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
   1: { color: '#F3F4F6', textColor: '#6B7280' },
@@ -95,6 +93,9 @@ function FilterBubble({ label, selectedLabel, elements }: FilterBubbleProps) {
 
 // ── Main component ────────────────────────────────────────────────
 const ProjectBacklog: React.FC = () => {
+  const { id } = useParams();
+  const PROJECT_ID = Number(id);
+  const USER_ID = 1;
   const { user } = useUser();
   const isAdmin = (user?.idRolGlobal ?? 99) <= 2;
   const { items, loading: itemsLoading, refresh } = useBacklogItems(PROJECT_ID);
