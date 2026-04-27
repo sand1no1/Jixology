@@ -238,11 +238,7 @@ const ProjectsPage: React.FC = () => {
                       projectFTE={p.fte}
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
-<<<<<<< HEAD
                       onClick={() => navigate(`/proyectos/${p.id}/backlog`)}
-=======
-                      onClick={() => navigate(`/proyectos/${project.id}`)}
->>>>>>> 882723f (Project Routing)
                       menuItems={buildMenuItems(p)}
                     />
                   ))}
