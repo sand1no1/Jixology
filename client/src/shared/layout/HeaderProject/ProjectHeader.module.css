@@ -13,6 +13,13 @@
   margin: 0px 0px;
   border-bottom: 1px solid var(--border);
   gap: 8px;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.navContainer {
+  display: flex;
+  flex: 1; /* ocupa todo el espacio restante */
   justify-content: space-around;
 }
 
@@ -62,4 +69,9 @@
 
 .elementActive .label::after {
   width: 100%;
+}
+
+.backArrow {
+  margin: 0px 16px;
+  min-width: unset;
 }

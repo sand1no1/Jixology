@@ -40,9 +40,9 @@ export function AppRouter() {
 
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
         <Route element={<AppLayoutHsProject />}>
-          <Route path="/proyectos/dummy" element={<Navigate to="/proyectos/dummy/tasks" replace />} />
-          <Route path="/proyectos/dummy/tasks"   element={<ProjectTask />} />
-          <Route path="/proyectos/dummy/backlog" element={<ProjectBacklog />} />
+          <Route path="/proyectos/:id" element={<Navigate to="/proyectos/:id/backlog" replace />} />
+          <Route path="/proyectos/:id/tasks"   element={<ProjectTask />} />
+          <Route path="/proyectos/:id/backlog" element={<ProjectBacklog />} />
         </Route>
       </Route>
 
