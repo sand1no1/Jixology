@@ -6,7 +6,7 @@ import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useRegisterUserOptions } from '../../hooks/useUserOptions';
 import { useAdminUsers } from '../../hooks/useAdminUsers';
 import type { AdminUserRoleBadge } from '../../types/admin.types';
-import FilterBar from '@/shared/components/FilterBar/FilterBar';
+import FilterBar from '@/shared/components/FilterBar';
 import ListUserCard from '@/shared/components/ListUserCard';
 import UserCard from '@/features/profile/components/UserCard/UserCard';
 import { useUserProfile } from '@/features/user/services/user.service';
@@ -366,7 +366,7 @@ export default function RegisterUserPage() {
                 { id: 'inactive', label: 'Usuarios inactivos' },
               ]}
               activeFilter={statusFilter === 'all' ? null : statusFilter}
-              onFilterChange={(id) =>
+              onFilterChange={(id: string | number | null) =>
                 setStatusFilter(id === null ? 'all' : (id as 'active' | 'inactive'))
               }
               allLabel="Todos"
