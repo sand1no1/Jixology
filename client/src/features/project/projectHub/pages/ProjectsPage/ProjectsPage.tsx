@@ -76,11 +76,11 @@ const ProjectsPage: React.FC = () => {
   const buildMenuItems = (project: Project): MenuComponent[] => [
     {
       text: 'Abrir',
-      onClick: () => navigate(`/projects/${project.id}`),
+      onClick: () => navigate(`/proyectos/${project.id}/backlog`),
     },
     {
       text: 'Editar Proyecto',
-      onClick: () => navigate(`/projects/${project.id}/edit`),
+      onClick: () => navigate(`/proyectos/${project.id}/edit`),
     },
     ...(project.id_estatus !== 5 ? [{
       text: 'Cambiar Estatus',
@@ -128,7 +128,7 @@ const ProjectsPage: React.FC = () => {
     projectDueDate={project.fecha_final}
     projectFTE={project.fte}
     statusLabel={<StatusLabel statusId={project.id_estatus} />}
-    onClick={() => trackVisit(project.id)}
+    onClick={() => navigate(`/proyectos/${project.id}`)}
     menuItems={buildMenuItems(project)}
   />
 );
@@ -227,7 +227,7 @@ const ProjectsPage: React.FC = () => {
                       projectFTE={p.fte}
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
-                      onClick={() => trackVisit(p.id)}
+                      onClick={() => navigate(`/proyectos/${project.id}`)}
                       menuItems={buildMenuItems(p)}
                     />
                   ))}
