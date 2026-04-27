@@ -65,7 +65,7 @@ export async function fetchSprintsByProject(projectId: number): Promise<SprintRe
   return data ?? [];
 }
 
-export async function fetchProjectMembers(_projectId: number): Promise<UserRecord[]> {
+export async function fetchProjectMembers(): Promise<UserRecord[]> {
   const { data, error } = await supabase
     .from('usuario')
     .select('id, nombre, apellido, email')

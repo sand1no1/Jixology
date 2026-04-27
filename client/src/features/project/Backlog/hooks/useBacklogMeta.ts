@@ -26,7 +26,7 @@ export function useBacklogMeta(projectId: number | null | undefined) {
       fetchBacklogTypes(),
       fetchSprintsByProject(projectId),
       fetchBacklogItems(projectId),
-      fetchProjectMembers(projectId),
+      fetchProjectMembers(),
       fetchSugerencias(projectId),
     ])
       .then(([statuses, priorities, types, sprints, items, users, sugerencias]) => {
