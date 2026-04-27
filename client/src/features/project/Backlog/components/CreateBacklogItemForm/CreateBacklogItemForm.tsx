@@ -10,6 +10,8 @@ import FormPopUp from '@/shared/components/FormPopUp';
 import styles from './CreateBacklogItemForm.module.css';
 import { useBacklogMeta } from '../../hooks/useBacklogMeta';
 import { useCreateBacklogItem } from '../../hooks/useCreateBacklogItem';
+import { createSugerencia } from '../../services/backlog.service';
+import { useUser } from '@/core/auth/userContext';
 import type { BacklogStatusRecord, BacklogPriorityRecord, CreateBacklogItemPayload } from '../../types/backlog.types';
 
 // ── Status colour map by orden ────────────────────────────────────
@@ -205,6 +207,8 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
 }) => {
   const { meta, loading: metaLoading } = useBacklogMeta(projectId);
   const { submit, loading: submitting, error } = useCreateBacklogItem();
+  const { user } = useUser();
+  const isAdmin = (user?.idRolGlobal ?? 99) <= 2;
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -228,7 +232,10 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
       id_usuario_creador:     userId,
     };
     try {
-      await submit(payload);
+      const newItem = await submit(payload);
+      if (!isAdmin && newItem?.id) {
+        await createSugerencia(newItem.id);
+      }
       onCreated?.();
       onClose();
     } catch { /* shown via error state */ }

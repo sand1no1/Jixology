@@ -79,11 +79,18 @@ export interface UserRecord {
   email: string;
 }
 
+export interface SugerenciaRecord {
+  id: number;
+  aceptada: boolean;
+  id_usuario_acepto: number | null;
+}
+
 export interface BacklogMeta {
-  statuses:   BacklogStatusRecord[];
-  priorities: BacklogPriorityRecord[];
-  types:      BacklogTypeRecord[];
-  sprints:    SprintRecord[];
-  items:      BacklogItemRecord[];
-  users:      UserRecord[];
+  statuses:    BacklogStatusRecord[];
+  priorities:  BacklogPriorityRecord[];
+  types:       BacklogTypeRecord[];
+  sprints:     SprintRecord[];
+  items:       BacklogItemRecord[];
+  users:       UserRecord[];
+  sugerencias: SugerenciaRecord[];
 }

@@ -73,11 +73,16 @@ interface BacklogListItemProps {
   priority?: Priority;
   itemType?: BacklogItemType;
   responsibleUserId?: number;
+  isSuggestion?: boolean;
+  hasChildren?: boolean;
+  isExpanded?: boolean;
+  onToggle?: () => void;
   onStatusChange?: (status: BacklogStatus) => void;
   onPriorityChange?: (priority: Priority) => void;
   onAssign?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onAcceptSuggestion?: () => void;
 }
 
 const BacklogListItem: React.FC<BacklogListItemProps> = ({
@@ -88,11 +93,16 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
   priority = 'medium',
   itemType = 'Tarea',
   responsibleUserId,
+  isSuggestion = false,
+  hasChildren = false,
+  isExpanded = false,
+  onToggle,
   onStatusChange,
   onPriorityChange,
   onAssign,
   onEdit,
   onDelete,
+  onAcceptSuggestion,
 }) => {
   const [open, setOpen]                       = useState<OpenDropdown>(null);
   const [currentStatus, setCurrentStatus]     = useState<BacklogStatus>(status);
@@ -115,11 +125,28 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
 
   const menuItems = [
     { text: 'Editar',    onClick: () => { setOpen(null); onEdit?.();   } },
+    ...(isSuggestion && onAcceptSuggestion ? [{ text: 'Aceptar sugerencia', onClick: () => { setOpen(null); onAcceptSuggestion(); } }] : []),
     { text: 'Eliminar',  onClick: () => { setOpen(null); onDelete?.(); } },
   ];
 
   return (
-    <div className={styles.row} ref={rowRef}>
+    <div className={`${styles.row} ${!hasChildren ? styles.rowCompact : ''} ${isSuggestion ? styles.rowSuggestion : ''}`} ref={rowRef}>
+      {/* Expand toggle — only rendered when item has children */}
+      {hasChildren && (
+        <button
+          type="button"
+          className={`${styles.toggleBtn} ${styles.toggleBtnVisible}`}
+          onClick={onToggle}
+          aria-label={isExpanded ? 'Contraer hijos' : 'Expandir hijos'}
+        >
+          <ChevronDownIcon
+            width={12}
+            height={12}
+            className={`${styles.toggleIcon} ${isExpanded ? styles.toggleIconOpen : ''}`}
+          />
+        </button>
+      )}
+
       {/* Type icon */}
       <span className={styles.typeIcon} aria-label={itemType}>
         {TYPE_ICONS[itemType]}
@@ -129,7 +156,10 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
       <span className={styles.code}>{code}</span>
 
       {/* Title */}
-      <span className={styles.title}>{title}</span>
+      <span className={styles.title}>
+        {title}
+        {isSuggestion && <span className={styles.suggestionBadge}>Sugerencia</span>}
+      </span>
 
       {/* Status — with dropdown */}
       <div className={styles.statusWrapper}>

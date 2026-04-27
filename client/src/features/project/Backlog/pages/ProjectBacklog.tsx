@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
 import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
@@ -10,6 +11,8 @@ import ContextMenu from '@/shared/components/ContextMenu';
 import type { MenuComponent } from '@/shared/components/ContextMenu';
 import { useBacklogItems } from '@/features/project/Backlog/hooks/useBacklogItems';
 import { useBacklogMeta } from '@/features/project/Backlog/hooks/useBacklogMeta';
+import { acceptSugerencia } from '@/features/project/Backlog/services/backlog.service';
+import { useUser } from '@/core/auth/userContext';
 import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord, SprintRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
 
@@ -92,15 +95,55 @@ function FilterBubble({ label, selectedLabel, elements }: FilterBubbleProps) {
 
 // ── Main component ────────────────────────────────────────────────
 const ProjectBacklog: React.FC = () => {
+  const { user } = useUser();
+  const isAdmin = (user?.idRolGlobal ?? 99) <= 2;
   const { items, loading: itemsLoading, refresh } = useBacklogItems(PROJECT_ID);
   const { meta, loading: metaLoading } = useBacklogMeta(PROJECT_ID);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingItem, setEditingItem] = useState<BacklogItemRecord | null>(null);
-  const [search, setSearch] = useState('');
-  const [filterStatus, setFilterStatus] = useState<number | null>(null);
-  const [filterType,   setFilterType]   = useState<number | null>(null);
-  const [filterUser,   setFilterUser]   = useState<number | null>(null);
-  const [filterSprint, setFilterSprint] = useState<number | null>(null);
+  const [showCreateForm, setShowCreateForm]   = useState(false);
+  const [editingItem, setEditingItem]         = useState<BacklogItemRecord | null>(null);
+  const [expandedItems, setExpandedItems]     = useState<Set<number>>(new Set());
+
+  const toggleExpanded = (itemId: number) => {
+    setExpandedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId); else next.add(itemId);
+      return next;
+    });
+  };
+
+  // Build parent→children map from ALL items (unfiltered)
+  const childrenMap = useMemo(() => {
+    const map = new Map<number, BacklogItemRecord[]>();
+    for (const item of items) {
+      if (item.id_backlog_item_padre != null) {
+        if (!map.has(item.id_backlog_item_padre)) map.set(item.id_backlog_item_padre, []);
+        map.get(item.id_backlog_item_padre)!.push(item);
+      }
+    }
+    return map;
+  }, [items]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const search       = searchParams.get('q')      ?? '';
+  const filterStatus = searchParams.get('status') ? Number(searchParams.get('status')) : null;
+  const filterType   = searchParams.get('type')   ? Number(searchParams.get('type'))   : null;
+  const filterUser   = searchParams.get('user')   ? Number(searchParams.get('user'))   : null;
+  const filterSprint = searchParams.get('sprint') ? Number(searchParams.get('sprint')) : null;
+
+  const setParam = (key: string, value: number | string | null) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (value === null || value === '') next.delete(key);
+      else next.set(key, String(value));
+      return next;
+    }, { replace: true });
+  };
+
+  const setSearch       = (v: string)         => setParam('q',      v || null);
+  const setFilterStatus = (v: number | null)  => setParam('status', v);
+  const setFilterType   = (v: number | null)  => setParam('type',   v);
+  const setFilterUser   = (v: number | null)  => setParam('user',   v);
+  const setFilterSprint = (v: number | null)  => setParam('sprint', v);
 
   const loading = itemsLoading || metaLoading;
   const allStatuses = meta.statuses.map(toBacklogStatus);
@@ -171,6 +214,45 @@ const ProjectBacklog: React.FC = () => {
     ? meta.sprints.find(s => s.id === filterSprint)?.nombre
     : undefined;
 
+  const renderItem = (item: BacklogItemRecord, depth = 0): React.ReactNode => {
+    const statusRecord   = meta.statuses.find(s => s.id === item.id_estatus);
+    const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
+    const typeRecord     = meta.types.find(t => t.id === item.id_tipo);
+    const status: BacklogStatus = statusRecord
+      ? toBacklogStatus(statusRecord)
+      : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
+    const sugerencia   = meta.sugerencias.find(s => s.id === item.id);
+    const isSuggestion = !!sugerencia && !sugerencia.aceptada;
+    const children     = childrenMap.get(item.id) ?? [];
+    const isExpanded   = expandedItems.has(item.id);
+
+    return (
+      <React.Fragment key={item.id}>
+        <div style={depth > 0 ? { paddingLeft: depth * 24 } : undefined}>
+          <BacklogListItem
+            code={`${TYPE_PREFIX[typeRecord?.nombre ?? ''] ?? 'IT'}-${String(item.id).padStart(2, '0')}`}
+            title={item.nombre}
+            status={status}
+            statuses={allStatuses}
+            priority={toPriority(priorityRecord)}
+            itemType={typeRecord?.nombre as BacklogItemType | undefined}
+            responsibleUserId={item.id_usuario_responsable ?? undefined}
+            isSuggestion={isSuggestion}
+            hasChildren={filterType !== null && children.length > 0}
+            isExpanded={isExpanded}
+            onToggle={() => toggleExpanded(item.id)}
+            onAcceptSuggestion={isAdmin && isSuggestion ? async () => {
+              await acceptSugerencia(item.id, user!.id);
+              refresh();
+            } : undefined}
+            onEdit={() => setEditingItem(item)}
+          />
+        </div>
+        {isExpanded && children.map(child => renderItem(child, depth + 1))}
+      </React.Fragment>
+    );
+  };
+
   return (
     <div className={styles.container}>
 
@@ -218,28 +300,7 @@ const ProjectBacklog: React.FC = () => {
               </div>
 
               <div className={styles.list}>
-                {groupItems.map(item => {
-                  const statusRecord   = meta.statuses.find(s => s.id === item.id_estatus);
-                  const priorityRecord = meta.priorities.find(p => p.id === item.id_prioridad);
-                  const typeRecord     = meta.types.find(t => t.id === item.id_tipo);
-                  const status: BacklogStatus = statusRecord
-                    ? toBacklogStatus(statusRecord)
-                    : { label: 'Sin estatus', color: '#F3F4F6', textColor: '#6B7280' };
-
-                  return (
-                    <BacklogListItem
-                      key={item.id}
-                      code={`${TYPE_PREFIX[typeRecord?.nombre ?? ''] ?? 'IT'}-${String(item.id).padStart(2, '0')}`}
-                      title={item.nombre}
-                      status={status}
-                      statuses={allStatuses}
-                      priority={toPriority(priorityRecord)}
-                      itemType={typeRecord?.nombre as BacklogItemType | undefined}
-                      responsibleUserId={item.id_usuario_responsable ?? undefined}
-                      onEdit={() => setEditingItem(item)}
-                    />
-                  );
-                })}
+                {groupItems.map(item => renderItem(item))}
               </div>
             </div>
           ))
