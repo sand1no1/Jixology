@@ -2,10 +2,12 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.css';
+import { useUser } from '@/core/auth/userContext';
+
 import {
   UserCircleIcon,
   BeakerIcon,
-  LockClosedIcon,
+  //LockClosedIcon,
   BookOpenIcon,
   BookmarkIcon,
   UserPlusIcon,
@@ -13,12 +15,16 @@ import {
 } from '@heroicons/react/24/solid';
 import { signOutService } from '@/features/auth/services/auth.service';
 
+//const ADMIN_VIEWS = [1,2];
+
 export interface ISidebarProps {
   children?: ReactNode;
 }
 
 const Sidebar: React.FC<ISidebarProps> = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
+  if (!user) return null;
 
   const handleLogout = async () => {
     try {
@@ -33,6 +39,7 @@ const Sidebar: React.FC<ISidebarProps> = () => {
     <>
       <aside className={styles.sidebar}>
         <ul className={styles.menu}>
+          <div>
           <li className={styles.menuItem}>
             <a href="/dashboard-usuario">
               <BeakerIcon className={styles.icon} />
@@ -57,19 +64,16 @@ const Sidebar: React.FC<ISidebarProps> = () => {
               <span><b>Perfil</b></span>
             </a>
           </li>
-
-          <li className={styles.menuItem}>
-            <a href="/inicio-sesion">
-              <LockClosedIcon className={styles.icon} />
-              <span><b>Verificación</b></span>
-            </a>
-          </li>
-          <li className={styles.menuItem}>
-            <a href="/usuarios">
-              <UserPlusIcon className={styles.icon} />
-              <span><b>Crear Usuario</b></span>
-            </a>
-          </li>
+          {user.idRolGlobal === 1 && (
+            <li className={styles.menuItem}>
+              <a href="/usuarios">
+                <UserPlusIcon className={styles.icon} />
+                <span><b>Crear Usuario</b></span>
+              </a>
+            </li>
+          )}
+          </div>
+          <div>
           <li className={styles.menuItem}>
             <button
               type="button"
@@ -80,6 +84,7 @@ const Sidebar: React.FC<ISidebarProps> = () => {
               <span><b>Cerrar Sesión</b></span>
             </button>
           </li>
+          </div>
         </ul>
       </aside>
 
