@@ -16,7 +16,7 @@ import { useAvatarCatalog } from '@/features/profile/hooks/useAvatarCatalog';
 import { useUserAvatar } from '@/features/profile/hooks/useUserAvatar';
 import { useAvatarFeatures } from '@/features/profile/hooks/useAvatarFeatures';
 import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
-import type { BacklogStatus, Priority } from '@/features/project/Backlog/components/BacklogListItem';
+import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
 import CreateBacklogItemForm from '@/features/project/Backlog/components/CreateBacklogItemForm';
 import SkeletonBacklogItem from '@/features/project/Backlog/components/SkeletonBacklogItem/SkeletonBacklogItem';
 import { useBacklogItems } from '@/features/project/Backlog/hooks/useBacklogItems';
@@ -105,6 +105,7 @@ function DebugBacklogList() {
             status={status}
             statuses={allStatuses}
             priority={toPriority(priorityRecord)}
+            itemType={typeRecord?.nombre as BacklogItemType | undefined}
           />
         );
       })}
