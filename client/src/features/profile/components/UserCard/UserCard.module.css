@@ -260,18 +260,17 @@
 
 /* ── Preview Card ─────────────────────────────────────────────────── */
 .profileCardPreview {
-  width: 320px;
-  min-width: 320px;
-  max-width: 320px;
-  min-height: 490px;
-  padding: 24px 18px 20px;
-  gap: 16px;
+  width: 300px;
+  min-width: 300px;
+  max-width: 300px;
+  padding: 22px 18px 18px;
+  gap: 14px;
   margin: 0 auto;
 }
 
 .profileCardPreview .avatarCircle {
-  width: 118px;
-  height: 118px;
+  width: 108px;
+  height: 108px;
 }
 
 .profileCardPreview .profileInfo {
@@ -292,7 +291,13 @@
 }
 
 .profileCardPreview .aboutMeSection {
-  min-height: 78px;
+  min-height: 0;
+  padding-top: 0.85rem;
+}
+
+.profileCardPreview .aboutMeText {
+  margin: 0;
+  line-height: 1.5;
 }
 /* ── Responsive ─────────────────────────────────────────────────── */
 @media (max-width: 768px) {
