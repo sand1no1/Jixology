@@ -81,7 +81,7 @@
 .sprintGroup {
   border: 1px solid var(--color-clarity-gray-2);
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .sprintHeader {
@@ -91,6 +91,7 @@
   padding: 0.625rem 1rem;
   background: var(--color-clarity-gray-1);
   border-bottom: 1px solid var(--color-clarity-gray-2);
+  border-radius: 12px 12px 0 0;
 }
 
 .sprintName {

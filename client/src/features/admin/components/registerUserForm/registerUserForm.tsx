@@ -202,8 +202,9 @@ export function RegisterUserForm({
                       aria-invalid={touchedFields.id_rol_global && !hasRol}
                     >
                       <option value="">Selecciona rol</option>
-                      <option value="1">Administrador</option>
-                      <option value="2">Usuario</option>
+                      <option value="2">Admin</option>
+                      <option value="3">Viewer</option>
+                      <option value="4">Usuario</option>
                     </select>
                     <ChevronDownIcon className="register-user-card__select-icon" />
                   </div>
