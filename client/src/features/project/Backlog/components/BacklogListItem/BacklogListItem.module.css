@@ -1,15 +1,15 @@
 /* ── Row — same base pattern as ListUserCard ─────────────────────── */
 .row {
   display: grid;
-  grid-template-columns: 18px 28px 64px 1fr 160px 36px 36px 28px;
+  grid-template-columns: 18px 28px 72px 1fr 160px 36px 36px 28px;
   align-items: center;
-  column-gap: 12px;
-  padding: 10px 16px;
+  column-gap: 16px;
+  padding: 14px 20px;
   background: var(--color-white);
   border-radius: 10px;
   border: 1px solid var(--color-clarity-gray-2);
   font-family: 'Poppins', 'Aptos', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -20,7 +20,7 @@
 
 /* ── Compact row (no toggle column) ─────────────────────────────── */
 .rowCompact {
-  grid-template-columns: 28px 64px 1fr 160px 36px 36px 28px;
+  grid-template-columns: 28px 72px 1fr 160px 36px 36px 28px;
 }
 
 /* ── Expand toggle ───────────────────────────────────────────────── */
