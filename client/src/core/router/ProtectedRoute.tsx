@@ -10,6 +10,11 @@ export function ProtectedRoute({ allowedRoles }: Props) {
 
   if (loading) return null;
   if (!user) return <Navigate to="/inicio-sesion" replace />;
+
+  if (user.activo === false) {
+    return <Navigate to="/inicio-sesion" replace />;
+  }
+
   if (user.idRolGlobal === null || !allowedRoles.includes(user.idRolGlobal)) {
     return <Navigate to="/sin-acceso" replace />;
   }
