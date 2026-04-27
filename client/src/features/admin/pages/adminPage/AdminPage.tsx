@@ -50,13 +50,16 @@ function computeContextMenuStyle(position: { x: number; y: number }): React.CSSP
   const MARGIN = 8;
   const MENU_WIDTH = 190;
   const MENU_HEIGHT = 110;
+  const HORIZONTAL_OFFSET = 170; // move menu left from click
+  const VERTICAL_OFFSET = 8;
 
-  let left = position.x;
-  let top = position.y;
+  let left = position.x - HORIZONTAL_OFFSET;
+  let top = position.y - VERTICAL_OFFSET;
 
   if (left + MENU_WIDTH > window.innerWidth - MARGIN) {
     left = window.innerWidth - MENU_WIDTH - MARGIN;
   }
+
   if (top + MENU_HEIGHT > window.innerHeight - MARGIN) {
     top = window.innerHeight - MENU_HEIGHT - MARGIN;
   }
