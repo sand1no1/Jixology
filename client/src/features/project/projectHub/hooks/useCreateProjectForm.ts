@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ChangeEvent, ComponentProps, FocusEvent } from 'react';
-<<<<<<< HEAD
 import {
   createProject,
   updateCreateProyectData,
@@ -14,10 +13,6 @@ import type {
   ProjectCatalogs,
   ProjectFormFeedback,
 } from '@/features/project/projectHub/types/create.project.types';
-=======
-import { createProject, updateCreateProyectData, getCreateProjectCatalogs, getAllCreateProyectData } from '@/features/project/projectHub/services/create.project';
-import type { CreateProjectFormErrors, CreateProjectFormValues, CreateProjectPayload, ProjectCatalogs, ProjectFormFeedback } from '@/features/project/projectHub/types/create.project.types';
->>>>>>> 4a9d19f (Dev-125: Feature - Editar Proyecto -> Modificacion completa de la funcionalidad de crear proyecto para que pueda aceptar la edicion de proyecto.)
 
 export const minAllowedDate = '2000-01-01';
 export const maxAllowedDate = '2100-12-31';
