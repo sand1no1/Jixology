@@ -12,12 +12,13 @@ import ProjectHeader from '@/shared/layout/HeaderProject';
 
 export interface IAppLayoutHsProps {
   children?: ReactNode;
+  title: string;
 }
 
-const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children }) => {
+const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children, title }) => {
   return (
     <div className={styles.container}>
-      <Header />
+      <Header title={title}/>
       <div className={styles.belowHeadbar}>
         <Sidebar />
         <div className={styles.innerProject}>
