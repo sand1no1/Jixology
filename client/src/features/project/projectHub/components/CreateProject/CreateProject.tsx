@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+<<<<<<< HEAD
 import {
   useCreateProjectForm,
   minAllowedDate,
@@ -11,6 +12,10 @@ import {
   MinusIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
+=======
+import { useCreateProjectForm, minAllowedDate, maxAllowedDate } from '@/features/project/projectHub/hooks/useCreateProjectForm';
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+>>>>>>> 4a9d19f (Dev-125: Feature - Editar Proyecto -> Modificacion completa de la funcionalidad de crear proyecto para que pueda aceptar la edicion de proyecto.)
 import './CreateProject.css';
 
 type Props = {

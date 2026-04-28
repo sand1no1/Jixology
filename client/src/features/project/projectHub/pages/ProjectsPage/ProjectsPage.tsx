@@ -82,6 +82,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       text: 'Editar Proyecto',
+<<<<<<< HEAD
       onClick: () => setEditingProjectId(project.id),
     },
     ...(project.id_estatus !== 5 ? [{
