@@ -14,10 +14,15 @@ export interface IAppLayoutHsProps {
   children?: ReactNode;
 }
 
+interface HeaderProps {
+  title: string;
+}
+
+
 const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children }) => {
   return (
     <div className={styles.container}>
-      <Header />
+      <Header title="Proyecto 1"/>
       <div className={styles.belowHeadbar}>
         <Sidebar />
         <div className={styles.innerProject}>
