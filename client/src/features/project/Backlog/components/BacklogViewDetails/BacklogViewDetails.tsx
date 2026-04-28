@@ -109,8 +109,8 @@ const BacklogViewDetails: React.FC<BacklogViewDetailsProps> = ({ item, meta, onC
     u ? ([u.nombre, u.apellido].filter(Boolean).join(' ') || u.email) : null;
 
   return (
-    <div className={styles.overlay} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className={styles.panel}>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.panel} onClick={e => e.stopPropagation()}>
 
         {/* ── Top bar ── */}
         <div className={styles.topBar}>

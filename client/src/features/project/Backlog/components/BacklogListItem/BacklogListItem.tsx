@@ -184,7 +184,10 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
       <span className={styles.code}>{code}</span>
 
       {/* Title */}
-      <span className={styles.title}>
+      <span
+        className={`${styles.title} ${onViewDetails ? styles.titleClickable : ''}`}
+        onClick={onViewDetails}
+      >
         {title}
         {isSuggestion && <span className={styles.suggestionBadge}>Sugerencia</span>}
       </span>

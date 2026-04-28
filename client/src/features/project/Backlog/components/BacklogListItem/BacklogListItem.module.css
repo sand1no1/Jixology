@@ -108,6 +108,18 @@
   text-overflow: ellipsis;
 }
 
+.titleClickable {
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.titleClickable:hover {
+  color: var(--color-mahindra-red);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ── Status badge — same badge pattern as ListUserCard ───────────── */
 .statusBtn {
   display: inline-flex;
