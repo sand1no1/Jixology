@@ -355,6 +355,18 @@ export default function RegisterUserPage() {
               <h1 className="admin-page__title">Usuarios del sistema</h1>
               <p className="admin-page__subtitle"></p>
             </div>
+
+            <button
+              type="button"
+              className="admin-page__create-button"
+              onClick={() => {
+                setPageError('');
+                setPageSuccess('');
+                setIsCreateModalOpen(true);
+              }}
+            >
+              Crear usuario
+            </button>
           </div>
 
           <div className="admin-page__search">
@@ -383,6 +395,19 @@ export default function RegisterUserPage() {
                 Crear usuario
               </button>
             </FilterBar>
+          </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <select
+              value={statusFilter}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as 'active' | 'inactive' | 'all')
+              }
+            >
+              <option value="active">Usuarios activos</option>
+              <option value="inactive">Usuarios inactivos</option>
+              <option value="all">Todos</option>
+            </select>
           </div>
 
           {pageSuccess && (

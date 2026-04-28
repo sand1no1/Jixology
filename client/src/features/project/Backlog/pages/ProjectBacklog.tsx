@@ -17,7 +17,6 @@ import { useUser } from '@/core/auth/userContext';
 import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord, SprintRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
 
-
 const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
   1: { color: '#F3F4F6', textColor: '#6B7280' },
   2: { color: '#DBEAFE', textColor: '#1D4ED8' },

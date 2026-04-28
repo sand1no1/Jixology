@@ -48,6 +48,7 @@ const ProjectsPage: React.FC = () => {
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
   const { recentIds } = useRecentProjects(user?.id);
   const navigate = useNavigate();
@@ -57,13 +58,20 @@ const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     if (activeFilter !== 'Archivados' || !user || user.idRolGlobal == null) return;
-    getArchivedProjects(user.idRolGlobal, user.id)
-      .then((data) => {
-        console.log('[Archivados] proyectos recibidos:', data);
+
+    const fetchArchived = async () => {
+      setArchivedLoading(true);
+      try {
+        const data = await getArchivedProjects(user.idRolGlobal!, user.id);
         setArchivedProjects(data);
-      })
-      .catch((err) => console.error('[Archivados] error al obtener:', err))
-      .finally(() => setArchivedLoading(false));
+      } catch (err) {
+        console.error('[Archivados] error al obtener:', err);
+      } finally {
+        setArchivedLoading(false);
+      }
+    };
+
+    void fetchArchived();
   }, [activeFilter, user]);
 
   const STATUS_OPTIONS: { id: number; label: string }[] = [
@@ -80,7 +88,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       text: 'Editar Proyecto',
-      onClick: () => navigate(`/proyectos/${project.id}/edit`),
+      onClick: () => setEditingProjectId(project.id),
     },
     ...(project.id_estatus !== 5 ? [{
       text: 'Cambiar Estatus',
@@ -102,16 +110,25 @@ const ProjectsPage: React.FC = () => {
       ? {
           text: 'Archivar Proyecto',
           onClick: async () => {
-            await archiveProject(project.id, user!.id);
-            setProjects((prev) => prev.filter((p) => p.id !== project.id));
+            try {
+              await archiveProject(project.id, user!.id);
+              setProjects((prev) => prev.filter((p) => p.id !== project.id));
+              setArchivedProjects((prev) => [...prev, { ...project, id_estatus: 5 }]);
+            } catch (err) {
+              console.error('[Archivar] error:', err);
+            }
           },
         }
       : {
           text: 'Desarchivar Proyecto',
           onClick: async () => {
-            await unarchiveProject(project.id, user!.id);
-            setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
-            setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+            try {
+              await unarchiveProject(project.id, user!.id);
+              setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
+              setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+            } catch (err) {
+              console.error('[Desarchivar] error:', err);
+            }
           },
         },
   ];
@@ -245,12 +262,18 @@ const ProjectsPage: React.FC = () => {
       </div>
       {user ? (
         <CreateProject
-          isOpen={isCreateProjectOpen}
-          onClose={() => setIsCreateProjectOpen(false)}
+          isOpen={isCreateProjectOpen || editingProjectId !== null}
+          isCreate={editingProjectId === null}
+          projectId={editingProjectId ?? undefined}
+          onClose={() => {
+            setIsCreateProjectOpen(false);
+            setEditingProjectId(null);
+          }}
           userId={user.id}
           onCreated={async (message) => {
             setCreationSuccessMessage(message);
             setIsCreateProjectOpen(false);
+            setEditingProjectId(null);
             await refetch();
           }}
         />
