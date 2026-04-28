@@ -48,6 +48,7 @@ const ProjectsPage: React.FC = () => {
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
   const { recentIds, trackVisit } = useRecentProjects(user?.id);
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const ProjectsPage: React.FC = () => {
     },
     {
       text: 'Editar Proyecto',
-      onClick: () => navigate(`/projects/${project.id}/edit`),
+      onClick: () => setEditingProjectId(project.id),
     },
     ...(project.id_estatus !== 5 ? [{
       text: 'Cambiar Estatus',
@@ -262,12 +263,18 @@ const ProjectsPage: React.FC = () => {
       </div>
       {user ? (
         <CreateProject
-          isOpen={isCreateProjectOpen}
-          onClose={() => setIsCreateProjectOpen(false)}
+          isOpen={isCreateProjectOpen || editingProjectId !== null}
+          isCreate={editingProjectId === null}
+          projectId={editingProjectId ?? undefined}
+          onClose={() => {
+            setIsCreateProjectOpen(false);
+            setEditingProjectId(null);
+          }}
           userId={user.id}
           onCreated={async (message) => {
             setCreationSuccessMessage(message);
             setIsCreateProjectOpen(false);
+            setEditingProjectId(null);
             await refetch();
           }}
         />

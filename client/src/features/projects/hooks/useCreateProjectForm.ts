@@ -1,16 +1,7 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ChangeEvent, ComponentProps, FocusEvent } from 'react';
-import {
-  createProject,
-  getCreateProjectCatalogs,
-} from '@/features/projects/services/create.project';
-import type {
-  CreateProjectFormErrors,
-  CreateProjectFormValues,
-  CreateProjectPayload,
-  ProjectCatalogs,
-  ProjectFormFeedback,
-} from '@/features/projects/types/create.project.types';
+import { createProject, updateCreateProyectData, getCreateProjectCatalogs, getAllCreateProyectData } from '@/features/projects/services/create.project';
+import type { CreateProjectFormErrors, CreateProjectFormValues, CreateProjectPayload, ProjectCatalogs, ProjectFormFeedback } from '@/features/projects/types/create.project.types';
 
 export const minAllowedDate = '2000-01-01';
 export const maxAllowedDate = '2100-12-31';
@@ -43,6 +34,7 @@ type UseCreateProjectFormReturn = {
 
 type UseCreateProjectFormOptions = {
   userId: number;
+  projectId?: number;
   onSuccess?: (message: string) => void;
 };
 
@@ -308,6 +300,10 @@ export function useCreateProjectForm(
     void loadCatalogs();
   }, [loadCatalogs]);
 
+  useEffect(() => {
+    if (options.projectId) void loadEditProyectData();
+  }, [options.projectId]);
+
   const handleFieldChange = (event: ChangeEvent<FieldElement>): void => {
     const fieldName = event.target.name as keyof CreateProjectFormValues;
     const nextValue =
@@ -455,15 +451,19 @@ export function useCreateProjectForm(
 
     try {
       const payload = normalizePayload(values, options.userId);
-      const response = await createProject(payload);
-      const successMessage = `${response.message} ID: ${response.id}.`;
+
+      if (options.projectId) {
+        await updateCreateProyectData(options.projectId, payload);
+        options.onSuccess?.(`Proyecto "${payload.nombre}" actualizado correctamente.`);
+      } else {
+        const response = await createProject(payload);
+        setValues(buildInitialValues(catalogs));
+        options.onSuccess?.(`${response.message} ID: ${response.id}.`);
+      }
 
       setErrors({});
-      setValues(buildInitialValues(catalogs));
       setValidationAttemptCount(0);
       setTouchedFields({});
-
-      options.onSuccess?.(successMessage);
     } catch (error) {
       setFeedback({
         type: 'error',
@@ -485,6 +485,20 @@ export function useCreateProjectForm(
   const isFormValid = useMemo(() => {
     return Object.keys(computedValidationErrors).length === 0;
   }, [computedValidationErrors]);
+
+  const loadEditProyectData = async () => {
+    setIsInitialLoading(true);
+    try {
+      const projectValues =  await getAllCreateProyectData(options.projectId!,options.userId)
+      setValues(projectValues);
+    } catch (error) {
+      setLoadError(getErrorMessage(error));
+    } finally {
+      setIsInitialLoading(false);
+    }
+
+  }
+
 
   return {
     catalogs,

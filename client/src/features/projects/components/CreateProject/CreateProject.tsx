@@ -1,16 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { 
-  useCreateProjectForm,
-  minAllowedDate,
-  maxAllowedDate
-} from '@/features/projects/hooks/useCreateProjectForm';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  PlusIcon,
-  MinusIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { useCreateProjectForm, minAllowedDate, maxAllowedDate } from '@/features/projects/hooks/useCreateProjectForm';
+import { ChevronDownIcon, ChevronUpIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import './CreateProject.css';
 
 type Props = {
@@ -18,9 +8,11 @@ type Props = {
   onClose: () => void;
   onCreated: (message: string) => void;
   userId: number;
+  isCreate: boolean;
+  projectId?: number; 
 };
 
-export default function CreateProject({ isOpen, onClose, onCreated, userId }: Props) {
+export default function CreateProject({ isOpen, onClose, onCreated, userId, isCreate = true, projectId }: Props) {
   const [isAdditionalDataVisible, setIsAdditionalDataVisible] = useState(false);
   const bodyRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,6 +38,7 @@ export default function CreateProject({ isOpen, onClose, onCreated, userId }: Pr
     updateStackField,
   } = useCreateProjectForm({
     userId,
+    projectId,
     onSuccess: (message) => {
       onCreated(message);
       setIsAdditionalDataVisible(false);
@@ -115,10 +108,10 @@ export default function CreateProject({ isOpen, onClose, onCreated, userId }: Pr
           <div>
             <p className="create-project-modal__eyebrow">Proyectos</p>
             <h2 id="create-project-modal-title" className="create-project-modal__title">
-              Crear proyecto
+              {isCreate ? "Crear Proyecto" : "Editar Proyecto"}
             </h2>
             <p className="create-project-modal__description">
-              Captura primero los datos obligatorios y expande detalles solo cuando
+              {isCreate? "Captura" : "Edita"} primero los datos obligatorios y expande detalles solo cuando
               realmente los necesites.
             </p>
           </div>
@@ -177,7 +170,7 @@ export default function CreateProject({ isOpen, onClose, onCreated, userId }: Pr
                 <div className="create-project-modal__section-header">
                   <h3 className="create-project-modal__section-title">Datos obligatorios</h3>
                   <p className="create-project-modal__section-description">
-                    Estos son los datos mínimos para registrar el proyecto.
+                    Estos son los datos mínimos para {isCreate && "registrar"} el proyecto.
                   </p>
                 </div>
 
@@ -786,7 +779,7 @@ export default function CreateProject({ isOpen, onClose, onCreated, userId }: Pr
                     />
                   ) : null}
                   <span className="create-project-modal__button-text">
-                    {isSubmitting ? 'Guardando proyecto...' : 'Crear proyecto'}
+                    {isSubmitting ? 'Guardando...' : isCreate ? 'Crear proyecto' : 'Guardar cambios'}
                   </span>
                 </button>
               </div>
