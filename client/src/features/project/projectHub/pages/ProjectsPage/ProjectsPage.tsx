@@ -58,14 +58,20 @@ const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     if (activeFilter !== 'Archivados' || !user || user.idRolGlobal == null) return;
-    setArchivedLoading(true);
-    getArchivedProjects(user.idRolGlobal, user.id)
-      .then((data) => {
-        console.log('[Archivados] proyectos recibidos:', data);
+
+    const fetchArchived = async () => {
+      setArchivedLoading(true);
+      try {
+        const data = await getArchivedProjects(user.idRolGlobal!, user.id);
         setArchivedProjects(data);
-      })
-      .catch((err) => console.error('[Archivados] error al obtener:', err))
-      .finally(() => setArchivedLoading(false));
+      } catch (err) {
+        console.error('[Archivados] error al obtener:', err);
+      } finally {
+        setArchivedLoading(false);
+      }
+    };
+
+    void fetchArchived();
   }, [activeFilter, user]);
 
   const STATUS_OPTIONS: { id: number; label: string }[] = [
@@ -82,7 +88,6 @@ const ProjectsPage: React.FC = () => {
     },
     {
       text: 'Editar Proyecto',
-<<<<<<< HEAD
       onClick: () => setEditingProjectId(project.id),
     },
     ...(project.id_estatus !== 5 ? [{

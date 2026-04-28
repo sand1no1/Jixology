@@ -1,17 +1,6 @@
 import { supabase } from '@/core/supabase/supabase.client';
-<<<<<<< HEAD:client/src/features/project/projectHub/services/create.project.ts
-import type {
-  CreateProjectPayload,
-  CreateProjectResponse,
-  ProjectCatalogs,
-  ProjectCatalogOption,
-  ProjectCurrencyOption,
-  ProjectStatusOption,
-} from '@/features/project/projectHub/types/create.project.types';
-=======
-import type { CreateProjectPayload, CreateProjectResponse, ProjectCatalogs, ProjectCatalogOption, ProjectCurrencyOption, ProjectStatusOption, CreateProjectFormValues } from '@/features/projects/types/create.project.types';
+import type { CreateProjectPayload, CreateProjectResponse, ProjectCatalogs, ProjectCatalogOption, ProjectCurrencyOption, ProjectStatusOption, CreateProjectFormValues } from '@/features/project/projectHub/types/create.project.types';
 import { hasAdminRole } from '@/core/auth/user.service';
->>>>>>> cc83e14 (Dev-125: Feature - Editar Proyecto -> Modificacion completa de la funcionalidad de crear proyecto para que pueda aceptar la edicion de proyecto.):client/src/features/projects/services/create.project.ts
 
 function mapCatalogOption(row: { id: number; nombre: string }): ProjectCatalogOption {
   return {
