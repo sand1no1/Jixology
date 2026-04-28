@@ -4,7 +4,6 @@ import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
 import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
 import CreateBacklogItemForm from '@/features/project/Backlog/components/CreateBacklogItemForm';
-import EditBacklogItemForm from '@/features/project/Backlog/components/EditBacklogItemForm/EditBacklogItemForm';
 import BacklogViewDetails from '@/features/project/Backlog/components/BacklogViewDetails/BacklogViewDetails';
 import SkeletonBacklogItem from '@/features/project/Backlog/components/SkeletonBacklogItem/SkeletonBacklogItem';
 import FilterBar from '@/shared/components/FilterBar';
@@ -101,10 +100,8 @@ const ProjectBacklog: React.FC = () => {
   const isAdmin = (user?.idRolGlobal ?? 99) <= 2;
   const { items, loading: itemsLoading, refresh } = useBacklogItems(PROJECT_ID);
   const { meta, loading: metaLoading } = useBacklogMeta(PROJECT_ID);
-  const [showCreateForm, setShowCreateForm]   = useState(false);
-  const [editingItem, setEditingItem]         = useState<BacklogItemRecord | null>(null);
-  const [viewingItem, setViewingItem]         = useState<BacklogItemRecord | null>(null);
-  const [expandedItems, setExpandedItems]     = useState<Set<number>>(new Set());
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [expandedItems, setExpandedItems]   = useState<Set<number>>(new Set());
 
   const toggleExpanded = (itemId: number) => {
     setExpandedItems(prev => {
@@ -132,6 +129,13 @@ const ProjectBacklog: React.FC = () => {
   const filterType   = searchParams.get('type')   ? Number(searchParams.get('type'))   : null;
   const filterUser   = searchParams.get('user')   ? Number(searchParams.get('user'))   : null;
   const filterSprint = searchParams.get('sprint') ? Number(searchParams.get('sprint')) : null;
+  const viewingId    = searchParams.get('item')   ? Number(searchParams.get('item'))   : null;
+
+  // Derive viewingItem from URL + items list (works across tab switches / refreshes)
+  const viewingItem  = viewingId != null ? (meta.items.find(i => i.id === viewingId) ?? null) : null;
+
+  const setViewingItem = (item: BacklogItemRecord | null) =>
+    setParam('item', item ? item.id : null);
 
   const setParam = (key: string, value: number | string | null) => {
     setSearchParams(prev => {
@@ -249,7 +253,6 @@ const ProjectBacklog: React.FC = () => {
               await acceptSugerencia(item.id, user!.id);
               refresh();
             } : undefined}
-            onEdit={() => setEditingItem(item)}
           />
         </div>
         {isExpanded && children.map(child => renderItem(child, depth + 1))}
@@ -319,20 +322,13 @@ const ProjectBacklog: React.FC = () => {
         onCreated={() => { refresh(); setShowCreateForm(false); }}
       />
 
-      {editingItem && (
-        <EditBacklogItemForm
-          item={editingItem}
-          meta={meta}
-          onClose={() => setEditingItem(null)}
-          onUpdated={() => { refresh(); setEditingItem(null); }}
-        />
-      )}
-
       {viewingItem && (
         <BacklogViewDetails
           item={viewingItem}
           meta={meta}
           onClose={() => setViewingItem(null)}
+          onUpdated={() => refresh()}
+          onNavigate={i => setViewingItem(i)}
         />
       )}
     </div>

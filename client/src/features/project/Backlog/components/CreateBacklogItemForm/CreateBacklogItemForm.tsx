@@ -174,6 +174,14 @@ function PriorityIconSelect({ priorities, value, onChange }: PriorityIconSelectP
   );
 }
 
+// ── Hierarchy: which type can be parent of which ──────────────────
+const PARENT_TYPE_NAME: Record<string, string> = {
+  'Historia de Usuario': 'Épica',
+  'Tarea':               'Historia de Usuario',
+  'Subtarea':            'Tarea',
+  'Bug':                 'Subtarea',
+};
+
 // ── Main form ─────────────────────────────────────────────────────
 interface CreateBacklogItemFormProps {
   projectId: number;
@@ -194,12 +202,13 @@ interface FormState {
   fecha_vencimiento: string;
   id_backlog_item_padre: string;
   id_usuario_responsable: string;
+  complejidad: number | null;
 }
 
 const EMPTY_FORM: FormState = {
   nombre: '', descripcion: '', id_tipo: '', id_estatus: '',
   id_prioridad: '', id_sprint: '', fecha_inicio: '', fecha_vencimiento: '',
-  id_backlog_item_padre: '', id_usuario_responsable: '',
+  id_backlog_item_padre: '', id_usuario_responsable: '', complejidad: null,
 };
 
 const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
@@ -230,6 +239,7 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
       id_usuario_responsable: form.id_usuario_responsable ? Number(form.id_usuario_responsable) : null,
       id_proyecto:            projectId,
       id_usuario_creador:     userId,
+      complejidad:            form.complejidad,
     };
     try {
       const newItem = await submit(payload);
@@ -270,16 +280,8 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
               placeholder="Descripción opcional..." rows={3} value={form.descripcion} onChange={handleChange} />
           </div>
 
-          {/* Row: Tipo + Estatus */}
+          {/* Row: Estatus + Prioridad */}
           <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label}>Tipo</label>
-              <select name="id_tipo" className={styles.select} value={form.id_tipo} onChange={handleChange}>
-                <option value="">Sin tipo</option>
-                {meta.types.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
-              </select>
-            </div>
-
             <div className={styles.field}>
               <label className={styles.label}>
                 Estatus <span className={styles.required}>*</span>
@@ -291,10 +293,7 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
                 required
               />
             </div>
-          </div>
 
-          {/* Row: Prioridad + Sprint */}
-          <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label}>Prioridad</label>
               <PriorityIconSelect
@@ -303,7 +302,10 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
                 onChange={v => setForm(f => ({ ...f, id_prioridad: v }))}
               />
             </div>
+          </div>
 
+          {/* Row: Sprint + Responsable */}
+          <div className={styles.row}>
             <div className={styles.field}>
               <label className={styles.label}>Sprint</label>
               <select name="id_sprint" className={styles.select} value={form.id_sprint} onChange={handleChange}>
@@ -311,29 +313,14 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
                 {meta.sprints.map(s => <option key={s.id} value={s.id}>{s.nombre}</option>)}
               </select>
             </div>
-          </div>
-
-          {/* Row: Item padre + Responsable */}
-          <div className={styles.row}>
-            <div className={styles.field}>
-              <label className={styles.label}>Ítem padre</label>
-              <select name="id_backlog_item_padre" className={styles.select} value={form.id_backlog_item_padre} onChange={handleChange}>
-                <option value="">Sin ítem padre</option>
-                {meta.items.map(item => (
-                  <option key={item.id} value={item.id}>
-                    HU-{String(item.id).padStart(2, '0')} — {item.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             <div className={styles.field}>
               <label className={styles.label}>Responsable</label>
               <select name="id_usuario_responsable" className={styles.select} value={form.id_usuario_responsable} onChange={handleChange}>
                 <option value="">Sin responsable</option>
-                {meta.users.map(user => (
-                  <option key={user.id} value={user.id}>
-                    {[user.nombre, user.apellido].filter(Boolean).join(' ') || user.email}
+                {meta.users.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {[u.nombre, u.apellido].filter(Boolean).join(' ') || u.email}
                   </option>
                 ))}
               </select>
@@ -349,6 +336,64 @@ const CreateBacklogItemForm: React.FC<CreateBacklogItemFormProps> = ({
             <div className={styles.field}>
               <label className={styles.label}>Fecha vencimiento</label>
               <input name="fecha_vencimiento" className={styles.input} type="date" value={form.fecha_vencimiento} onChange={handleChange} />
+            </div>
+          </div>
+
+          {/* Tipo — determines parent options, so placed before Ítem padre */}
+          <div className={styles.field}>
+            <label className={styles.label}>Tipo</label>
+            <select
+              name="id_tipo"
+              className={styles.select}
+              value={form.id_tipo}
+              onChange={e => setForm(f => ({ ...f, id_tipo: e.target.value, id_backlog_item_padre: '' }))}
+            >
+              <option value="">Sin tipo</option>
+              {meta.types.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
+            </select>
+          </div>
+
+          {/* Ítem padre — only shown when a type that can have a parent is selected */}
+          {(() => {
+            if (!form.id_tipo) return null;
+            const selectedType = meta.types.find(t => String(t.id) === form.id_tipo);
+            const parentTypeName = selectedType ? PARENT_TYPE_NAME[selectedType.nombre] : undefined;
+            if (!parentTypeName) return null; // Épica has no parent
+            const parentTypeId = meta.types.find(t => t.nombre === parentTypeName)?.id;
+            const validParents = parentTypeId != null
+              ? meta.items.filter(i => i.id_tipo === parentTypeId)
+              : [];
+            const PREFIX: Record<string, string> = { 'Historia de Usuario': 'HU', 'Tarea': 'TA', 'Bug': 'BG', 'Épica': 'EP', 'Subtarea': 'ST' };
+            const parentPrefix = PREFIX[parentTypeName] ?? 'IT';
+            return (
+              <div className={styles.field}>
+                <label className={styles.label}>Ítem padre <span className={styles.parentTypeHint}>({parentTypeName})</span></label>
+                <select name="id_backlog_item_padre" className={styles.select} value={form.id_backlog_item_padre} onChange={handleChange}>
+                  <option value="">Sin ítem padre</option>
+                  {validParents.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {parentPrefix}-{String(item.id).padStart(2, '0')} — {item.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
+
+          {/* Complejidad */}
+          <div className={styles.field}>
+            <label className={styles.label}>Complejidad</label>
+            <div className={styles.complexityRow}>
+              {[1, 2, 3, 4, 5].map(n => (
+                <button
+                  key={n}
+                  type="button"
+                  className={`${styles.complexityBtn} ${form.complejidad === n ? styles.complexityBtnActive : ''}`}
+                  onClick={() => setForm(f => ({ ...f, complejidad: f.complejidad === n ? null : n }))}
+                >
+                  {n}
+                </button>
+              ))}
             </div>
           </div>
 
