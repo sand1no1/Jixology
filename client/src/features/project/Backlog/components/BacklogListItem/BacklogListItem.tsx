@@ -105,6 +105,7 @@ interface BacklogListItemProps {
   onStatusChange?: (status: BacklogStatus) => void;
   onPriorityChange?: (priority: Priority) => void;
   onAssign?: () => void;
+  onViewDetails?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
   onAcceptSuggestion?: () => void;
@@ -125,6 +126,7 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
   onStatusChange,
   onPriorityChange,
   onAssign,
+  onViewDetails,
   onEdit,
   onDelete,
   onAcceptSuggestion,
@@ -149,9 +151,10 @@ const BacklogListItem: React.FC<BacklogListItemProps> = ({
   const currentPriorityOption = PRIORITY_OPTIONS.find(o => o.value === currentPriority) ?? PRIORITY_OPTIONS[2];
 
   const menuItems = [
-    { text: 'Editar',    onClick: () => { setOpen(null); onEdit?.();   } },
+    { text: 'Ver Detalles', onClick: () => { setOpen(null); onViewDetails?.(); } },
+    { text: 'Editar',       onClick: () => { setOpen(null); onEdit?.();        } },
     ...(isSuggestion && onAcceptSuggestion ? [{ text: 'Aceptar sugerencia', onClick: () => { setOpen(null); onAcceptSuggestion(); } }] : []),
-    { text: 'Eliminar',  onClick: () => { setOpen(null); onDelete?.(); } },
+    { text: 'Eliminar',     onClick: () => { setOpen(null); onDelete?.();      } },
   ];
 
   return (
