@@ -388,7 +388,7 @@ const BacklogViewDetails: React.FC<BacklogViewDetailsProps> = ({ item, meta, onC
 
   const handleTimeSave = async (minutes: number | null, onError: (msg: string) => void) => {
     try {
-      const updated = await updateBacklogItem(item.id, {
+      await updateBacklogItem(item.id, {
         nombre:                 item.nombre,
         descripcion:            item.descripcion,
         id_tipo:                item.id_tipo,
