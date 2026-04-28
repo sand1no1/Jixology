@@ -10,8 +10,8 @@ import {
   //LockClosedIcon,
   BookOpenIcon,
   BookmarkIcon,
-  UserPlusIcon,
   MinusCircleIcon,
+  UsersIcon,
 } from '@heroicons/react/24/solid';
 import { signOutService } from '@/features/auth/services/auth.service';
 
@@ -67,8 +67,8 @@ const Sidebar: React.FC<ISidebarProps> = () => {
           {user.idRolGlobal === 1 && (
             <li className={styles.menuItem}>
               <a href="/usuarios">
-                <UserPlusIcon className={styles.icon} />
-                <span><b>Crear Usuario</b></span>
+                <UsersIcon className={styles.icon} />
+                <span><b>Usuarios</b></span>
               </a>
             </li>
           )}

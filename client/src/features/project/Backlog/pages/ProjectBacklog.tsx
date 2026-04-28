@@ -5,6 +5,7 @@ import BacklogListItem from '@/features/project/Backlog/components/BacklogListIt
 import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
 import CreateBacklogItemForm from '@/features/project/Backlog/components/CreateBacklogItemForm';
 import EditBacklogItemForm from '@/features/project/Backlog/components/EditBacklogItemForm/EditBacklogItemForm';
+import BacklogViewDetails from '@/features/project/Backlog/components/BacklogViewDetails/BacklogViewDetails';
 import SkeletonBacklogItem from '@/features/project/Backlog/components/SkeletonBacklogItem/SkeletonBacklogItem';
 import FilterBar from '@/shared/components/FilterBar';
 import ContextMenu from '@/shared/components/ContextMenu';
@@ -102,6 +103,7 @@ const ProjectBacklog: React.FC = () => {
   const { meta, loading: metaLoading } = useBacklogMeta(PROJECT_ID);
   const [showCreateForm, setShowCreateForm]   = useState(false);
   const [editingItem, setEditingItem]         = useState<BacklogItemRecord | null>(null);
+  const [viewingItem, setViewingItem]         = useState<BacklogItemRecord | null>(null);
   const [expandedItems, setExpandedItems]     = useState<Set<number>>(new Set());
 
   const toggleExpanded = (itemId: number) => {
@@ -242,6 +244,7 @@ const ProjectBacklog: React.FC = () => {
             hasChildren={filterType !== null && children.length > 0}
             isExpanded={isExpanded}
             onToggle={() => toggleExpanded(item.id)}
+            onViewDetails={() => setViewingItem(item)}
             onAcceptSuggestion={isAdmin && isSuggestion ? async () => {
               await acceptSugerencia(item.id, user!.id);
               refresh();
@@ -322,6 +325,14 @@ const ProjectBacklog: React.FC = () => {
           meta={meta}
           onClose={() => setEditingItem(null)}
           onUpdated={() => { refresh(); setEditingItem(null); }}
+        />
+      )}
+
+      {viewingItem && (
+        <BacklogViewDetails
+          item={viewingItem}
+          meta={meta}
+          onClose={() => setViewingItem(null)}
         />
       )}
     </div>

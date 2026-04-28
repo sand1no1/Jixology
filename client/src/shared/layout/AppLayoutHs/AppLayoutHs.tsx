@@ -7,12 +7,13 @@ import Sidebar from '@/shared/layout/Sidebar';
 
 export interface IAppLayoutHsProps {
   children?: ReactNode;
+  title: string;
 }
 
-const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children }) => {
+const AppLayoutHs: React.FC<IAppLayoutHsProps> = ({ children, title }) => {
   return (
     <div>
-      <Header />
+      <Header title={title} />
       <div className={styles.belowHeadbar}>
         <Sidebar />
         <Outlet />
