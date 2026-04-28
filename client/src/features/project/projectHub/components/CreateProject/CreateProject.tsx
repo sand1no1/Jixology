@@ -1,21 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-<<<<<<< HEAD:client/src/features/projects/components/CreateProject/CreateProject.tsx
-import { useCreateProjectForm, minAllowedDate, maxAllowedDate } from '@/features/projects/hooks/useCreateProjectForm';
+import { useCreateProjectForm, minAllowedDate, maxAllowedDate } from '@/features/project/projectHub/hooks/useCreateProjectForm';
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-=======
-import { 
-  useCreateProjectForm,
-  minAllowedDate,
-  maxAllowedDate
-} from '@/features/project/projectHub/hooks/useCreateProjectForm';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  PlusIcon,
-  MinusIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
->>>>>>> 29190dc (Refactor clean forlder 👍):client/src/features/project/projectHub/components/CreateProject/CreateProject.tsx
 import './CreateProject.css';
 
 type Props = {
