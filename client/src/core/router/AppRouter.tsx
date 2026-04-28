@@ -27,19 +27,25 @@ export function AppRouter() {
       <Route path="/" element={<Navigate to="/inicio-sesion" replace />} />
 
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
-        <Route element={<AppLayoutHs />}>
+        <Route element={<AppLayoutHs title="Proyectos"/>}>
           <Route path="/proyectos"         element={<ProjectPage />} />
+        </Route>
+        <Route element={<AppLayoutHs title="Perfil de Usuario"/>}>
           <Route path="/perfil"            element={<ProfilePage />} />
+        </Route>
+        <Route element={<AppLayoutHs title="Dashboard"/>}>
           <Route path="/dashboard-usuario" element={<UserDashboardPage />} />
+        </Route>
           <Route element={<ProtectedRoute allowedRoles={ADMIN_VIEWS} />}>
-            <Route path="/usuarios" element={<AdminPage />} />
-            <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
+            <Route element={<AppLayoutHs title="Usuarios"/>}>
+              <Route path="/usuarios" element={<AdminPage />} />
+              <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
           </Route>
         </Route>
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
-        <Route element={<AppLayoutHsProject />}>
+        <Route element={<AppLayoutHsProject title="Proyecto"/>}>
           <Route path="/proyectos/:id" element={<Navigate to="/proyectos/:id/backlog" replace />} />
           <Route path="/proyectos/:id/tasks"   element={<ProjectTask />} />
           <Route path="/proyectos/:id/backlog" element={<ProjectBacklog />} />

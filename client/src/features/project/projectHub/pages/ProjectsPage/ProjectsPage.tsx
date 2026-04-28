@@ -128,7 +128,7 @@ const ProjectsPage: React.FC = () => {
     projectDueDate={project.fecha_final}
     projectFTE={project.fte}
     statusLabel={<StatusLabel statusId={project.id_estatus} />}
-    onClick={() => navigate(`/proyectos/${project.id}`)}
+    onClick={() => navigate(`/proyectos/${project.id}/backlog`)}
     menuItems={buildMenuItems(project)}
   />
 );
@@ -227,7 +227,7 @@ const ProjectsPage: React.FC = () => {
                       projectFTE={p.fte}
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
-                      onClick={() => navigate(`/proyectos/${p.id}`)}
+                      onClick={() => navigate(`/proyectos/${p.id}/backlog`)}
                       menuItems={buildMenuItems(p)}
                     />
                   ))}
