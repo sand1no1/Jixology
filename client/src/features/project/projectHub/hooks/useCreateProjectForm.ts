@@ -312,13 +312,25 @@ export function useCreateProjectForm(
     }
   }, []);
 
+  const loadEditProyectData = useCallback(async () => {
+    setIsInitialLoading(true);
+    try {
+      const projectValues = await getAllCreateProyectData(options.projectId!, options.userId);
+      setValues(projectValues);
+    } catch (error) {
+      setLoadError(getErrorMessage(error));
+    } finally {
+      setIsInitialLoading(false);
+    }
+  }, [options.projectId, options.userId]);
+
   useEffect(() => {
     void loadCatalogs();
   }, [loadCatalogs]);
 
   useEffect(() => {
     if (options.projectId) void loadEditProyectData();
-  }, [options.projectId]);
+  }, [options.projectId, loadEditProyectData]);
 
   const handleFieldChange = (event: ChangeEvent<FieldElement>): void => {
     const fieldName = event.target.name as keyof CreateProjectFormValues;
@@ -501,20 +513,6 @@ export function useCreateProjectForm(
   const isFormValid = useMemo(() => {
     return Object.keys(computedValidationErrors).length === 0;
   }, [computedValidationErrors]);
-
-  const loadEditProyectData = async () => {
-    setIsInitialLoading(true);
-    try {
-      const projectValues =  await getAllCreateProyectData(options.projectId!,options.userId)
-      setValues(projectValues);
-    } catch (error) {
-      setLoadError(getErrorMessage(error));
-    } finally {
-      setIsInitialLoading(false);
-    }
-
-  }
-
 
   return {
     catalogs,

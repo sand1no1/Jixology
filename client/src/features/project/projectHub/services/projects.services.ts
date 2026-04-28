@@ -111,7 +111,7 @@ export async function unarchiveProject(projectId: number, userId: number): Promi
   if (error) throw new Error(error.message);
 }
 
-export async function fetchAllProyectData(projectId: number, userId: number): Promise<Project> {
+export async function fetchAllProyectData(projectId: number): Promise<Project> {
     const [{ data, error }, { data: cardData, error: cardError }] = await Promise.all([
       supabase.from('proyecto').select('*').eq('id', projectId).single(),
       supabase.from('project_card_view').select('total_backlog_items, completed_backlog_items, completion_percentage').eq('id', projectId).single(),
