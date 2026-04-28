@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { XCircleIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useRegisterUserOptions } from '../../hooks/useUserOptions';
@@ -360,6 +360,8 @@ export default function RegisterUserPage() {
           <div className="admin-page__search">
             <FilterBar
               searchPlaceholder="Buscar usuario por nombre o correo..."
+              searchHeight="2.5rem"
+              searchFontSize="0.95rem"
               onSearchChange={setSearch}
               filters={[
                 { id: 'active', label: 'Usuarios activos' },
@@ -380,7 +382,8 @@ export default function RegisterUserPage() {
                   setIsCreateModalOpen(true);
                 }}
               >
-                Crear usuario
+                <PlusIcon className="admin-page__create-button-icon" aria-hidden="true" />
+                <span>Crear usuario</span>
               </button>
             </FilterBar>
           </div>

@@ -9,6 +9,8 @@ export interface FilterOption {
 
 export interface FilterBarProps {
   searchPlaceholder?: string;
+  searchHeight?: string;
+  searchFontSize?: string;
   onSearchChange: (value: string) => void;
   filters: FilterOption[];
   activeFilter: string | number | null;
@@ -19,6 +21,8 @@ export interface FilterBarProps {
 
 const FilterBar: React.FC<FilterBarProps> = ({
   searchPlaceholder = 'Buscar...',
+  searchHeight,
+  searchFontSize,
   onSearchChange,
   filters,
   activeFilter,
@@ -30,8 +34,14 @@ const FilterBar: React.FC<FilterBarProps> = ({
     <div className={styles.wrapper}>
       <div className={styles.topBar}>
         <div className={styles.searchWrapper}>
-          <SearchBarComponent infoText={searchPlaceholder} onChange={onSearchChange} />
+          <SearchBarComponent
+            infoText={searchPlaceholder}
+            onChange={onSearchChange}
+            height={searchHeight}
+            fontSize={searchFontSize}
+          />
         </div>
+
         {children && <div className={styles.actions}>{children}</div>}
       </div>
 
@@ -44,7 +54,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
           >
             {allLabel}
           </button>
-          {filters.map(f => (
+
+          {filters.map((f) => (
             <button
               key={f.id}
               type="button"

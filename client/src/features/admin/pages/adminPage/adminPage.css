@@ -95,20 +95,38 @@
 }
 
 .admin-page__create-button {
-  min-width: 10rem;
+  min-width: 10.75rem;
   height: 3rem;
+  padding: 0 1.2rem;
   border: none;
   border-radius: 999rem;
   background-color: var(--color-mahindra-red);
   color: var(--color-white);
   font-size: 0.95rem;
   font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .admin-page__create-button:hover {
   background-color: var(--color-impact-red);
+  transform: translateY(-1px);
+}
+
+.admin-page__create-button-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  stroke-width: 2.4;
 }
 
 .admin-page__search {
