@@ -7,9 +7,6 @@ import Sidebar from '@/shared/layout/Sidebar';
 
 export interface IAppLayoutHsProps {
   children?: ReactNode;
-}
-
-interface HeaderProps {
   title: string;
 }
 
