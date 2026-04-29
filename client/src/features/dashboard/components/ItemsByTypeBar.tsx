@@ -50,7 +50,7 @@ const ItemsByTypeBar: FC<Props> = ({ data }) => {
             tick={{ fontSize: 11, fontFamily: 'Poppins, sans-serif' }}
           />
           <Tooltip
-            formatter={(value: number) => [value, 'Ítems']}
+            formatter={(value) => [value, 'Ítems']}
             contentStyle={{ fontSize: '0.75rem', fontFamily: 'Poppins, sans-serif' }}
           />
           <Bar dataKey="count" radius={[0, 4, 4, 0]}>

@@ -43,7 +43,7 @@ const HoursBySprintBar: FC<Props> = ({ data }) => {
             unit="h"
           />
           <Tooltip
-            formatter={(value: number) => [`${value}h`, 'Horas']}
+            formatter={(value) => [`${value}h`, 'Horas']}
             contentStyle={{ fontSize: '0.75rem', fontFamily: 'Poppins, sans-serif' }}
           />
           <Bar dataKey="horas" fill="#0A0838" radius={[4, 4, 0, 0]} />

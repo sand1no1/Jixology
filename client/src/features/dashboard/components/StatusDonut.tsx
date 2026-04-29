@@ -43,7 +43,7 @@ const StatusDonut: FC<Props> = ({ data }) => {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number, name: string) => [value, name]}
+            formatter={(value, name) => [value, name]}
             contentStyle={{ fontSize: '0.75rem', fontFamily: 'Poppins, sans-serif' }}
           />
           <Legend
