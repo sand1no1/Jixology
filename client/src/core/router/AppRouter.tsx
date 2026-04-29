@@ -7,7 +7,7 @@ import UserDashboardPage from '@/features/dashboard/pages/UserDashboard';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 import AdminPage from '@/features/admin/pages/adminPage';
 import ProjectPage from '@/features/project/projectHub/pages/ProjectsPage';
-import ProjectTask from '@/features/project/ProjectTasks';
+import ProjectTask from '@/features/project/ProjectTasks/pages';
 import ProjectBacklog from '@/features/project/Backlog/pages/ProjectBacklog';
 import ProjectConfigPage from '@/features/project/projectConfig/pages/ProjectConfigPage';
 import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
