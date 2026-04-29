@@ -4,7 +4,7 @@ import { ChevronDownIcon, PlusIcon } from '@heroicons/react/24/outline';
 import BacklogListItem from '@/features/project/Backlog/components/BacklogListItem';
 import type { BacklogStatus, Priority, BacklogItemType } from '@/features/project/Backlog/components/BacklogListItem';
 import CreateBacklogItemForm from '@/features/project/Backlog/components/CreateBacklogItemForm';
-import BacklogViewDetails from '@/features/project/Backlog/components/BacklogViewDetails/BacklogViewDetails';
+import ViewItemDetail from '@/shared/components/ViewItemDetail/ViewItemDetail';
 import SkeletonBacklogItem from '@/features/project/Backlog/components/SkeletonBacklogItem/SkeletonBacklogItem';
 import FilterBar from '@/shared/components/FilterBar';
 import ContextMenu from '@/shared/components/ContextMenu';
@@ -349,7 +349,7 @@ const ProjectBacklog: React.FC = () => {
       />
 
       {viewingItem && (
-        <BacklogViewDetails
+        <ViewItemDetail
           item={viewingItem}
           meta={meta}
           initialEditing={openInEditMode}
