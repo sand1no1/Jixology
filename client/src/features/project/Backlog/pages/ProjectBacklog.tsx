@@ -101,6 +101,7 @@ const ProjectBacklog: React.FC = () => {
   const { meta, loading: metaLoading } = useBacklogMeta(PROJECT_ID);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [expandedItems, setExpandedItems]   = useState<Set<number>>(new Set());
+  const [openInEditMode, setOpenInEditMode] = useState(false);
 
   const toggleExpanded = (itemId: number) => {
     setExpandedItems(prev => {
@@ -247,7 +248,8 @@ const ProjectBacklog: React.FC = () => {
             hasChildren={filterType !== null && children.length > 0}
             isExpanded={isExpanded}
             onToggle={() => toggleExpanded(item.id)}
-            onViewDetails={() => setViewingItem(item)}
+            onViewDetails={() => { setOpenInEditMode(false); setViewingItem(item); }}
+            onEdit={() => { setOpenInEditMode(true); setViewingItem(item); }}
             onAcceptSuggestion={isAdmin && isSuggestion ? async () => {
               await acceptSugerencia(item.id, user!.id);
               refresh();
@@ -325,9 +327,10 @@ const ProjectBacklog: React.FC = () => {
         <BacklogViewDetails
           item={viewingItem}
           meta={meta}
-          onClose={() => setViewingItem(null)}
+          initialEditing={openInEditMode}
+          onClose={() => { setViewingItem(null); setOpenInEditMode(false); }}
           onUpdated={() => refresh()}
-          onNavigate={i => setViewingItem(i)}
+          onNavigate={i => { setOpenInEditMode(false); setViewingItem(i); }}
         />
       )}
     </div>
