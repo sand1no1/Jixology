@@ -52,11 +52,11 @@ const ComplexityScatter: FC<Props> = ({ data }) => {
               const bar = entry.payload as ComplexityBar;
               return [`${value}h (${bar.count} ítem${bar.count !== 1 ? 's' : ''})`, 'Tiempo'];
             }}
-            labelFormatter={(label: number) => `Complejidad ${label}`}
+            labelFormatter={(label) => `Complejidad ${label}`}
             contentStyle={{ fontSize: '0.75rem', fontFamily: 'Poppins, sans-serif' }}
           />
           <Bar dataKey="horas" radius={[4, 4, 0, 0]}>
-            {data.map((entry, index) => (
+            {data.map((_entry, index) => (
               <Cell key={`cell-${index}`} fill={COMPLEXITY_COLORS[index]} />
             ))}
           </Bar>
