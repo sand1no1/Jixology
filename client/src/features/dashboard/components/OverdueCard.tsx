@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { Link } from 'react-router-dom';
 import { ExclamationTriangleIcon, ClockIcon } from '@heroicons/react/24/outline';
 import type { BacklogItemRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ChartCard.module.css';
@@ -39,7 +40,12 @@ const OverdueCard: FC<Props> = ({ items }) => {
           {items.slice(0, 6).map(item => (
             <li key={item.id} className={styles.overdueItem}>
               <ClockIcon width={14} height={14} className={styles.iconRed} />
-              <span className={styles.overdueItemName}>{item.nombre}</span>
+              <Link
+                to={`/proyectos/${item.id_proyecto}/backlog?item=${item.id}`}
+                className={styles.overdueItemName}
+              >
+                {item.nombre}
+              </Link>
               <span className={styles.overdueItemDate}>
                 {item.fecha_vencimiento ? formatDate(item.fecha_vencimiento) : ''}
               </span>
