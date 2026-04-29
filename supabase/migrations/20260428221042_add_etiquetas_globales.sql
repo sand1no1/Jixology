@@ -9,3 +9,7 @@ VALUES
   ('Scrum Master',     'Scrum Master',      '#CA8A04', '#FFFFFF'),
   ('Ciberseguridad',   'Ciberseguridad',    '#1E3A5F', '#FFFFFF'),
   ('UX/UI',            'UX/UI Designer',    '#DB2777', '#FFFFFF');
+
+create unique index if not exists invitacion_proyecto_unique_pending
+on public.invitacion_proyecto (id_usuario_destino, id_proyecto)
+where aceptada = false;

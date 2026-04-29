@@ -1,6 +1,6 @@
 .row {
   display: grid;
-  grid-template-columns: 36px 1fr 220px 280px 40px;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(0, 340px) minmax(0, 200px) 40px;
   align-items: center;
   column-gap: 16px;
   padding: 12px 20px;
@@ -57,15 +57,19 @@
 
 /* ── Roles ───────────────────────────────────────────────────── */
 .roles {
+  position: relative; /* anchor for out-of-flow hidden badges */
   display: flex;
   align-items: center;
   gap: 6px;
   flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .rolesLabel {
   color: var(--color-anchor-gray-1);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .badge {
@@ -77,6 +81,22 @@
   font-weight: 600;
   white-space: nowrap;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.overflowBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  background: var(--color-clarity-gray-2);
+  color: var(--color-anchor-gray-1);
+  border: 1px solid var(--color-clarity-gray-2);
 }
 
 /* ── Spacer ──────────────────────────────────────────────────── */
@@ -88,6 +108,9 @@
 .email {
   color: var(--color-anchor-gray-1);
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .emailLabel {
