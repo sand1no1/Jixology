@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PlusIcon, UserPlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import FormPopUp from '@/shared/components/FormPopUp';
@@ -8,15 +8,14 @@ import MessagePopUp from '@/shared/components/MessagePopUp';
 import { useProjectMembers } from '../hooks/useProjectMembers';
 import { useProjectEtiquetas } from '../hooks/useProjectEtiquetas';
 import { useProjectFte } from '../hooks/useProjectFte';
+import { useToast } from '../hooks/useToast';
 import { useUser } from '@/core/auth/userContext';
-import {
-  deleteEtiquetaWithCascade,
-  upsertProyectoFte,
-} from '../services/projectConfig.service';
+import { deleteEtiquetaWithCascade, upsertProyectoFte } from '../services/projectConfig.service';
 import InviteUserForm from '../components/InviteUserForm';
 import CreateEtiquetaForm from '../components/CreateEtiquetaForm';
 import EditEtiquetaForm from '../components/EditEtiquetaForm';
 import UserEtiquetasPanel from '../components/UserEtiquetasPanel';
+import { MemberHoverCard } from '../components/MemberHoverCard';
 import type { EtiquetaPersonalizadaRecord, FteMemberRecord } from '../types/projectConfig.types';
 import styles from './ProjectConfigPage.module.css';
 
@@ -25,22 +24,10 @@ const ProjectConfigPage: React.FC = () => {
   const PROJECT_ID = Number(id);
   const { user } = useUser();
 
-  const {
-    members,
-    memberEtiquetas,
-    memberEtiquetasPred,
-    loading: membersLoading,
-    refresh: refreshMembers,
-  } = useProjectMembers(PROJECT_ID);
-
-  const {
-    etiquetas,
-    etiquetasPredeterminadas,
-    loading: etiquetasLoading,
-    refresh: refreshEtiquetas,
-  } = useProjectEtiquetas(PROJECT_ID);
-
+  const { members, memberEtiquetas, memberEtiquetasPred, loading: membersLoading, refresh: refreshMembers } = useProjectMembers(PROJECT_ID);
+  const { etiquetas, etiquetasPredeterminadas, loading: etiquetasLoading, refresh: refreshEtiquetas } = useProjectEtiquetas(PROJECT_ID);
   const { fteData, loading: fteLoading, refresh: refreshFte } = useProjectFte(PROJECT_ID);
+  const { toast, showError, clearToast } = useToast();
 
   // ── Modal visibility ──────────────────────────────────────────────
   const [showInviteForm, setShowInviteForm]         = useState(false);
@@ -54,10 +41,9 @@ const ProjectConfigPage: React.FC = () => {
   } | null>(null);
 
   // ── Jornada local state ───────────────────────────────────────────
-  const [localHours, setLocalHours]   = useState<Record<number, string>>({});
-  const [savingRows, setSavingRows]   = useState<Set<number>>(new Set());
+  const [localHours, setLocalHours] = useState<Record<number, string>>({});
+  const [savingRows, setSavingRows] = useState<Set<number>>(new Set());
 
-  // Initialise from server data, preserving in-flight user edits
   useEffect(() => {
     if (fteData.length === 0) return;
     setLocalHours(prev => {
@@ -71,16 +57,13 @@ const ProjectConfigPage: React.FC = () => {
     });
   }, [fteData]);
 
-  // ── Toast ─────────────────────────────────────────────────────────
-  const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4000);
-    return () => clearTimeout(t);
-  }, [toast]);
-
-  const showError = (message: string) => setToast(message);
+  // ── Avatar hover card ─────────────────────────────────────────────
+  const [hoveredMember, setHoveredMember] = useState<{
+    userId: number; name: string; email: string; roles: Role[]; rect: DOMRect;
+  } | null>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startHide   = useCallback(() => { hideTimer.current = setTimeout(() => setHoveredMember(null), 150); }, []);
+  const cancelHide  = useCallback(() => { if (hideTimer.current) clearTimeout(hideTimer.current); }, []);
 
   // ── Helpers ───────────────────────────────────────────────────────
   const rolesForMember = (userId: number): Role[] => {
@@ -120,15 +103,10 @@ const ProjectConfigPage: React.FC = () => {
     let cantidadHoras = raw === '' ? null : parseFloat(raw);
     if (cantidadHoras !== null && isNaN(cantidadHoras)) return;
 
-    // Clamp to the available capacity for this project
-    if (cantidadHoras !== null && member.max_horas !== null) {
-      if (cantidadHoras > member.max_horas) {
-        cantidadHoras = member.max_horas;
-        setLocalHours(prev => ({ ...prev, [member.id]: String(member.max_horas) }));
-        showError(
-          `Solo hay ${member.max_horas} hrs disponibles para ${[member.nombre, member.apellido].filter(Boolean).join(' ')} en este proyecto.`,
-        );
-      }
+    if (cantidadHoras !== null && member.max_horas !== null && cantidadHoras > member.max_horas) {
+      cantidadHoras = member.max_horas;
+      setLocalHours(prev => ({ ...prev, [member.id]: String(member.max_horas) }));
+      showError(`Solo hay ${member.max_horas} hrs disponibles para ${[member.nombre, member.apellido].filter(Boolean).join(' ')} en este proyecto.`);
     }
 
     setSavingRows(prev => new Set(prev).add(member.id));
@@ -160,11 +138,7 @@ const ProjectConfigPage: React.FC = () => {
               {members.length} {members.length === 1 ? 'miembro' : 'miembros'}
             </p>
           </div>
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={() => setShowInviteForm(true)}
-          >
+          <button type="button" className={styles.primaryBtn} onClick={() => setShowInviteForm(true)}>
             <UserPlusIcon width={15} height={15} />
             Invitar usuario
           </button>
@@ -178,18 +152,19 @@ const ProjectConfigPage: React.FC = () => {
           ) : (
             members.map(member => {
               const fullName = [member.nombre, member.apellido].filter(Boolean).join(' ') || member.email;
+              const roles = rolesForMember(member.id);
               return (
                 <div key={member.id} className={styles.memberRow}>
                   <ListUserCard
                     userId={member.id}
                     fullName={fullName}
                     email={member.email}
-                    roles={rolesForMember(member.id)}
-                    onEdit={pos =>
-                      setEtiquetasPanel(prev =>
-                        prev?.userId === member.id ? null : { userId: member.id, userName: fullName, position: pos },
-                      )
-                    }
+                    roles={roles}
+                    onEdit={pos => setEtiquetasPanel(prev =>
+                      prev?.userId === member.id ? null : { userId: member.id, userName: fullName, position: pos }
+                    )}
+                    onAvatarEnter={rect => { cancelHide(); setHoveredMember({ userId: member.id, name: fullName, email: member.email, roles, rect }); }}
+                    onAvatarLeave={startHide}
                   />
                 </div>
               );
@@ -216,7 +191,6 @@ const ProjectConfigPage: React.FC = () => {
             fteData.map(member => {
               const fullName = [member.nombre, member.apellido].filter(Boolean).join(' ') || member.email;
               const ftePercent = currentFte(member);
-
               return (
                 <div key={member.id} className={styles.fteRow}>
                   <span className={styles.fteName}>{fullName}</span>
@@ -232,12 +206,7 @@ const ProjectConfigPage: React.FC = () => {
                       placeholder="0"
                       onChange={e => {
                         const val = e.target.value;
-                        // Prevent typing values above the cap
-                        if (
-                          member.max_horas !== null &&
-                          val !== '' &&
-                          parseFloat(val) > member.max_horas
-                        ) return;
+                        if (member.max_horas !== null && val !== '' && parseFloat(val) > member.max_horas) return;
                         setLocalHours(prev => ({ ...prev, [member.id]: val }));
                       }}
                       onBlur={() => handleFteBlur(member)}
@@ -252,11 +221,10 @@ const ProjectConfigPage: React.FC = () => {
                   </div>
 
                   <div className={styles.fteBadgeWrap}>
-                    {ftePercent !== null ? (
-                      <span className={styles.fteBadge}>{ftePercent}% FTE</span>
-                    ) : (
-                      <span className={styles.fteNoJornada}>Sin jornada</span>
-                    )}
+                    {ftePercent !== null
+                      ? <span className={styles.fteBadge}>{ftePercent}% FTE</span>
+                      : <span className={styles.fteNoJornada}>Sin jornada</span>
+                    }
                   </div>
                 </div>
               );
@@ -272,11 +240,7 @@ const ProjectConfigPage: React.FC = () => {
             <h2 className={styles.panelTitle}>Etiquetas personalizadas</h2>
             <p className={styles.panelSubtitle}>Haz clic en una etiqueta para editarla</p>
           </div>
-          <button
-            type="button"
-            className={styles.primaryBtn}
-            onClick={() => setShowCreateEtiqueta(true)}
-          >
+          <button type="button" className={styles.primaryBtn} onClick={() => setShowCreateEtiqueta(true)}>
             <PlusIcon width={15} height={15} />
             Nueva etiqueta
           </button>
@@ -291,29 +255,14 @@ const ProjectConfigPage: React.FC = () => {
             <div className={styles.etiquetasGrid}>
               {etiquetas.map(et => (
                 <div key={et.id} className={styles.etiquetaCard}>
-                  <button
-                    type="button"
-                    className={styles.etiquetaBadgeBtn}
-                    onClick={() => setEditingEtiqueta(et)}
-                    title="Editar etiqueta"
-                  >
-                    <span
-                      className={styles.etiquetaBadge}
-                      style={{ backgroundColor: et.color_bloque, color: et.color_letra }}
-                    >
+                  <button type="button" className={styles.etiquetaBadgeBtn} onClick={() => setEditingEtiqueta(et)} title="Editar etiqueta">
+                    <span className={styles.etiquetaBadge} style={{ backgroundColor: et.color_bloque, color: et.color_letra }}>
                       {et.nombre}
                     </span>
                     <PencilIcon className={styles.editIcon} />
                   </button>
-                  {et.descripcion && (
-                    <span className={styles.etiquetaDesc}>{et.descripcion}</span>
-                  )}
-                  <button
-                    type="button"
-                    className={styles.deleteBtn}
-                    aria-label={`Eliminar etiqueta ${et.nombre}`}
-                    onClick={() => setDeletingEtiqueta(et)}
-                  >
+                  {et.descripcion && <span className={styles.etiquetaDesc}>{et.descripcion}</span>}
+                  <button type="button" className={styles.deleteBtn} aria-label={`Eliminar etiqueta ${et.nombre}`} onClick={() => setDeletingEtiqueta(et)}>
                     <TrashIcon className={styles.deleteBtnIcon} />
                   </button>
                 </div>
@@ -369,31 +318,18 @@ const ProjectConfigPage: React.FC = () => {
         />
       )}
 
-      {/* ── Delete confirmation ───────────────────────────────── */}
       <FormPopUp
         eyebrow="Etiquetas personalizadas"
         title="Eliminar etiqueta"
-        subtitle={
-          deletingEtiqueta
-            ? `¿Estás seguro de que deseas eliminar "${deletingEtiqueta.nombre}"? Se eliminará de todos los miembros del proyecto y esta acción no se puede deshacer.`
-            : ''
-        }
+        subtitle={deletingEtiqueta ? `¿Estás seguro de que deseas eliminar "${deletingEtiqueta.nombre}"? Se eliminará de todos los miembros del proyecto y esta acción no se puede deshacer.` : ''}
         isOpen={deletingEtiqueta !== null}
         onClose={() => setDeletingEtiqueta(null)}
       >
         <div className={styles.confirmActions}>
-          <button
-            type="button"
-            className={styles.confirmCancelBtn}
-            onClick={() => setDeletingEtiqueta(null)}
-          >
+          <button type="button" className={styles.confirmCancelBtn} onClick={() => setDeletingEtiqueta(null)}>
             Cancelar
           </button>
-          <button
-            type="button"
-            className={styles.confirmDeleteBtn}
-            onClick={handleConfirmDelete}
-          >
+          <button type="button" className={styles.confirmDeleteBtn} onClick={handleConfirmDelete}>
             <TrashIcon width={14} height={14} />
             Eliminar
           </button>
@@ -401,11 +337,18 @@ const ProjectConfigPage: React.FC = () => {
       </FormPopUp>
 
       {toast && (
-        <MessagePopUp
-          type="error"
-          title="Ocurrió un error"
-          message={toast}
-          onClose={() => setToast(null)}
+        <MessagePopUp type="error" title="Ocurrió un error" message={toast} onClose={clearToast} />
+      )}
+
+      {hoveredMember && (
+        <MemberHoverCard
+          userId={hoveredMember.userId}
+          name={hoveredMember.name}
+          email={hoveredMember.email}
+          roles={hoveredMember.roles}
+          rect={hoveredMember.rect}
+          onMouseEnter={cancelHide}
+          onMouseLeave={startHide}
         />
       )}
     </div>

@@ -1,6 +1,6 @@
 .admin-page {
-  min-height: 100%;
   width: 100%;
+  min-height: 100vh;
   padding: 1.5rem;
   background:
     radial-gradient(circle at top, rgba(221, 0, 49, 0.04), transparent 28%),
@@ -12,12 +12,11 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  min-height: 100%;
 }
 
 .admin-page__card {
   width: 100%;
-  min-height: calc(100vh - 7rem);
+  min-height: calc(100vh - 55px - 3rem);
   background-color: var(--color-white, #ffffff);
   border: 0.0625rem solid rgba(31, 54, 80, 0.08);
   border-radius: 2rem;
