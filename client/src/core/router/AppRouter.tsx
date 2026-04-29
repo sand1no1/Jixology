@@ -9,6 +9,7 @@ import AdminPage from '@/features/admin/pages/adminPage';
 import ProjectPage from '@/features/project/projectHub/pages/ProjectsPage';
 import ProjectTask from '@/features/project/ProjectTasks';
 import ProjectBacklog from '@/features/project/Backlog/pages/ProjectBacklog';
+import ProjectConfigPage from '@/features/project/projectConfig/pages/ProjectConfigPage';
 import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
 
 // --- Layout ---
@@ -47,8 +48,9 @@ export function AppRouter() {
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
         <Route element={<AppLayoutHsProject title="Proyecto"/>}>
           <Route path="/proyectos/:id" element={<Navigate to="/proyectos/:id/backlog" replace />} />
-          <Route path="/proyectos/:id/tasks"   element={<ProjectTask />} />
-          <Route path="/proyectos/:id/backlog" element={<ProjectBacklog />} />
+          <Route path="/proyectos/:id/tasks"          element={<ProjectTask />} />
+          <Route path="/proyectos/:id/backlog"        element={<ProjectBacklog />} />
+          <Route path="/proyectos/:id/configuracion"  element={<ProjectConfigPage />} />
         </Route>
       </Route>
 
