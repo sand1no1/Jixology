@@ -79,6 +79,7 @@ const ListUserCard: React.FC<ListUserCardProps> = ({
   const overflowCount = roles.length - fittingCount;
 
   return (
+    <div className={styles.rowContainer}>
     <div className={styles.row}>
       <div
         className={`${styles.avatar}${onAvatarEnter ? ` ${styles.avatarClickable}` : ''}`}
@@ -158,6 +159,7 @@ const ListUserCard: React.FC<ListUserCardProps> = ({
       >
         <EllipsisVerticalIcon className={styles.optionsButtonIcon} />
       </button>
+    </div>
     </div>
   );
 };
