@@ -9,6 +9,7 @@ const Header: React.FC = () => {
   const NAV_ITEMS = [
     { label: 'Tareas',  to: `/proyectos/${id}/tasks` },
     { label: 'Backlog', to: `/proyectos/${id}/backlog` },
+    { label: 'Configuracion', to: `/proyectos/${id}/configuracion`},
   ];
   return (
     <div className={styles.headerP}>

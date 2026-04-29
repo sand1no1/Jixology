@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { XCircleIcon } from '@heroicons/react/24/outline';
+import { XCircleIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { RegisterUserForm } from '../../components/registerUserForm';
 import { useRegisterUser } from '../../hooks/useRegisterUser';
 import { useRegisterUserOptions } from '../../hooks/useUserOptions';
@@ -355,23 +355,13 @@ export default function RegisterUserPage() {
               <h1 className="admin-page__title">Usuarios del sistema</h1>
               <p className="admin-page__subtitle"></p>
             </div>
-
-            <button
-              type="button"
-              className="admin-page__create-button"
-              onClick={() => {
-                setPageError('');
-                setPageSuccess('');
-                setIsCreateModalOpen(true);
-              }}
-            >
-              Crear usuario
-            </button>
           </div>
 
           <div className="admin-page__search">
             <FilterBar
               searchPlaceholder="Buscar usuario por nombre o correo..."
+              searchHeight="2.5rem"
+              searchFontSize="0.95rem"
               onSearchChange={setSearch}
               filters={[
                 { id: 'active', label: 'Usuarios activos' },
@@ -392,22 +382,10 @@ export default function RegisterUserPage() {
                   setIsCreateModalOpen(true);
                 }}
               >
-                Crear usuario
+                <PlusIcon className="admin-page__create-button-icon" aria-hidden="true" />
+                <span>Crear usuario</span>
               </button>
             </FilterBar>
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as 'active' | 'inactive' | 'all')
-              }
-            >
-              <option value="active">Usuarios activos</option>
-              <option value="inactive">Usuarios inactivos</option>
-              <option value="all">Todos</option>
-            </select>
           </div>
 
           {pageSuccess && (

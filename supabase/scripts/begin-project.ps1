@@ -135,6 +135,7 @@ $bootstrapPath = Join-Path $repoRoot 'scripts\bootstrap-users.ps1'
 $postBootstrapSeedPath = Join-Path $repoRoot 'client\scripts\post-bootstrap-seed.mjs'
 $SupabaseCmd = Join-Path $scriptDir '..\node_modules\.bin\supabase.cmd'
 
+
 if (-not (Test-Path $bootstrapPath)) {
   throw "No existe bootstrap-users.ps1 en: $bootstrapPath"
 }
