@@ -14,6 +14,8 @@ export interface BacklogItemRecord {
   id_estatus: number;
   id_proyecto: number;
   id_sprint: number | null;
+  complejidad: number | null;
+  tiempo: number | null;
 }
 
 export interface BacklogStatusRecord {
@@ -55,6 +57,8 @@ export interface UpdateBacklogItemPayload {
   fecha_vencimiento?: string | null;
   id_backlog_item_padre?: number | null;
   id_usuario_responsable?: number | null;
+  complejidad?: number | null;
+  tiempo?: number | null;
 }
 
 export interface CreateBacklogItemPayload {
@@ -70,6 +74,7 @@ export interface CreateBacklogItemPayload {
   id_backlog_item_padre?: number | null;
   id_proyecto: number;
   id_usuario_creador: number;
+  complejidad?: number | null;
 }
 
 export interface UserRecord {

@@ -3,12 +3,13 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // --- Páginas ---
 import LoginPage from '@/features/auth/pages/LogInPage';
 import ProfilePage from '@/features/profile/pages';
-import UserDashboardPage from '@/features/user/pages/DashboardPage';
+import UserDashboardPage from '@/features/dashboard/pages/UserDashboard';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 import AdminPage from '@/features/admin/pages/adminPage';
 import ProjectPage from '@/features/project/projectHub/pages/ProjectsPage';
 import ProjectTask from '@/features/project/ProjectTasks';
 import ProjectBacklog from '@/features/project/Backlog/pages/ProjectBacklog';
+import ProjectConfigPage from '@/features/project/projectConfig/pages/ProjectConfigPage';
 import AdminUserProfilePage from '@/features/admin/pages/adminUserProfilePage/AdminUserProfilePage';
 import NotificationsPage from '@/features/notifications/pages/NotificationsPage';
 import NotificationDetailPage from '@/features/notifications/pages/NotificationDetailPage';
@@ -51,14 +52,9 @@ export function AppRouter() {
       <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
         <Route element={<AppLayoutHsProject title="Proyecto" />}>
           <Route path="/proyectos/:id" element={<Navigate to="/proyectos/:id/backlog" replace />} />
-          <Route path="/proyectos/:id/tasks"   element={<ProjectTask />} />
-          <Route path="/proyectos/:id/backlog" element={<ProjectBacklog />} />
-          <Route
-            path="/proyectos/dummy"
-            element={<Navigate to="/proyectos/dummy/tasks" replace />}
-          />
-          <Route path="/proyectos/dummy/tasks" element={<ProjectTask />} />
-          <Route path="/proyectos/dummy/backlog" element={<ProjectBacklog />} />
+          <Route path="/proyectos/:id/tasks"          element={<ProjectTask />} />
+          <Route path="/proyectos/:id/backlog"        element={<ProjectBacklog />} />
+          <Route path="/proyectos/:id/configuracion"  element={<ProjectConfigPage />} />
         </Route>
       </Route>
 

@@ -115,6 +115,8 @@ export async function updateBacklogItem(id: number, payload: UpdateBacklogItemPa
       fecha_vencimiento:      payload.fecha_vencimiento ?? null,
       id_backlog_item_padre:  payload.id_backlog_item_padre  ?? null,
       id_usuario_responsable: payload.id_usuario_responsable ?? null,
+      complejidad:            payload.complejidad ?? null,
+      ...(payload.tiempo !== undefined ? { tiempo: payload.tiempo ?? null } : {}),
     })
     .eq('id', id)
     .select()
