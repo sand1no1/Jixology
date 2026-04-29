@@ -23,7 +23,7 @@ import type {
   BacklogPriorityRecord,
   UpdateBacklogItemPayload,
 } from '@/features/project/Backlog/types/backlog.types';
-import styles from './BacklogViewDetails.module.css';
+import styles from './ViewItemDetail.module.css';
 
 // ── Constants ────────────────────────────────────────────────────────
 const STATUS_COLORS: Record<number, { color: string; textColor: string }> = {
@@ -363,7 +363,7 @@ function itemToForm(item: BacklogItemRecord): FormState {
 }
 
 // ── Props ─────────────────────────────────────────────────────────────
-interface BacklogViewDetailsProps {
+interface ViewItemDetailProps {
   item: BacklogItemRecord;
   meta: BacklogMeta;
   onClose: () => void;
@@ -373,7 +373,7 @@ interface BacklogViewDetailsProps {
 }
 
 // ── Component ─────────────────────────────────────────────────────────
-const BacklogViewDetails: React.FC<BacklogViewDetailsProps> = ({ item, meta, onClose, onUpdated, onNavigate, initialEditing = false }) => {
+const ViewItemDetail: React.FC<ViewItemDetailProps> = ({ item, meta, onClose, onUpdated, onNavigate, initialEditing = false }) => {
   const [isEditing, setIsEditing]     = useState(initialEditing);
   const [form, setForm]               = useState<FormState>(() => itemToForm(item));
   const [submitting, setSubmitting]   = useState(false);
@@ -754,4 +754,4 @@ const BacklogViewDetails: React.FC<BacklogViewDetailsProps> = ({ item, meta, onC
   );
 };
 
-export default BacklogViewDetails;
+export default ViewItemDetail;
