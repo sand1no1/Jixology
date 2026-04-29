@@ -40,11 +40,11 @@ export function AppRouter() {
           <Route path="/dashboard-usuario" element={<UserDashboardPage />} />
           <Route path="/notificaciones"    element={<NotificationsPage />} />
           <Route path="/notificaciones/:id" element={<NotificationDetailPage />} />
-        </Route>
-        <Route element={<ProtectedRoute allowedRoles={ADMIN_VIEWS} />}>
-          <Route element={<AppLayoutHs title="Usuarios"/>}>
-            <Route path="/usuarios" element={<AdminPage />} />
-            <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
+          <Route element={<ProtectedRoute allowedRoles={ADMIN_VIEWS} />}>
+            <Route element={<AppLayoutHs title="Usuarios"/>}>
+              <Route path="/usuarios" element={<AdminPage />} />
+              <Route path="/usuarios/:id" element={<AdminUserProfilePage />} />
+            </Route>
           </Route>
         </Route>
       </Route>
