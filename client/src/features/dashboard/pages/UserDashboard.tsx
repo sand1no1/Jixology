@@ -7,6 +7,8 @@ import ItemsByTypeBar from '../components/ItemsByTypeBar';
 import PriorityBar from '../components/PriorityBar';
 import ComplexityScatter from '../components/ComplexityScatter';
 import OverdueCard from '../components/OverdueCard';
+import UpcomingCard from '../components/UpcomingCard';
+import JornadaFteCard from '../components/JornadaFteCard';
 import styles from './UserDashboard.module.css';
 
 const UserDashboard: FC = () => {
@@ -50,7 +52,7 @@ const UserDashboard: FC = () => {
           <div className={styles.statLabel}>Vencidos</div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statValue}>{data.scatterData.length}</div>
+          <div className={styles.statValue}>{data.itemsWithEstimate}</div>
           <div className={styles.statLabel}>Con estimación</div>
         </div>
         <div className={styles.statCard}>
@@ -62,12 +64,14 @@ const UserDashboard: FC = () => {
       </div>
 
       <div className={styles.grid}>
+        <OverdueCard       items={data.overdueItems}  />
+        <UpcomingCard      items={data.upcomingItems} />
+        <JornadaFteCard data={data.jornadaFte} />
         <StatusDonut       data={data.statusData}    />
         <HoursBySprintBar  data={data.sprintHours}   />
         <ItemsByTypeBar    data={data.typeData}       />
         <PriorityBar       data={data.priorityData}  />
-        <ComplexityScatter data={data.scatterData}   />
-        <OverdueCard       items={data.overdueItems} />
+        <ComplexityScatter data={data.complexityData} />
       </div>
     </div>
   );

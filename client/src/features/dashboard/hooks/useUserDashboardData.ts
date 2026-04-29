@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@/core/auth/userContext';
-import { fetchUserAssignedItems, fetchAllSprints } from '../services/dashboard.service';
+import { fetchUserAssignedItems, fetchAllSprints, fetchUserJornadaFte } from '../services/dashboard.service';
+import type { UserJornadaFte } from '../services/dashboard.service';
 import {
   fetchBacklogStatuses,
   fetchBacklogPriorities,
@@ -18,16 +19,19 @@ export interface StatusSlice   { name: string; value: number; color: string }
 export interface SprintHours   { sprint: string; horas: number }
 export interface TypeCount     { tipo: string; count: number }
 export interface PriorityCount { prioridad: string; count: number; color: string }
-export interface ScatterPoint  { x: number; y: number; nombre: string }
+export interface ComplexityBar  { complejidad: number; horas: number; count: number }
 
 export interface DashboardData {
-  totalItems:    number;
-  statusData:    StatusSlice[];
-  sprintHours:   SprintHours[];
-  typeData:      TypeCount[];
-  priorityData:  PriorityCount[];
-  scatterData:   ScatterPoint[];
-  overdueItems:  BacklogItemRecord[];
+  totalItems:         number;
+  itemsWithEstimate:  number;
+  statusData:         StatusSlice[];
+  sprintHours:        SprintHours[];
+  typeData:           TypeCount[];
+  priorityData:       PriorityCount[];
+  complexityData:     ComplexityBar[];
+  overdueItems:       BacklogItemRecord[];
+  upcomingItems:      BacklogItemRecord[];
+  jornadaFte:         UserJornadaFte;
 }
 
 const STATUS_PALETTE = [
@@ -67,7 +71,7 @@ function buildSprintHours(
   const hours = new Map<number, number>();
   for (const item of items) {
     if (item.id_sprint == null) continue;
-    hours.set(item.id_sprint, (hours.get(item.id_sprint) ?? 0) + (item.tiempo ?? 0));
+    hours.set(item.id_sprint, (hours.get(item.id_sprint) ?? 0) + (item.tiempo ?? 0) / 60);
   }
   return Array.from(hours.entries())
     .map(([id, horas]) => ({ sprint: sprintMap.get(id) ?? `Sprint ${id}`, horas }))
@@ -109,10 +113,38 @@ function buildPriorityData(
   });
 }
 
-function buildScatterData(items: BacklogItemRecord[]): ScatterPoint[] {
+function buildComplexityData(items: BacklogItemRecord[]): ComplexityBar[] {
+  const hoursMap = new Map<number, number>();
+  const countMap = new Map<number, number>();
+
+  for (const item of items) {
+    if (item.complejidad == null) continue;
+    hoursMap.set(item.complejidad, (hoursMap.get(item.complejidad) ?? 0) + (item.tiempo != null ? item.tiempo / 60 : 0));
+    countMap.set(item.complejidad, (countMap.get(item.complejidad) ?? 0) + 1);
+  }
+
+  // Always emit all 5 levels so the X axis is consistent
+  return [1, 2, 3, 4, 5].map(c => ({
+    complejidad: c,
+    horas:       Math.round((hoursMap.get(c) ?? 0) * 10) / 10,
+    count:       countMap.get(c) ?? 0,
+  }));
+}
+
+function buildUpcomingItems(
+  items: BacklogItemRecord[],
+  statuses: BacklogStatusRecord[],
+): BacklogItemRecord[] {
+  const terminalIds = new Set(statuses.filter(s => s.es_terminal).map(s => s.id));
+  const today = new Date().toISOString().split('T')[0];
   return items
-    .filter(item => item.complejidad != null && item.tiempo != null)
-    .map(item => ({ x: item.complejidad!, y: item.tiempo!, nombre: item.nombre }));
+    .filter(
+      item =>
+        item.fecha_vencimiento !== null &&
+        item.fecha_vencimiento >= today &&
+        !terminalIds.has(item.id_estatus),
+    )
+    .sort((a, b) => (a.fecha_vencimiento! < b.fecha_vencimiento! ? -1 : 1));
 }
 
 function buildOverdueItems(
@@ -152,17 +184,22 @@ export function useUserDashboardData(): UserDashboardDataResult {
       fetchBacklogPriorities(),
       fetchBacklogTypes(),
       fetchAllSprints(),
+      fetchUserJornadaFte(user.id),
     ])
-      .then(([items, statuses, priorities, types, sprints]) => {
+      .then(([items, statuses, priorities, types, sprints, jornadaFte]) => {
         if (!isMounted) return;
+        const complexityData = buildComplexityData(items);
         setData({
-          totalItems:   items.length,
-          statusData:   buildStatusData(items, statuses),
-          sprintHours:  buildSprintHours(items, sprints),
-          typeData:     buildTypeData(items, types),
-          priorityData: buildPriorityData(items, priorities),
-          scatterData:  buildScatterData(items),
-          overdueItems: buildOverdueItems(items, statuses),
+          totalItems:        items.length,
+          itemsWithEstimate: items.filter(i => i.complejidad != null && i.tiempo != null).length,
+          statusData:        buildStatusData(items, statuses),
+          sprintHours:       buildSprintHours(items, sprints),
+          typeData:          buildTypeData(items, types),
+          priorityData:      buildPriorityData(items, priorities),
+          complexityData,
+          overdueItems:      buildOverdueItems(items, statuses),
+          upcomingItems:     buildUpcomingItems(items, statuses),
+          jornadaFte,
         });
         setError(null);
       })

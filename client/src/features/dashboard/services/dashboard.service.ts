@@ -1,6 +1,49 @@
 import { supabase } from '@/core/supabase/supabase.client';
 import type { BacklogItemRecord, SprintRecord } from '@/features/project/Backlog/types/backlog.types';
 
+export interface FteRow {
+  id_proyecto: number;
+  projectName: string;
+  cantidad_horas: number;
+  fte: number | null;
+}
+
+export interface UserJornadaFte {
+  jornada: number | null;
+  rows: FteRow[];
+}
+
+export async function fetchUserJornadaFte(userId: number): Promise<UserJornadaFte> {
+  const [{ data: userData, error: userError }, { data: fteData, error: fteError }] =
+    await Promise.all([
+      supabase
+        .from('usuario')
+        .select('jornada')
+        .eq('id', userId)
+        .single(),
+      supabase
+        .from('usuario_proyecto_fte')
+        .select('id_proyecto, cantidad_horas, fte, proyecto(nombre)')
+        .eq('id_usuario', userId)
+        .order('id_proyecto', { ascending: true }),
+    ]);
+
+  if (userError) throw new Error(userError.message);
+  if (fteError)  throw new Error(fteError.message);
+
+  const rows: FteRow[] = (fteData ?? []).map(row => {
+    const proj = row.proyecto as unknown as { nombre: string } | null;
+    return {
+      id_proyecto:    row.id_proyecto,
+      projectName:    proj?.nombre ?? `Proyecto ${row.id_proyecto}`,
+      cantidad_horas: row.cantidad_horas,
+      fte:            row.fte ?? null,
+    };
+  });
+
+  return { jornada: userData?.jornada ?? null, rows };
+}
+
 export async function fetchUserAssignedItems(userId: number): Promise<BacklogItemRecord[]> {
   const { data, error } = await supabase
     .from('backlog_item')
