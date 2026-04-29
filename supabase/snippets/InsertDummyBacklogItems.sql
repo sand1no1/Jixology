@@ -14,7 +14,8 @@ INSERT INTO backlog_item (
   id, nombre, descripcion, fecha_creacion,
   id_tipo, id_estatus, id_prioridad, id_sprint,
   id_proyecto, id_usuario_creador, id_usuario_responsable,
-  id_backlog_item_padre, es_terminal
+  id_backlog_item_padre, es_terminal,
+  complejidad, tiempo
 )
 OVERRIDING SYSTEM VALUE VALUES
 
@@ -22,53 +23,53 @@ OVERRIDING SYSTEM VALUE VALUES
   -- Épica (id_tipo=4) — root, no parent
   (7,  'Módulo de gestión de proyectos',
        'Épica raíz que agrupa todo el módulo de proyectos.',
-       NOW(), 4, 2, 2, 3, 1, 1, 1,    NULL, false),
+       NOW(), 4, 2, 2, 3, 1, 1, 1,    NULL, false, 5, 2400),
 
   -- Historia de Usuario (id_tipo=1) — parent: Épica id=7
   (1,  'Como usuario quiero iniciar sesión',
        'Implementar flujo de autenticación con email y contraseña.',
-       NOW(), 1, 2, 2, 1, 1, 1, 1,    7,    false),
+       NOW(), 1, 2, 2, 1, 1, 1, 1,    7,    false, 3,  480),
 
   -- Tarea (id_tipo=2) — parent: HU id=1
   (3,  'Configurar conexión a Supabase',
        'Instalar cliente y definir variables de entorno.',
-       NOW(), 2, 4, 1, 1, 1, 1, 1,    1,    false),
+       NOW(), 2, 4, 1, 1, 1, 1, 1,    1,    false, 2,  120),
 
   -- Subtarea (id_tipo=5) — parent: Tarea id=3
   (9,  'Diseñar componente BacklogListItem',
        'Crear el componente visual para listar ítems del backlog.',
-       NOW(), 5, 4, 2, 1, 1, 1, 1,    3,    false),
+       NOW(), 5, 4, 2, 1, 1, 1, 1,    3,    false, 2,  180),
 
   -- Bug (id_tipo=3) — parent: Subtarea id=9
   (5,  'Fix: token expirado no redirige al login',
        'Al expirar la sesión el usuario ve pantalla en blanco.',
-       NOW(), 3, 2, 1, 1, 1, 1, 1,    9,    false),
+       NOW(), 3, 2, 1, 1, 1, 1, 1,    9,    false, 3,   90),
 
   -- ── Set B ─────────────────────────────────────────────────────
   -- Épica (id_tipo=4) — root, no parent
   (8,  'Módulo de backlog',
        'Épica raíz para el desarrollo completo del backlog de producto.',
-       NOW(), 4, 1, 3, 3, 1, 1, NULL, NULL, false),
+       NOW(), 4, 1, 3, 3, 1, 1, NULL, NULL, false, 5, 3000),
 
   -- Historia de Usuario (id_tipo=1) — parent: Épica id=8
   (2,  'Como usuario quiero ver mi perfil',
        'Mostrar datos personales y avatar del usuario autenticado.',
-       NOW(), 1, 1, 3, 1, 1, 1, NULL, 8,    false),
+       NOW(), 1, 1, 3, 1, 1, 1, NULL, 8,    false, 2,  240),
 
   -- Tarea (id_tipo=2) — parent: HU id=2
   (4,  'Crear estructura de carpetas del proyecto',
        'Definir árbol de directorios siguiendo feature-based arch.',
-       NOW(), 2, 1, 4, 2, 1, 1, NULL, 2,    false),
+       NOW(), 2, 1, 4, 2, 1, 1, NULL, 2,    false, 1,   60),
 
   -- Subtarea (id_tipo=5) — parent: Tarea id=4
   (10, 'Conectar hook useBacklogItems a la vista',
        'Integrar el hook con el componente de lista del backlog.',
-       NOW(), 5, 3, 1, 2, 1, 1, NULL, 4,    false),
+       NOW(), 5, 3, 1, 2, 1, 1, NULL, 4,    false, 3,  150),
 
   -- Bug (id_tipo=3) — parent: Subtarea id=10
   (6,  'Fix: avatar no carga en Firefox',
        'La imagen SVG del avatar no renderiza correctamente.',
-       NOW(), 3, 3, 2, 2, 1, 1, NULL, 10,   false)
+       NOW(), 3, 3, 2, 2, 1, 1, NULL, 10,   false, 2,   90)
 
 ON CONFLICT (id) DO NOTHING;
 
