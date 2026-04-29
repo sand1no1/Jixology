@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useToast(durationMs = 4000) {
   const [toast, setToast] = useState<string | null>(null);
@@ -9,9 +9,8 @@ export function useToast(durationMs = 4000) {
     return () => clearTimeout(t);
   }, [toast, durationMs]);
 
-  return {
-    toast,
-    showError: (message: string) => setToast(message),
-    clearToast: () => setToast(null),
-  };
+  const showError  = useCallback((message: string) => setToast(message), []);
+  const clearToast = useCallback(() => setToast(null), []);
+
+  return { toast, showError, clearToast };
 }
