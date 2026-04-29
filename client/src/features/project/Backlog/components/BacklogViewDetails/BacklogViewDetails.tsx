@@ -369,17 +369,18 @@ interface BacklogViewDetailsProps {
   onClose: () => void;
   onUpdated?: () => void;
   onNavigate?: (item: BacklogItemRecord) => void;
+  initialEditing?: boolean;
 }
 
 // ── Component ─────────────────────────────────────────────────────────
-const BacklogViewDetails: React.FC<BacklogViewDetailsProps> = ({ item, meta, onClose, onUpdated, onNavigate }) => {
-  const [isEditing, setIsEditing]     = useState(false);
+const BacklogViewDetails: React.FC<BacklogViewDetailsProps> = ({ item, meta, onClose, onUpdated, onNavigate, initialEditing = false }) => {
+  const [isEditing, setIsEditing]     = useState(initialEditing);
   const [form, setForm]               = useState<FormState>(() => itemToForm(item));
   const [submitting, setSubmitting]   = useState(false);
   const [error, setError]             = useState<string | null>(null);
   const [showTimePopup, setShowTimePopup] = useState(false);
 
-  useEffect(() => { setForm(itemToForm(item)); setIsEditing(false); }, [item]);
+  useEffect(() => { setForm(itemToForm(item)); setIsEditing(initialEditing); }, [item, initialEditing]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
