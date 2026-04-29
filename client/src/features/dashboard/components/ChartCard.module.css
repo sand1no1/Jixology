@@ -103,6 +103,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+
+.overdueItemName:hover {
+  text-decoration: underline;
+  color: var(--color-anchor-gray-2);
 }
 
 .overdueItemDate {

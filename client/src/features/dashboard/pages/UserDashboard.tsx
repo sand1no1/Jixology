@@ -57,7 +57,7 @@ const UserDashboard: FC = () => {
         </div>
         <div className={styles.statCard}>
           <div className={styles.statValue}>
-            {data.sprintHours.reduce((acc, s) => acc + s.horas, 0)}h
+            {data.sprintHours.total}h
           </div>
           <div className={styles.statLabel}>Horas totales</div>
         </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@/core/auth/userContext';
-import { fetchUserAssignedItems, fetchAllSprints, fetchUserJornadaFte } from '../services/dashboard.service';
-import type { UserJornadaFte } from '../services/dashboard.service';
+import { fetchUserAssignedItems, fetchAllSprints, fetchUserJornadaFte, fetchAllProjects } from '../services/dashboard.service';
+import type { UserJornadaFte, ProjectRecord } from '../services/dashboard.service';
 import {
   fetchBacklogStatuses,
   fetchBacklogPriorities,
@@ -16,7 +16,12 @@ import type {
 } from '@/features/project/Backlog/types/backlog.types';
 
 export interface StatusSlice   { name: string; value: number; color: string }
-export interface SprintHours   { sprint: string; horas: number }
+export interface SprintGroupRow { sprint: string; [projectName: string]: number | string }
+export interface SprintHoursData {
+  rows:     SprintGroupRow[];
+  projects: { name: string; color: string }[];
+  total:    number;
+}
 export interface TypeCount     { tipo: string; count: number }
 export interface PriorityCount { prioridad: string; count: number; color: string }
 export interface ComplexityBar  { complejidad: number; horas: number; count: number }
@@ -25,7 +30,7 @@ export interface DashboardData {
   totalItems:         number;
   itemsWithEstimate:  number;
   statusData:         StatusSlice[];
-  sprintHours:        SprintHours[];
+  sprintHours:        SprintHoursData;
   typeData:           TypeCount[];
   priorityData:       PriorityCount[];
   complexityData:     ComplexityBar[];
@@ -63,23 +68,69 @@ function buildStatusData(
   }));
 }
 
+const PROJECT_COLORS = ['#3b82f6', '#f59e0b', '#E31837', '#10b981', '#8b5cf6', '#0A0838'];
+
 function buildSprintHours(
   items: BacklogItemRecord[],
   sprints: SprintRecord[],
-): SprintHours[] {
-  const sprintMap = new Map(sprints.map(s => [s.id, s.nombre]));
-  const hours = new Map<number, number>();
+  projects: ProjectRecord[],
+): SprintHoursData {
+  const projectMap  = new Map(projects.map(p => [p.id, p.nombre]));
+  const sprintInfo  = new Map(sprints.map(s => [s.id, { nombre: s.nombre, id_proyecto: s.id_proyecto }]));
+
+  // sprintName → projectName → hours
+  const hoursMap = new Map<string, Map<string, number>>();
+
   for (const item of items) {
     if (item.id_sprint == null) continue;
-    hours.set(item.id_sprint, (hours.get(item.id_sprint) ?? 0) + (item.tiempo ?? 0) / 60);
+    const info = sprintInfo.get(item.id_sprint);
+    if (!info) continue;
+    const sprintName   = info.nombre;
+    const projectName  = projectMap.get(info.id_proyecto) ?? `Proyecto ${info.id_proyecto}`;
+    const h            = (item.tiempo ?? 0) / 60;
+
+    if (!hoursMap.has(sprintName)) hoursMap.set(sprintName, new Map());
+    const pm = hoursMap.get(sprintName)!;
+    pm.set(projectName, (pm.get(projectName) ?? 0) + h);
   }
-  return Array.from(hours.entries())
-    .map(([id, horas]) => ({ sprint: sprintMap.get(id) ?? `Sprint ${id}`, horas }))
-    .sort((a, b) => {
-      const sa = sprints.find(s => s.nombre === a.sprint);
-      const sb = sprints.find(s => s.nombre === b.sprint);
-      return (sa?.fecha_inicio ?? '') < (sb?.fecha_inicio ?? '') ? -1 : 1;
-    });
+
+  // Sort sprint names naturally (Sprint 1 < Sprint 2 < Sprint 3)
+  const sprintNames = Array.from(hoursMap.keys()).sort((a, b) => {
+    const na = parseInt(a.replace(/\D/g, '')) || 0;
+    const nb = parseInt(b.replace(/\D/g, '')) || 0;
+    return na - nb;
+  });
+
+  // Collect unique project names in project ID order
+  const seenProjects = new Set<string>();
+  for (const p of projects) {
+    const name = projectMap.get(p.id);
+    if (name && Array.from(hoursMap.values()).some(m => m.has(name))) {
+      seenProjects.add(name);
+    }
+  }
+
+  const projectList = Array.from(seenProjects).map((name, i) => ({
+    name,
+    color: PROJECT_COLORS[i % PROJECT_COLORS.length],
+  }));
+
+  const rows: SprintGroupRow[] = sprintNames.map(sprint => {
+    const row: SprintGroupRow = { sprint };
+    const pm = hoursMap.get(sprint)!;
+    for (const [projectName, h] of pm.entries()) {
+      row[projectName] = Math.round(h * 10) / 10;
+    }
+    return row;
+  });
+
+  const total = Math.round(
+    Array.from(hoursMap.values())
+      .flatMap(m => Array.from(m.values()))
+      .reduce((acc, h) => acc + h, 0) * 10
+  ) / 10;
+
+  return { rows, projects: projectList, total };
 }
 
 function buildTypeData(
@@ -185,15 +236,16 @@ export function useUserDashboardData(): UserDashboardDataResult {
       fetchBacklogTypes(),
       fetchAllSprints(),
       fetchUserJornadaFte(user.id),
+      fetchAllProjects(),
     ])
-      .then(([items, statuses, priorities, types, sprints, jornadaFte]) => {
+      .then(([items, statuses, priorities, types, sprints, jornadaFte, projects]) => {
         if (!isMounted) return;
         const complexityData = buildComplexityData(items);
         setData({
           totalItems:        items.length,
           itemsWithEstimate: items.filter(i => i.complejidad != null && i.tiempo != null).length,
           statusData:        buildStatusData(items, statuses),
-          sprintHours:       buildSprintHours(items, sprints),
+          sprintHours:       buildSprintHours(items, sprints, projects),
           typeData:          buildTypeData(items, types),
           priorityData:      buildPriorityData(items, priorities),
           complexityData,

@@ -55,6 +55,18 @@ export async function fetchUserAssignedItems(userId: number): Promise<BacklogIte
   return data ?? [];
 }
 
+export interface ProjectRecord { id: number; nombre: string }
+
+export async function fetchAllProjects(): Promise<ProjectRecord[]> {
+  const { data, error } = await supabase
+    .from('proyecto')
+    .select('id, nombre')
+    .order('id', { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
 export async function fetchAllSprints(): Promise<SprintRecord[]> {
   const { data, error } = await supabase
     .from('sprint')
