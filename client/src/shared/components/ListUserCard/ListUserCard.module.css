@@ -5,7 +5,7 @@
 
 .row {
   display: grid;
-  grid-template-columns: 2.25rem minmax(0, 1fr) minmax(0, 21.25rem) minmax(0, 12.5rem) 2.5rem;
+  grid-template-columns: 2.25rem minmax(8rem, 1fr) minmax(0, 12rem) minmax(0, 9rem) 2.5rem;
   align-items: center;
   column-gap: 1rem;
   padding: 0.75rem 1.25rem;
@@ -172,14 +172,28 @@
   transform: scale(1.08);
 }
 
-/* ── Responsive: hide email at narrow widths ─────────────────── */
+/* ── Responsive: hide email, shrink roles, keep name visible ─── */
 @container (max-width: 38rem) {
   .row {
-    grid-template-columns: 2.25rem minmax(0, 1fr) minmax(0, 18rem) 2.5rem;
+    grid-template-columns: 2.25rem minmax(6rem, 1fr) minmax(0, 8rem) 2.5rem;
   }
 
   .email {
     display: none;
+  }
+
+  .badge {
+    font-size: 0.68rem;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .overflowBadge {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.35rem;
+  }
+
+  .rolesLabel {
+    font-size: 0.78rem;
   }
 }
 

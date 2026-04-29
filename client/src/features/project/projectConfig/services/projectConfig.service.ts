@@ -84,18 +84,7 @@ export async function sendInvitation(
   projectId: number,
   creadorId: number,
 ): Promise<void> {
-  const { data: existing, error: existingError } = await supabase
-    .from('invitacion_proyecto')
-    .select('id')
-    .eq('id_usuario_destino', userId)
-    .eq('id_proyecto', projectId)
-    .eq('aceptada', false)
-    .limit(1);
-
-  if (existingError) throw new Error(existingError.message);
-  if ((existing ?? []).length > 0) return;
-
-  const { error } = await supabase
+  const { error, status } = await supabase
     .from('invitacion_proyecto')
     .insert({
       id_usuario_destino: userId,
@@ -105,7 +94,8 @@ export async function sendInvitation(
       fecha_envio: new Date().toISOString(),
     });
 
-  if (error) throw new Error(error.message);
+  // HTTP 409 = unique constraint violation (invitation already pending) — treat as success
+  if (error && status !== 409) throw new Error(error.message);
 }
 
 // ── Custom etiquetas catalog ──────────────────────────────────────
