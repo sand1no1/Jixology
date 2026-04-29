@@ -287,22 +287,24 @@ const ProjectBacklog: React.FC = () => {
   return (
     <div className={styles.container}>
 
-      <FilterBar
-        searchPlaceholder="Buscar ítems..."
-        onSearchChange={setSearch}
-        filters={[]}
-        activeFilter={null}
-        onFilterChange={() => {}}
-      >
-        <button
-          type="button"
-          className={styles.newItemBtn}
-          onClick={() => setShowCreateForm(true)}
+      <div className={styles.toolbar}>
+        <FilterBar
+          searchPlaceholder="Buscar ítems..."
+          onSearchChange={setSearch}
+          filters={[]}
+          activeFilter={null}
+          onFilterChange={() => {}}
         >
-          <PlusIcon width={16} height={16} />
-          Nuevo ítem
-        </button>
-      </FilterBar>
+          <button
+            type="button"
+            className={styles.newItemBtn}
+            onClick={() => setShowCreateForm(true)}
+          >
+            <PlusIcon width={16} height={16} />
+            Nuevo ítem
+          </button>
+        </FilterBar>
+      </div>
 
       <div className={styles.bubbles}>
         <FilterBubble label="Estatus"     selectedLabel={selectedStatusLabel} elements={statusOptions} />
