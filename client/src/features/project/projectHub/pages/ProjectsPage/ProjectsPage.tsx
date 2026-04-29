@@ -50,7 +50,7 @@ const ProjectsPage: React.FC = () => {
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
-  const { recentIds } = useRecentProjects(user?.id);
+  const { recentIds, trackVisit } = useRecentProjects(user?.id);
   const navigate = useNavigate();
 
   const [archivedProjects, setArchivedProjects] = useState<Project[]>([]);
@@ -145,7 +145,10 @@ const ProjectsPage: React.FC = () => {
     projectDueDate={project.fecha_final}
     projectFTE={project.fte}
     statusLabel={<StatusLabel statusId={project.id_estatus} />}
-    onClick={() => navigate(`/proyectos/${project.id}/backlog`)}
+    onClick={() => {
+      trackVisit(project.id);
+      navigate(`/proyectos/${project.id}/backlog`);
+    }}
     menuItems={buildMenuItems(project)}
   />
 );
@@ -244,7 +247,10 @@ const ProjectsPage: React.FC = () => {
                       projectFTE={p.fte}
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
-                      onClick={() => navigate(`/proyectos/${p.id}/backlog`)}
+                      onClick={() => {
+                        trackVisit(p.id);
+                        navigate(`/proyectos/${p.id}/backlog`);
+                      }}
                       menuItems={buildMenuItems(p)}
                     />
                   ))}
