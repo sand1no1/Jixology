@@ -17,7 +17,7 @@ import { useRecentProjects } from '../../hooks/useRecentProjects';
 // --- Componentes ---
 import ProjectCard from '@/features/project/projectHub/components/ProjectCard';
 import StatusLabel from '@/shared/components/StatusLabel';
-import SearchBarComponent from '@/shared/components/SearchBarComponent';
+import FilterBar from '@/shared/components/FilterBar';
 import EmptyState from '@/shared/components/EmptyState';
 import SkeletonCard from '@/shared/components/SkeletonCard';
 import CreateProject from '@/features/project/projectHub/components/CreateProject';
@@ -48,8 +48,9 @@ const ProjectsPage: React.FC = () => {
   const [search, setSearch]         = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterKey>('TodosLosProyectos');
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null);
   const [creationSuccessMessage, setCreationSuccessMessage] = useState<string | null>(null);
-  const { recentIds, trackVisit } = useRecentProjects(user?.id);
+  const { recentIds } = useRecentProjects(user?.id);
   const navigate = useNavigate();
 
   const [archivedProjects, setArchivedProjects] = useState<Project[]>([]);
@@ -57,13 +58,20 @@ const ProjectsPage: React.FC = () => {
 
   useEffect(() => {
     if (activeFilter !== 'Archivados' || !user || user.idRolGlobal == null) return;
-    getArchivedProjects(user.idRolGlobal, user.id)
-      .then((data) => {
-        console.log('[Archivados] proyectos recibidos:', data);
+
+    const fetchArchived = async () => {
+      setArchivedLoading(true);
+      try {
+        const data = await getArchivedProjects(user.idRolGlobal!, user.id);
         setArchivedProjects(data);
-      })
-      .catch((err) => console.error('[Archivados] error al obtener:', err))
-      .finally(() => setArchivedLoading(false));
+      } catch (err) {
+        console.error('[Archivados] error al obtener:', err);
+      } finally {
+        setArchivedLoading(false);
+      }
+    };
+
+    void fetchArchived();
   }, [activeFilter, user]);
 
   const STATUS_OPTIONS: { id: number; label: string }[] = [
@@ -76,11 +84,11 @@ const ProjectsPage: React.FC = () => {
   const buildMenuItems = (project: Project): MenuComponent[] => [
     {
       text: 'Abrir',
-      onClick: () => navigate(`/projects/${project.id}`),
+      onClick: () => navigate(`/proyectos/${project.id}/backlog`),
     },
     {
       text: 'Editar Proyecto',
-      onClick: () => navigate(`/projects/${project.id}/edit`),
+      onClick: () => setEditingProjectId(project.id),
     },
     ...(project.id_estatus !== 5 ? [{
       text: 'Cambiar Estatus',
@@ -102,16 +110,25 @@ const ProjectsPage: React.FC = () => {
       ? {
           text: 'Archivar Proyecto',
           onClick: async () => {
-            await archiveProject(project.id, user!.id);
-            setProjects((prev) => prev.filter((p) => p.id !== project.id));
+            try {
+              await archiveProject(project.id, user!.id);
+              setProjects((prev) => prev.filter((p) => p.id !== project.id));
+              setArchivedProjects((prev) => [...prev, { ...project, id_estatus: 5 }]);
+            } catch (err) {
+              console.error('[Archivar] error:', err);
+            }
           },
         }
       : {
           text: 'Desarchivar Proyecto',
           onClick: async () => {
-            await unarchiveProject(project.id, user!.id);
-            setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
-            setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+            try {
+              await unarchiveProject(project.id, user!.id);
+              setArchivedProjects((prev) => prev.filter((p) => p.id !== project.id));
+              setProjects((prev) => [...prev, { ...project, id_estatus: 4 }]);
+            } catch (err) {
+              console.error('[Desarchivar] error:', err);
+            }
           },
         },
   ];
@@ -128,7 +145,7 @@ const ProjectsPage: React.FC = () => {
     projectDueDate={project.fecha_final}
     projectFTE={project.fte}
     statusLabel={<StatusLabel statusId={project.id_estatus} />}
-    onClick={() => trackVisit(project.id)}
+    onClick={() => navigate(`/proyectos/${project.id}/backlog`)}
     menuItems={buildMenuItems(project)}
   />
 );
@@ -164,26 +181,19 @@ const ProjectsPage: React.FC = () => {
   return (
     <>
       <div className={styles.container}>
-        <div className={styles.topBar}>
-          <div className={styles.searchWrapper}>
-            <SearchBarComponent infoText="Buscar proyectos" onChange={setSearch} />
-          </div>
+        <FilterBar
+          searchPlaceholder="Buscar proyectos"
+          onSearchChange={setSearch}
+          filters={(Object.keys(FILTER_LABELS) as FilterKey[])
+            .filter(k => k !== 'TodosLosProyectos')
+            .map(k => ({ id: k, label: FILTER_LABELS[k] }))}
+          activeFilter={activeFilter === 'TodosLosProyectos' ? null : activeFilter}
+          onFilterChange={v => setActiveFilter(v === null ? 'TodosLosProyectos' : v as FilterKey)}
+        >
           <button className={`${styles.createProject} ${styles.createProjectWrapper}`} onClick={() => setIsCreateProjectOpen(true)}>
             Crear proyecto
           </button>
-        </div>
-        <div className={styles.filterPills}>
-          {(Object.keys(FILTER_LABELS) as FilterKey[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveFilter(key)}
-              className={`${styles.pill} ${activeFilter === key ? styles.pillActive : ''}`}
-            >
-              {FILTER_LABELS[key]}
-            </button>
-          ))}
-        </div>
+        </FilterBar>
 
         {activeFilter === 'Archivados' ? (
           archivedLoading ? (
@@ -234,7 +244,7 @@ const ProjectsPage: React.FC = () => {
                       projectFTE={p.fte}
                       statusLabel={<StatusLabel statusId={p.id_estatus} />}
                       forceExpanded
-                      onClick={() => trackVisit(p.id)}
+                      onClick={() => navigate(`/proyectos/${p.id}/backlog`)}
                       menuItems={buildMenuItems(p)}
                     />
                   ))}
@@ -252,12 +262,18 @@ const ProjectsPage: React.FC = () => {
       </div>
       {user ? (
         <CreateProject
-          isOpen={isCreateProjectOpen}
-          onClose={() => setIsCreateProjectOpen(false)}
+          isOpen={isCreateProjectOpen || editingProjectId !== null}
+          isCreate={editingProjectId === null}
+          projectId={editingProjectId ?? undefined}
+          onClose={() => {
+            setIsCreateProjectOpen(false);
+            setEditingProjectId(null);
+          }}
           userId={user.id}
           onCreated={async (message) => {
             setCreationSuccessMessage(message);
             setIsCreateProjectOpen(false);
+            setEditingProjectId(null);
             await refetch();
           }}
         />

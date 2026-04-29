@@ -101,9 +101,14 @@ const UserCard: React.FC<UserCardProps> = ({
   const isSelfEdit = editScope === 'self';
   const isFullEdit = editScope === 'full';
   const isAboutMeOnly = editScope === 'aboutMe';
+  const isPreviewOnly = editScope === 'none';
 
   return (
-    <div className={styles.profileCard}>
+    <div
+      className={`${styles.profileCard} ${
+        isPreviewOnly ? styles.profileCardPreview : ''
+      }`}
+    >
       {editScope !== 'none' && !isEditing && (
         <button
           className={styles.editCardBtn}
@@ -287,64 +292,84 @@ const UserCard: React.FC<UserCardProps> = ({
         </>
       ) : (
         <>
-          <div className={styles.profileInfo}>
-            <div className={styles.infoRow}>
-              <span>Nombre: {name}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Edad: {age}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Fecha de nacimiento: {birthDate}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Teléfono: {phone}</span>
-            </div>
-            <div className={styles.infoRow}>
-              <span>Correo: {email}</span>
-            </div>
-          </div>
-
-          <div className={styles.aboutMeSection}>
-            <div className={styles.aboutMeLabel}>Sobre mí</div>
-
-            {isAboutMeOnly && isEditing ? (
-              <>
-                <textarea
-                  className={styles.aboutMeTextarea}
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  rows={5}
-                  disabled={saving}
-                  autoFocus
-                />
-                {saveError && <p className={styles.saveError}>{saveError}</p>}
-                <div className={styles.editActions}>
-                  <button
-                    className={styles.saveBtn}
-                    onClick={handleSaveAboutMe}
-                    disabled={saving}
-                    type="button"
-                  >
-                    <CheckIcon width={14} height={14} />
-                    {saving ? 'Guardando…' : 'Guardar'}
-                  </button>
-
-                  <button
-                    className={styles.cancelBtn}
-                    onClick={handleCancel}
-                    disabled={saving}
-                    type="button"
-                  >
-                    <XMarkIcon width={14} height={14} />
-                    Cancelar
-                  </button>
+          {isPreviewOnly ? (
+            <>
+              <div className={styles.profileInfo}>
+                <div className={styles.infoRow}>
+                  <span>Nombre: {name}</span>
                 </div>
-              </>
-            ) : (
-              <p className={styles.aboutMeText}>{aboutMe || '—'}</p>
-            )}
-          </div>
+                <div className={styles.infoRow}>
+                  <span>Correo: {email}</span>
+                </div>
+              </div>
+
+              <div className={styles.aboutMeSection}>
+                <div className={styles.aboutMeLabel}>Sobre mí</div>
+                <p className={styles.aboutMeText}>{aboutMe || '—'}</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.profileInfo}>
+                <div className={styles.infoRow}>
+                  <span>Nombre: {name}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>Edad: {age}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>Fecha de nacimiento: {birthDate}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>Teléfono: {phone}</span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>Correo: {email}</span>
+                </div>
+              </div>
+
+              <div className={styles.aboutMeSection}>
+                <div className={styles.aboutMeLabel}>Sobre mí</div>
+
+                {isAboutMeOnly && isEditing ? (
+                  <>
+                    <textarea
+                      className={styles.aboutMeTextarea}
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      rows={5}
+                      disabled={saving}
+                      autoFocus
+                    />
+                    {saveError && <p className={styles.saveError}>{saveError}</p>}
+                    <div className={styles.editActions}>
+                      <button
+                        className={styles.saveBtn}
+                        onClick={handleSaveAboutMe}
+                        disabled={saving}
+                        type="button"
+                      >
+                        <CheckIcon width={14} height={14} />
+                        {saving ? 'Guardando…' : 'Guardar'}
+                      </button>
+
+                      <button
+                        className={styles.cancelBtn}
+                        onClick={handleCancel}
+                        disabled={saving}
+                        type="button"
+                      >
+                        <XMarkIcon width={14} height={14} />
+                        Cancelar
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p className={styles.aboutMeText}>{aboutMe || '—'}</p>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

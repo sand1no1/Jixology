@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ChangeEvent, ComponentProps, FocusEvent } from 'react';
 import {
   createProject,
+  updateCreateProyectData,
   getCreateProjectCatalogs,
+  getAllCreateProyectData,
 } from '@/features/project/projectHub/services/create.project';
 import type {
   CreateProjectFormErrors,
@@ -43,6 +45,7 @@ type UseCreateProjectFormReturn = {
 
 type UseCreateProjectFormOptions = {
   userId: number;
+  projectId?: number;
   onSuccess?: (message: string) => void;
 };
 
@@ -304,9 +307,25 @@ export function useCreateProjectForm(
     }
   }, []);
 
+  const loadEditProyectData = useCallback(async () => {
+    setIsInitialLoading(true);
+    try {
+      const projectValues = await getAllCreateProyectData(options.projectId!, options.userId);
+      setValues(projectValues);
+    } catch (error) {
+      setLoadError(getErrorMessage(error));
+    } finally {
+      setIsInitialLoading(false);
+    }
+  }, [options.projectId, options.userId]);
+
   useEffect(() => {
     void loadCatalogs();
   }, [loadCatalogs]);
+
+  useEffect(() => {
+    if (options.projectId) void loadEditProyectData();
+  }, [options.projectId, loadEditProyectData]);
 
   const handleFieldChange = (event: ChangeEvent<FieldElement>): void => {
     const fieldName = event.target.name as keyof CreateProjectFormValues;
@@ -455,15 +474,19 @@ export function useCreateProjectForm(
 
     try {
       const payload = normalizePayload(values, options.userId);
-      const response = await createProject(payload);
-      const successMessage = `${response.message} ID: ${response.id}.`;
+
+      if (options.projectId) {
+        await updateCreateProyectData(options.projectId, payload);
+        options.onSuccess?.(`Proyecto "${payload.nombre}" actualizado correctamente.`);
+      } else {
+        const response = await createProject(payload);
+        setValues(buildInitialValues(catalogs));
+        options.onSuccess?.(`${response.message} ID: ${response.id}.`);
+      }
 
       setErrors({});
-      setValues(buildInitialValues(catalogs));
       setValidationAttemptCount(0);
       setTouchedFields({});
-
-      options.onSuccess?.(successMessage);
     } catch (error) {
       setFeedback({
         type: 'error',

@@ -67,7 +67,7 @@ const ProjectCard: React.FC<IProjectCardProps> = ({
         <>
           <div
             style={{ position: 'fixed', inset: 0, zIndex: 999 }}
-            onClick={() => setMenu(null)}
+            onClick={(e) => { e.stopPropagation(); setMenu(null); }}
             onContextMenu={(e) => { e.preventDefault(); setMenu(null); }}
           />
           <div ref={menuRef} style={{ position: 'fixed', top: menu.y, left: menu.x, zIndex: 1000, visibility: 'hidden' }}>
