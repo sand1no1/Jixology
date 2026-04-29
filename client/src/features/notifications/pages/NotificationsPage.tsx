@@ -4,12 +4,20 @@ import ConfirmDialog from '@/shared/components/ConfirmDialog/ConfirmDialog';
 import EmptyState from '@/shared/components/EmptyState/EmptyState';
 import ErrorState from '@/shared/components/ErrorState/ErrorState';
 import LoadingState from '@/shared/components/LoadingState/LoadingState';
-import NotificationList from '../components/NotificationList';
+import NotificationItem from '../components/NotificationItem';
+import InvitacionItem from '../components/InvitacionItem/InvitacionItem';
 import NotificationTabs from '../components/NotificationTabs';
 import { useNotifications } from '../hooks/useNotifications';
+import { useInvitaciones } from '../hooks/useInvitaciones';
 import type { NotificationTabFilter } from '../types/notification.types';
+import type { NotificationRecord } from '../types/notification.types';
+import type { InvitacionPendienteRecord } from '../types/invitacion.types';
 import SearchBarComponent from '@/shared/components/SearchBarComponent/SearchBarComponent';
 import './NotificationsPage.css';
+
+type UnifiedItem =
+  | { kind: 'notification'; data: NotificationRecord }
+  | { kind: 'invitacion';   data: InvitacionPendienteRecord };
 
 export default function NotificationsPage() {
 	const {
@@ -25,6 +33,8 @@ export default function NotificationsPage() {
 		deleteNotification,
 	} = useNotifications();
 
+  const { invitaciones, loadingIds: invLoadingIds, onAccept, onDeny } = useInvitaciones();
+
 	const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<NotificationTabFilter>('all');
   const [markingAsReadIds, setMarkingAsReadIds] = useState<number[]>([]);
@@ -34,38 +44,51 @@ export default function NotificationsPage() {
 	const [pendingDeleteIds, setPendingDeleteIds] = useState<number[]>([]);
 	const [isDeletingConfirmed, setIsDeletingConfirmed] = useState(false);
 
+  // ── Filtered notifications (unchanged logic) ──────────────────
 	const filteredNotifications = useMemo(() => {
 		const normalizedSearch = search.trim().toLowerCase();
 
 		const notificationsByTab = notifications.filter((notification) => {
-			if (activeTab === 'unread') {
-				return !notification.leida;
-			}
-
-			if (activeTab === 'read') {
-				return notification.leida;
-			}
-
+			if (activeTab === 'unread') return !notification.leida;
+			if (activeTab === 'read')   return notification.leida;
 			return true;
 		});
 
-		if (!normalizedSearch) {
-			return notificationsByTab;
-		}
+		if (!normalizedSearch) return notificationsByTab;
 
 		return notificationsByTab.filter((notification) => {
-			const name = notification.nombre.toLowerCase();
+			const name        = notification.nombre.toLowerCase();
 			const description = notification.descripcion?.toLowerCase() ?? '';
-
-			return (
-				name.includes(normalizedSearch) ||
-				description.includes(normalizedSearch)
-			);
+			return name.includes(normalizedSearch) || description.includes(normalizedSearch);
 		});
 	}, [activeTab, notifications, search]);
 
+  // ── Unified list: invitations + notifications merged by date ──
+  const unifiedItems = useMemo((): UnifiedItem[] => {
+    const q = search.trim().toLowerCase();
+
+    // Invitations are always "unread" — show in 'all' and 'unread' tabs
+    const invItems: UnifiedItem[] = activeTab !== 'read'
+      ? invitaciones
+          .filter(inv =>
+            !q ||
+            inv.nombre_proyecto.toLowerCase().includes(q) ||
+            (inv.descripcion?.toLowerCase() ?? '').includes(q)
+          )
+          .map(inv => ({ kind: 'invitacion' as const, data: inv }))
+      : [];
+
+    const notifItems: UnifiedItem[] = filteredNotifications.map(
+      n => ({ kind: 'notification' as const, data: n })
+    );
+
+    return [...invItems, ...notifItems].sort(
+      (a, b) => new Date(b.data.fecha_envio).getTime() - new Date(a.data.fecha_envio).getTime()
+    );
+  }, [filteredNotifications, invitaciones, activeTab, search]);
+
   const filteredNotificationIds = useMemo(
-    () => filteredNotifications.map((notification) => notification.id),
+    () => filteredNotifications.map((n) => n.id),
     [filteredNotifications],
   );
 
@@ -73,25 +96,19 @@ export default function NotificationsPage() {
     filteredNotificationIds.length > 0 &&
     filteredNotificationIds.every((id) => selectedIds.includes(id));
 
-	const unreadSelectedCount = selectedIds.filter((notificationId) => {
-		const notification = notifications.find((item) => item.id === notificationId);
-		return notification && !notification.leida;
+	const unreadSelectedCount = selectedIds.filter((id) => {
+		const n = notifications.find((item) => item.id === id);
+		return n && !n.leida;
 	}).length;
 
-	const readSelectedCount = selectedIds.filter((notificationId) => {
-		const notification = notifications.find((item) => item.id === notificationId);
-		return notification && notification.leida;
+	const readSelectedCount = selectedIds.filter((id) => {
+		const n = notifications.find((item) => item.id === id);
+		return n && n.leida;
 	}).length;
 
   const emptyTitle = useMemo(() => {
-    if (activeTab === 'unread') {
-      return 'No tienes notificaciones sin leer';
-    }
-
-    if (activeTab === 'read') {
-      return 'No tienes notificaciones leídas';
-    }
-
+    if (activeTab === 'unread') return 'No tienes notificaciones sin leer';
+    if (activeTab === 'read')   return 'No tienes notificaciones leídas';
     return 'No tienes notificaciones';
   }, [activeTab]);
 
@@ -102,162 +119,91 @@ export default function NotificationsPage() {
 	};
 
   const handleToggleSelected = (notificationId: number) => {
-    setSelectedIds((current) => {
-      if (current.includes(notificationId)) {
-        return current.filter((id) => id !== notificationId);
-      }
-
-      return [...current, notificationId];
-    });
+    setSelectedIds((current) =>
+      current.includes(notificationId)
+        ? current.filter((id) => id !== notificationId)
+        : [...current, notificationId]
+    );
   };
 
   const handleToggleSelectAll = () => {
-    setSelectedIds((current) => {
-      if (areAllFilteredSelected) {
-        return current.filter((id) => !filteredNotificationIds.includes(id));
-      }
-
-      return Array.from(new Set([...current, ...filteredNotificationIds]));
-    });
+    setSelectedIds((current) =>
+      areAllFilteredSelected
+        ? current.filter((id) => !filteredNotificationIds.includes(id))
+        : Array.from(new Set([...current, ...filteredNotificationIds]))
+    );
   };
 
-	const handleStartSelection = () => {
-		setIsSelectionMode(true);
-	};
+	const handleStartSelection  = () => setIsSelectionMode(true);
+	const handleClearSelection  = () => { setSelectedIds([]); setIsSelectionMode(false); };
 
-	const handleClearSelection = () => {
-		setSelectedIds([]);
-		setIsSelectionMode(false);
-	};
-
-  const handleRequestDeleteOne = (notificationId: number) => {
-    setPendingDeleteIds([notificationId]);
-  };
-
-  const handleRequestDeleteSelected = () => {
-    if (selectedIds.length === 0) {
-      return;
-    }
-
-    setPendingDeleteIds(selectedIds);
-  };
-
-  const handleCancelDelete = () => {
-    if (isDeletingConfirmed) {
-      return;
-    }
-
-    setPendingDeleteIds([]);
-  };
+  const handleRequestDeleteOne      = (id: number) => setPendingDeleteIds([id]);
+  const handleRequestDeleteSelected = () => { if (selectedIds.length > 0) setPendingDeleteIds(selectedIds); };
+  const handleCancelDelete          = () => { if (!isDeletingConfirmed) setPendingDeleteIds([]); };
 
   const handleConfirmDelete = async () => {
-    if (pendingDeleteIds.length === 0) {
-      return;
-    }
-
+    if (pendingDeleteIds.length === 0) return;
     setIsDeletingConfirmed(true);
-    setDeletingIds((current) =>
-      Array.from(new Set([...current, ...pendingDeleteIds])),
-    );
+    setDeletingIds((current) => Array.from(new Set([...current, ...pendingDeleteIds])));
 
 		try {
-			await Promise.all(
-				pendingDeleteIds.map((notificationId) =>
-					deleteNotification(notificationId),
-				),
-			);
-
+			await Promise.all(pendingDeleteIds.map((id) => deleteNotification(id)));
 			setSelectedIds([]);
 			setIsSelectionMode(false);
 			setPendingDeleteIds([]);
 		} finally {
-			setDeletingIds((current) =>
-				current.filter((id) => !pendingDeleteIds.includes(id)),
-			);
+			setDeletingIds((current) => current.filter((id) => !pendingDeleteIds.includes(id)));
 			setIsDeletingConfirmed(false);
 		}
   };
 
 	const handleToggleReadStatus = async (notificationId: number) => {
 		const notification = notifications.find((item) => item.id === notificationId);
-
-		if (!notification) {
-			return;
-		}
+		if (!notification) return;
 
 		setMarkingAsReadIds((current) =>
-			current.includes(notificationId)
-				? current
-				: [...current, notificationId],
+			current.includes(notificationId) ? current : [...current, notificationId],
 		);
 
 		try {
-			if (notification.leida) {
-				await markAsUnread(notificationId);
-				return;
-			}
-
+			if (notification.leida) { await markAsUnread(notificationId); return; }
 			await markAsRead(notificationId);
 		} finally {
-			setMarkingAsReadIds((current) =>
-				current.filter((id) => id !== notificationId),
-			);
+			setMarkingAsReadIds((current) => current.filter((id) => id !== notificationId));
 		}
 	};
-	
+
 	const handleMarkSelectedAsRead = async () => {
-		const unreadSelectedIds = selectedIds.filter((notificationId) => {
-			const notification = notifications.find((item) => item.id === notificationId);
-			return notification && !notification.leida;
+		const unreadSelectedIds = selectedIds.filter((id) => {
+			const n = notifications.find((item) => item.id === id);
+			return n && !n.leida;
 		});
+		if (unreadSelectedIds.length === 0) return;
 
-		if (unreadSelectedIds.length === 0) {
-			return;
-		}
-
-		setMarkingAsReadIds((current) =>
-			Array.from(new Set([...current, ...unreadSelectedIds])),
-		);
-
+		setMarkingAsReadIds((current) => Array.from(new Set([...current, ...unreadSelectedIds])));
 		try {
-			await Promise.all(
-				unreadSelectedIds.map((notificationId) => markAsRead(notificationId)),
-			);
-
+			await Promise.all(unreadSelectedIds.map((id) => markAsRead(id)));
 			setSelectedIds([]);
 			setIsSelectionMode(false);
 		} finally {
-			setMarkingAsReadIds((current) =>
-				current.filter((id) => !unreadSelectedIds.includes(id)),
-			);
+			setMarkingAsReadIds((current) => current.filter((id) => !unreadSelectedIds.includes(id)));
 		}
 	};
 
 	const handleMarkSelectedAsUnread = async () => {
-		const readSelectedIds = selectedIds.filter((notificationId) => {
-			const notification = notifications.find((item) => item.id === notificationId);
-			return notification && notification.leida;
+		const readSelectedIds = selectedIds.filter((id) => {
+			const n = notifications.find((item) => item.id === id);
+			return n && n.leida;
 		});
+		if (readSelectedIds.length === 0) return;
 
-		if (readSelectedIds.length === 0) {
-			return;
-		}
-
-		setMarkingAsReadIds((current) =>
-			Array.from(new Set([...current, ...readSelectedIds])),
-		);
-
+		setMarkingAsReadIds((current) => Array.from(new Set([...current, ...readSelectedIds])));
 		try {
-			await Promise.all(
-				readSelectedIds.map((notificationId) => markAsUnread(notificationId)),
-			);
-
+			await Promise.all(readSelectedIds.map((id) => markAsUnread(id)));
 			setSelectedIds([]);
 			setIsSelectionMode(false);
 		} finally {
-			setMarkingAsReadIds((current) =>
-				current.filter((id) => !readSelectedIds.includes(id)),
-			);
+			setMarkingAsReadIds((current) => current.filter((id) => !readSelectedIds.includes(id)));
 		}
 	};
 
@@ -266,11 +212,7 @@ export default function NotificationsPage() {
 		: 'Cuando existan notificaciones para esta sección, aparecerán aquí.';
 
 	if (isLoading && notifications.length === 0) {
-		return (
-			<main className="notifications-page">
-				<LoadingState message="Cargando notificaciones..." />
-			</main>
-		);
+		return <main className="notifications-page"><LoadingState message="Cargando notificaciones..." /></main>;
 	}
 
 	if (error && notifications.length === 0) {
@@ -286,7 +228,9 @@ export default function NotificationsPage() {
 		);
 	}
 
-		return (
+  const hasAnyContent = notifications.length > 0 || invitaciones.length > 0;
+
+	return (
     <main className="notifications-page">
       <section className="notifications-page__header">
         <div>
@@ -305,7 +249,7 @@ export default function NotificationsPage() {
         />
       </section>
 
-			{notifications.length > 0 && (
+			{hasAnyContent && (
 				<section className="notifications-page__toolbar">
 					<div className="notifications-page__search">
 						<SearchBarComponent
@@ -318,62 +262,32 @@ export default function NotificationsPage() {
 
 					<div className="notifications-page__toolbar-actions">
 						{!isSelectionMode ? (
-							<button
-								type="button"
-								className="notifications-page__toolbar-button"
-								onClick={handleStartSelection}
-							>
+							<button type="button" className="notifications-page__toolbar-button" onClick={handleStartSelection}>
 								Seleccionar
 							</button>
 						) : (
 							<>
-								<button
-									type="button"
-									className="notifications-page__toolbar-button"
-									onClick={handleToggleSelectAll}
-								>
-									{areAllFilteredSelected
-										? 'Quitar selección'
-										: 'Seleccionar todas'}
+								<button type="button" className="notifications-page__toolbar-button" onClick={handleToggleSelectAll}>
+									{areAllFilteredSelected ? 'Quitar selección' : 'Seleccionar todas'}
 								</button>
 
 								<span className="notifications-page__selection-count">
-									{selectedIds.length} seleccionada
-									{selectedIds.length === 1 ? '' : 's'}
+									{selectedIds.length} seleccionada{selectedIds.length === 1 ? '' : 's'}
 								</span>
 
-								<button
-									type="button"
-									className="notifications-page__toolbar-button notifications-page__toolbar-button--danger"
-									onClick={handleRequestDeleteSelected}
-									disabled={selectedIds.length === 0}
-								>
+								<button type="button" className="notifications-page__toolbar-button notifications-page__toolbar-button--danger" onClick={handleRequestDeleteSelected} disabled={selectedIds.length === 0}>
 									Eliminar seleccionadas
 								</button>
 
-								<button
-									type="button"
-									className="notifications-page__toolbar-button notifications-page__toolbar-button--success"
-									onClick={handleMarkSelectedAsRead}
-									disabled={unreadSelectedCount === 0}
-								>
+								<button type="button" className="notifications-page__toolbar-button notifications-page__toolbar-button--success" onClick={handleMarkSelectedAsRead} disabled={unreadSelectedCount === 0}>
 									Marcar leídas
 								</button>
 
-								<button
-									type="button"
-									className="notifications-page__toolbar-button"
-									onClick={handleMarkSelectedAsUnread}
-									disabled={readSelectedCount === 0}
-								>
+								<button type="button" className="notifications-page__toolbar-button" onClick={handleMarkSelectedAsUnread} disabled={readSelectedCount === 0}>
 									Marcar no leídas
 								</button>
 
-								<button
-									type="button"
-									className="notifications-page__toolbar-button"
-									onClick={handleClearSelection}
-								>
+								<button type="button" className="notifications-page__toolbar-button" onClick={handleClearSelection}>
 									Cancelar
 								</button>
 							</>
@@ -383,34 +297,46 @@ export default function NotificationsPage() {
 			)}
 
       <section className="notifications-page__content">
-        {filteredNotifications.length === 0 ? (
+        {unifiedItems.length === 0 ? (
 					<EmptyState
 						icon={<BellIcon className="notifications-page__empty-icon" />}
 						title={emptyTitle}
 						subtitle={emptySubtitle}
 					/>
         ) : (
-					<NotificationList
-						notifications={filteredNotifications}
-						userTimeZone={userContext?.timeZone ?? 'UTC'}
-						markingAsReadIds={markingAsReadIds}
-						deletingIds={deletingIds}
-						selectedIds={selectedIds}
-						isSelectionMode={isSelectionMode}
-						onToggleSelected={handleToggleSelected}
-						onToggleReadStatus={handleToggleReadStatus}
-						onDelete={handleRequestDeleteOne}
-					/>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {unifiedItems.map(item =>
+              item.kind === 'invitacion' ? (
+                <InvitacionItem
+                  key={`inv-${item.data.id}`}
+                  invitacion={item.data}
+                  userTimeZone={userContext?.timeZone ?? 'UTC'}
+                  isLoading={invLoadingIds.includes(item.data.id)}
+                  onAccept={() => onAccept(item.data.id)}
+                  onDeny={() => onDeny(item.data.id)}
+                />
+              ) : (
+                <NotificationItem
+                  key={`notif-${item.data.id}`}
+                  notification={item.data}
+                  userTimeZone={userContext?.timeZone ?? 'UTC'}
+                  isMarkingAsRead={markingAsReadIds.includes(item.data.id)}
+                  isDeleting={deletingIds.includes(item.data.id)}
+                  isSelected={selectedIds.includes(item.data.id)}
+                  isSelectionMode={isSelectionMode}
+                  onToggleSelected={() => handleToggleSelected(item.data.id)}
+                  onToggleReadStatus={() => handleToggleReadStatus(item.data.id)}
+                  onDelete={() => handleRequestDeleteOne(item.data.id)}
+                />
+              )
+            )}
+          </div>
         )}
       </section>
 
       <ConfirmDialog
         isOpen={pendingDeleteIds.length > 0}
-        title={
-          pendingDeleteIds.length === 1
-            ? 'Eliminar notificación'
-            : 'Eliminar notificaciones'
-        }
+        title={pendingDeleteIds.length === 1 ? 'Eliminar notificación' : 'Eliminar notificaciones'}
         message={
           pendingDeleteIds.length === 1
             ? '¿Seguro que quieres eliminar esta notificación? Esta acción no se puede deshacer.'
