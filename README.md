@@ -93,3 +93,63 @@ Supabase configuration, database migrations, and project resources.
 -- npm run begin-project
 
 (properly stop the DB Supabase before)
+
+
+
+## #######################################################################################################################################
+## Docker — Build & Run
+
+### Prerequisites
+- Docker Desktop installed and running
+- `server/.env` file created with the following variables:
+  ```
+  SUPABASE_URL=your_supabase_url
+  SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+  PORT=3000
+  ```
+  Find these values in the Supabase dashboard under **Project Settings → API**.
+
+### 1. Build the images
+Run both commands from the **repo root**:
+
+```bash
+# Client (Nginx, serves the React app)
+docker build -t jixology-client -f client/Dockerfile client/
+
+# Server (Express + Socket.io)
+docker build -t jixology-server -f server/Dockerfile .
+```
+
+### 2. Run the containers
+
+```bash
+# Client — available at http://localhost
+docker run -d -p 80:80 --name jixology-client jixology-client
+
+# Server — available at http://localhost:3000
+docker run -d -p 3000:3000 --env-file server/.env --name jixology-server jixology-server
+```
+
+### 3. Verify
+
+```bash
+# Check both containers are running
+docker ps
+
+# Check server health
+curl http://localhost:3000/health
+```
+
+Open [http://localhost](http://localhost) in your browser to access the app.
+
+### Useful commands
+
+```bash
+# View logs
+docker logs jixology-client
+docker logs jixology-server
+
+# Stop and remove containers
+docker stop jixology-client jixology-server
+docker rm   jixology-client jixology-server
+```
