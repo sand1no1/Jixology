@@ -5,12 +5,13 @@
   grid-template-rows: 1fr 1fr;
   gap: 1.25rem;
   padding: 1.25rem;
-  /* flex: 1 + min-height: 0 fill remaining height inside the flex-column
-     AppLayoutHsProject provides (now that .belowHeadbar uses height, not min-height) */
   flex: 1;
   min-height: 0;
   box-sizing: border-box;
   overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(221, 0, 49, 0.04), transparent 28%),
+    var(--color-clarity-gray-1);
 }
 
 /* ── Panel base ──────────────────────────────────────────────────── */

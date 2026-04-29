@@ -73,8 +73,7 @@ const ListUserCard: React.FC<ListUserCardProps> = ({
       count++;
     }
 
-    setFittingCount(count);
-  // roles.length in deps so we re-measure when total count changes (affects the reserve logic)
+    queueMicrotask(() => setFittingCount(count));
   }, [rolesKey, roles.length]);
 
   const overflowCount = roles.length - fittingCount;

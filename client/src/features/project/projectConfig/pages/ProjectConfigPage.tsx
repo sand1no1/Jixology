@@ -216,7 +216,6 @@ const ProjectConfigPage: React.FC = () => {
             fteData.map(member => {
               const fullName = [member.nombre, member.apellido].filter(Boolean).join(' ') || member.email;
               const ftePercent = currentFte(member);
-              const isSaving = savingRows.has(member.id);
 
               return (
                 <div key={member.id} className={styles.fteRow}>

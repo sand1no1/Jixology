@@ -317,7 +317,8 @@ export async function fetchProjectMembersWithJornada(
 
   if (error) throw new Error(error.message);
 
-  return ((data ?? []) as Array<{ usuario: { id: number; nombre: string | null; apellido: string | null; email: string; jornada: number | null } }>)
+  type JoinRow = { usuario: { id: number; nombre: string | null; apellido: string | null; email: string; jornada: number | null } };
+  return ((data ?? []) as unknown as JoinRow[])
     .map(row => ({
       id:       row.usuario.id,
       nombre:   row.usuario.nombre,

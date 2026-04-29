@@ -15,7 +15,7 @@ export function useProjectFte(projectId: number) {
   const loadedProjectRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (loadedProjectRef.current !== projectId) setLoading(true);
+    if (loadedProjectRef.current !== projectId) setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
 
     fetchProjectMembersWithJornada(projectId)
       .then(async members => {

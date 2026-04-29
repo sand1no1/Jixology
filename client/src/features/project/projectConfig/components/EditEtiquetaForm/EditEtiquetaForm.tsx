@@ -42,7 +42,8 @@ const EditEtiquetaForm: React.FC<EditEtiquetaFormProps> = ({
       color_bloque: etiqueta.color_bloque,
       color_letra:  etiqueta.color_letra,
     });
-  }, [etiqueta.id]);
+  // Re-sync whenever any field of the etiqueta changes (including id when a different one opens)
+  }, [etiqueta.id, etiqueta.nombre, etiqueta.descripcion, etiqueta.color_bloque, etiqueta.color_letra]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));

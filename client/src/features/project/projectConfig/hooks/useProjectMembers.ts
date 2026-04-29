@@ -24,7 +24,7 @@ export function useProjectMembers(projectId: number) {
 
   useEffect(() => {
     if (loadedProjectRef.current !== projectId) {
-      setLoading(true);
+      setLoading(true); // eslint-disable-line react-hooks/set-state-in-effect
     }
 
     Promise.all([
