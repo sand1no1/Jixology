@@ -29,6 +29,16 @@ const ProjectConfigPage: React.FC = () => {
   const { fteData, loading: fteLoading, refresh: refreshFte } = useProjectFte(PROJECT_ID);
   const { toast, showError, clearToast } = useToast();
 
+  // SAdmins (1) and Admins (2) can always invite; PMs in this project can too
+  const canInvite = (() => {
+    if (user?.idRolGlobal === 1 || user?.idRolGlobal === 2) return true;
+    const pmEntry = etiquetasPredeterminadas.find(e => e.nombre === 'PM');
+    if (!pmEntry) return false;
+    return memberEtiquetasPred.some(
+      me => me.id_usuario === user?.id && me.id_etiqueta_proyecto_predeterminada === pmEntry.id
+    );
+  })();
+
   // ── Modal visibility ──────────────────────────────────────────────
   const [showInviteForm, setShowInviteForm]         = useState(false);
   const [showCreateEtiqueta, setShowCreateEtiqueta] = useState(false);
@@ -138,10 +148,12 @@ const ProjectConfigPage: React.FC = () => {
               {members.length} {members.length === 1 ? 'miembro' : 'miembros'}
             </p>
           </div>
-          <button type="button" className={styles.primaryBtn} onClick={() => setShowInviteForm(true)}>
-            <UserPlusIcon width={15} height={15} />
-            Invitar usuario
-          </button>
+          {canInvite && (
+            <button type="button" className={styles.primaryBtn} onClick={() => setShowInviteForm(true)}>
+              <UserPlusIcon width={15} height={15} />
+              Invitar usuario
+            </button>
+          )}
         </div>
 
         <div className={styles.panelContent}>

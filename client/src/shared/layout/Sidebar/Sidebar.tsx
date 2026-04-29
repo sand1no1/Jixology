@@ -9,7 +9,6 @@ import {
   UserCircleIcon,
   BeakerIcon,
   BookOpenIcon,
-  BookmarkIcon,
   UserPlusIcon,
   MinusCircleIcon,
 } from '@heroicons/react/24/solid';
@@ -52,13 +51,6 @@ const Sidebar: React.FC<ISidebarProps> = () => {
               <NavLink to="/proyectos">
                 <BookOpenIcon className={styles.icon} />
                 <span><b>Proyectos</b></span>
-              </NavLink>
-            </li>
-
-            <li className={styles.menuItem}>
-              <NavLink to="/proyectos/dummy">
-                <BookmarkIcon className={styles.icon} />
-                <span><b>Dummy</b></span>
               </NavLink>
             </li>
 
