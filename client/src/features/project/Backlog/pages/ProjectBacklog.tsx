@@ -11,7 +11,7 @@ import ContextMenu from '@/shared/components/ContextMenu';
 import type { MenuComponent } from '@/shared/components/ContextMenu';
 import { useBacklogItems } from '@/features/project/Backlog/hooks/useBacklogItems';
 import { useBacklogMeta } from '@/features/project/Backlog/hooks/useBacklogMeta';
-import { acceptSugerencia } from '@/features/project/Backlog/services/backlog.service';
+import { acceptSugerencia, updateBacklogItem } from '@/features/project/Backlog/services/backlog.service';
 import { useUser } from '@/core/auth/userContext';
 import type { BacklogItemRecord, BacklogStatusRecord, BacklogPriorityRecord, SprintRecord } from '@/features/project/Backlog/types/backlog.types';
 import styles from './ProjectBacklog.module.css';
@@ -98,7 +98,8 @@ const ProjectBacklog: React.FC = () => {
   const { user } = useUser();
   const isAdmin = (user?.idRolGlobal ?? 99) <= 2;
   const { items, loading: itemsLoading, refresh } = useBacklogItems(PROJECT_ID);
-  const { meta, loading: metaLoading } = useBacklogMeta(PROJECT_ID);
+  const { meta, loading: metaLoading, refresh: refreshMeta } = useBacklogMeta(PROJECT_ID);
+  const refreshAll = () => { refresh(); refreshMeta(); };
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [expandedItems, setExpandedItems]   = useState<Set<number>>(new Set());
   const [openInEditMode, setOpenInEditMode] = useState(false);
@@ -248,11 +249,33 @@ const ProjectBacklog: React.FC = () => {
             hasChildren={filterType !== null && children.length > 0}
             isExpanded={isExpanded}
             onToggle={() => toggleExpanded(item.id)}
+            onStatusChange={async (newStatus) => {
+              const statusRecord = meta.statuses.find(s => s.nombre === newStatus.label);
+              if (!statusRecord) return;
+              try {
+                await updateBacklogItem(item.id, {
+                  nombre:                 item.nombre,
+                  descripcion:            item.descripcion,
+                  id_tipo:                item.id_tipo,
+                  id_estatus:             statusRecord.id,
+                  id_prioridad:           item.id_prioridad,
+                  id_sprint:              item.id_sprint,
+                  fecha_inicio:           item.fecha_inicio,
+                  fecha_vencimiento:      item.fecha_vencimiento,
+                  id_backlog_item_padre:  item.id_backlog_item_padre,
+                  id_usuario_responsable: item.id_usuario_responsable,
+                  complejidad:            item.complejidad,
+                });
+                refreshAll();
+              } catch (err) {
+                console.error('Error actualizando estado:', err);
+              }
+            }}
             onViewDetails={() => { setOpenInEditMode(false); setViewingItem(item); }}
             onEdit={() => { setOpenInEditMode(true); setViewingItem(item); }}
             onAcceptSuggestion={isAdmin && isSuggestion ? async () => {
               await acceptSugerencia(item.id, user!.id);
-              refresh();
+              refreshAll();
             } : undefined}
           />
         </div>
@@ -320,7 +343,7 @@ const ProjectBacklog: React.FC = () => {
         userId={USER_ID}
         isOpen={showCreateForm}
         onClose={() => setShowCreateForm(false)}
-        onCreated={() => { refresh(); setShowCreateForm(false); }}
+        onCreated={() => { refreshAll(); setShowCreateForm(false); }}
       />
 
       {viewingItem && (
@@ -329,7 +352,7 @@ const ProjectBacklog: React.FC = () => {
           meta={meta}
           initialEditing={openInEditMode}
           onClose={() => { setViewingItem(null); setOpenInEditMode(false); }}
-          onUpdated={() => refresh()}
+          onUpdated={() => refreshAll()}
           onNavigate={i => { setOpenInEditMode(false); setViewingItem(i); }}
         />
       )}
