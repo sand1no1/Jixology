@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useUser } from '@/core/auth/userContext';
 import { fetchUserAssignedItems, fetchAllSprints, fetchUserJornadaFte, fetchAllProjects } from '../services/dashboard.service';
 import type { UserJornadaFte, ProjectRecord } from '../services/dashboard.service';
@@ -94,14 +94,12 @@ function buildSprintHours(
     pm.set(projectName, (pm.get(projectName) ?? 0) + h);
   }
 
-  // Sort sprint names naturally (Sprint 1 < Sprint 2 < Sprint 3)
   const sprintNames = Array.from(hoursMap.keys()).sort((a, b) => {
     const na = parseInt(a.replace(/\D/g, '')) || 0;
     const nb = parseInt(b.replace(/\D/g, '')) || 0;
     return na - nb;
   });
 
-  // Collect unique project names in project ID order
   const seenProjects = new Set<string>();
   for (const p of projects) {
     const name = projectMap.get(p.id);
@@ -174,7 +172,6 @@ function buildComplexityData(items: BacklogItemRecord[]): ComplexityBar[] {
     countMap.set(item.complejidad, (countMap.get(item.complejidad) ?? 0) + 1);
   }
 
-  // Always emit all 5 levels so the X axis is consistent
   return [1, 2, 3, 4, 5].map(c => ({
     complejidad: c,
     horas:       Math.round((hoursMap.get(c) ?? 0) * 10) / 10,
@@ -212,15 +209,27 @@ function buildOverdueItems(
   );
 }
 
-export interface UserDashboardDataResult {
-  data:    DashboardData | null;
-  loading: boolean;
-  error:   string | null;
+// ── Raw fetched data (never filtered) ─────────────────────────────────
+interface RawData {
+  allItems:    BacklogItemRecord[];
+  statuses:    BacklogStatusRecord[];
+  priorities:  BacklogPriorityRecord[];
+  types:       BacklogTypeRecord[];
+  sprints:     SprintRecord[];
+  jornadaFte:  UserJornadaFte;
+  projects:    ProjectRecord[];
 }
 
-export function useUserDashboardData(): UserDashboardDataResult {
+export interface UserDashboardDataResult {
+  data:     DashboardData | null;
+  projects: ProjectRecord[];
+  loading:  boolean;
+  error:    string | null;
+}
+
+export function useUserDashboardData(selectedProjectIds: number[] | null): UserDashboardDataResult {
   const { user, loading: userLoading } = useUser();
-  const [data, setData]     = useState<DashboardData | null>(null);
+  const [raw, setRaw]       = useState<RawData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]   = useState<string | null>(null);
 
@@ -238,21 +247,9 @@ export function useUserDashboardData(): UserDashboardDataResult {
       fetchUserJornadaFte(user.id),
       fetchAllProjects(),
     ])
-      .then(([items, statuses, priorities, types, sprints, jornadaFte, projects]) => {
+      .then(([allItems, statuses, priorities, types, sprints, jornadaFte, projects]) => {
         if (!isMounted) return;
-        const complexityData = buildComplexityData(items);
-        setData({
-          totalItems:        items.length,
-          itemsWithEstimate: items.filter(i => i.complejidad != null && i.tiempo != null).length,
-          statusData:        buildStatusData(items, statuses),
-          sprintHours:       buildSprintHours(items, sprints, projects),
-          typeData:          buildTypeData(items, types),
-          priorityData:      buildPriorityData(items, priorities),
-          complexityData,
-          overdueItems:      buildOverdueItems(items, statuses),
-          upcomingItems:     buildUpcomingItems(items, statuses),
-          jornadaFte,
-        });
+        setRaw({ allItems, statuses, priorities, types, sprints, jornadaFte, projects });
         setError(null);
       })
       .catch((err: unknown) => {
@@ -265,5 +262,42 @@ export function useUserDashboardData(): UserDashboardDataResult {
     return () => { isMounted = false; };
   }, [user, userLoading]);
 
-  return { data, loading, error };
+  // Apply project filter on the client — no extra network calls needed
+  const data = useMemo<DashboardData | null>(() => {
+    if (!raw) return null;
+
+    const { allItems, statuses, priorities, types, sprints, jornadaFte, projects } = raw;
+
+    const filterSet = selectedProjectIds && selectedProjectIds.length > 0
+      ? new Set(selectedProjectIds)
+      : null;
+
+    const items = filterSet
+      ? allItems.filter(i => filterSet.has(i.id_proyecto))
+      : allItems;
+
+    const filteredJornadaFte: UserJornadaFte = filterSet
+      ? { ...jornadaFte, rows: jornadaFte.rows.filter(r => filterSet.has(r.id_proyecto)) }
+      : jornadaFte;
+
+    // Only pass projects that are relevant to the current filter
+    const visibleProjects = filterSet
+      ? projects.filter(p => filterSet.has(p.id))
+      : projects;
+
+    return {
+      totalItems:        items.length,
+      itemsWithEstimate: items.filter(i => i.complejidad != null && i.tiempo != null).length,
+      statusData:        buildStatusData(items, statuses),
+      sprintHours:       buildSprintHours(items, sprints, visibleProjects),
+      typeData:          buildTypeData(items, types),
+      priorityData:      buildPriorityData(items, priorities),
+      complexityData:    buildComplexityData(items),
+      overdueItems:      buildOverdueItems(items, statuses),
+      upcomingItems:     buildUpcomingItems(items, statuses),
+      jornadaFte:        filteredJornadaFte,
+    };
+  }, [raw, selectedProjectIds]);
+
+  return { data, projects: raw?.projects ?? [], loading, error };
 }
