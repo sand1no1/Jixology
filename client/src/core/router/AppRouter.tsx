@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 // --- Páginas ---
 import LoginPage from '@/features/auth/pages/LogInPage';
 import ProfilePage from '@/features/profile/pages';
-import UserDashboardPage from '@/features/user/pages/DashboardPage';
+import UserDashboardPage from '@/features/dashboard/pages/UserDashboard';
 import EmailVerificationPage from '@/features/verification/pages/EmailVerification';
 import AdminPage from '@/features/admin/pages/adminPage';
 import ProjectPage from '@/features/project/projectHub/pages/ProjectsPage';
